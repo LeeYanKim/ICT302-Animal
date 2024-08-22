@@ -1,0 +1,6 @@
+@ICT302_BackendAPI_HostAddress = http://localhost:5173
+
+GET {{ICT302_BackendAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
