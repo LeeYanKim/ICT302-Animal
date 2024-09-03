@@ -1,0 +1,64 @@
+import React, {useContext} from 'react';
+
+import { UserProfileContext } from "../../Internals/ContextStore";
+
+import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Box, FormLabel} from '@mui/material';
+
+import NewUpload from './NewUpload';
+
+import CheckIcon from '@mui/icons-material/Check';
+
+import {UploadProps} from './UploadProps';
+import  UserAlert  from '../../Internals/components/Alerts/Alert';
+
+const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
+  const userContext = useContext(UserProfileContext);
+
+  const [open, setOpen] = React.useState(false);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setAlertQueue([...alertQueue, <UserAlert icon={<CheckIcon/>} severity='success' message="Upload Successful" progress={null}/>]);
+    };
+
+    const HandleSubmit = () => {
+        console.log('Submit');
+    }
+
+  return (
+    <div>
+      <h1>Get Started Uploading!</h1>
+      <Box
+        component="form"
+        onSubmit={HandleSubmit}
+        noValidate
+        sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        gap: 2,
+        }}>
+        <FormControl>
+            <FormControl>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignSelf: 'center'}}>
+                    <Button
+                        variant='contained'
+                        onClick={handleClickOpen}
+                        sx={{ alignSelf: 'baseline' }}
+                        >
+                        Upload Media
+                    </Button>
+                </Box>
+            </FormControl>
+            <NewUpload open={open} handleClose={handleClose} />
+        </FormControl>
+      </Box>
+    </div>
+  );
+}
+
+export default UploadPrompt;

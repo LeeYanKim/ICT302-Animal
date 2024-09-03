@@ -1,30 +1,26 @@
-import React from "react";
+import React, {useContext, useState} from "react";
 import { Link } from 'react-router-dom';
 
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
+import {AppBar, Box, Toolbar, IconButton, Typography, Menu, MenuItem, Avatar, Button, Tooltip, Container} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
 import PetsIcon from '@mui/icons-material/Pets';
 
 import {ThemeProvider} from "@mui/material/styles";
 import AppTheme  from "./UI/Theme";
+import {UserProfileContext} from "../Internals/ContextStore";
 
-import './Navigation.css';
+import './LandingNav.css';
 
-const pages = ['Home', 'About', 'Contact', 'Login']; // TODO Add any other pages here, Must match the routes in App.tsx
+const pages = ['Home', 'About', 'Contact']; // TODO Add any other pages here, Must match the routes in App.tsx
 
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout']; // TODO Add any other settings here
+const settings = ['Account', 'Dashboard', 'SignOut']; // TODO Add any other settings here
 
-const NavigationBar: React.FC = () => {
+
+const LandingNav: React.FC= () => {
+    const userContext = useContext(UserProfileContext);
+
+    const [mode, setMode] = useState('light');
+
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -44,6 +40,8 @@ const NavigationBar: React.FC = () => {
         setAnchorElUser(null);
     };
 
+    console.log(userContext)
+
     return (
             <AppBar position="static">
                 <Container maxWidth="xl">
@@ -59,7 +57,6 @@ const NavigationBar: React.FC = () => {
                                 display: { xs: 'none', md: 'flex' },
                                 fontFamily: 'monospace',
                                 fontWeight: 700,
-                                letterSpacing: '.3rem',
                                 color: 'inherit',
                                 textDecoration: 'none',
                             }}
@@ -133,10 +130,11 @@ const NavigationBar: React.FC = () => {
                                 </Button>
                             ))}
                         </Box>
+                        {userContext.valid && userContext.contextRef?.current.loggedInState ?
                         <Box sx={{ flexGrow: 0 }}> {/* TODO Replace with user avatar */}
-                            <Tooltip title="Open settings">
+                            <Tooltip title="Open Profile">
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                    <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                    <Avatar alt={userContext.contextRef?.current.username}>{userContext.contextRef?.current.initials}</Avatar>
                                 </IconButton>
                             </Tooltip>
                             <Menu
@@ -157,16 +155,28 @@ const NavigationBar: React.FC = () => {
                             >
                                 {settings.map((setting) => (
                                     <MenuItem key={setting}>
-                                        <Link to={setting.toLowerCase()}>
+                                        <Link to={setting.toLowerCase() === 'account' ? '/dashboard/account' : setting.toLowerCase()}>
                                             <Typography sx={{ textAlign: 'center' }} >{setting}</Typography>
                                         </Link>
                                     </MenuItem>
                                 ))}
+                        
                             </Menu>
                         </Box>
+                        : 
+                        <Box sx={{ flexGrow: 0 }}>
+                            <Button
+                            component={Link}
+                            sx={{ my: 2, color: 'white', display: 'block' }}
+                            to={'/signin'}
+                            >
+                                Sign-In
+                            </Button>
+                        </Box>
+                        }
                     </Toolbar>
                 </Container>
             </AppBar>
     );
 }
-export default NavigationBar;
+export default LandingNav;

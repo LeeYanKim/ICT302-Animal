@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { Typography, Container, Button, Card, CardContent } from '@mui/material';
 import Grid  from '@mui/material/Grid2';
 import { Box } from '@mui/system';
@@ -7,12 +7,14 @@ import { Box } from '@mui/system';
 import './LandingPage.css';
 
 import Item from '../Components/UI/Item';
+import { UserProfileContext } from "../Internals/ContextStore";
 
 // This is the Landing Page for the application
 
 
 
 const LandingPage: React.FC = () => {
+    const userContext = useContext(UserProfileContext);
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
 
@@ -56,7 +58,7 @@ const LandingPage: React.FC = () => {
                                     Upload Media
                                 </Typography>
                                 <Typography component="p">
-                                    Upload images and videos to generate 3D models.
+                                    Use images and videos to generate 3D models.
                                 </Typography>
                             </CardContent>
                         </Card>

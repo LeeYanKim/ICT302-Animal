@@ -1,10 +1,14 @@
-import React from 'react';
-import ModelLoader from "../Components/ModelLoader";
+import React, {useContext} from 'react';
+import ModelViewer from "../Components/ModelViewer/ModelViewer";
 
-function View() {
+import { UserProfileContext } from "../Internals/ContextStore";
+
+
+const View: React.FC = () => {
+  const userContext = useContext(UserProfileContext);
   return (
-    <div className="view-container">
-      <ModelLoader url="/3d_test_files/toon_cat_free/scene.gltf"/>
+    <div>
+      <ModelViewer />
     </div>
   );
 }

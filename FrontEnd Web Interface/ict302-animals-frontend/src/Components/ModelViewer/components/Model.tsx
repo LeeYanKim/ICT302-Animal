@@ -1,22 +1,34 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, createRef } from 'react';
 import { useLoader, useFrame, useThree } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import {AnimationMixer, Group, Box3, Vector3, MeshStandardMaterial, Mesh, BufferGeometry} from 'three';
+import { useGLTF, Wireframe, useAnimations } from '@react-three/drei';
+import {AnimationMixer, Group, Box3, SkinnedMesh, Vector3, MeshStandardMaterial, Mesh, BufferGeometry, Object3DEventMap} from 'three';
+
 
 interface ModelProps {
     url: string;
     isAnimating: boolean;
+    wireframe: boolean;
 }
 
-const Model: React.FC<ModelProps> = ({ url, isAnimating }) => {
+const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe }) => {
+    const group = createRef<Group<Object3DEventMap>>();
     const modelRef = useRef<Group | null>(null);
     const mixerRef = useRef<AnimationMixer | null>(null);
     const { camera } = useThree();
-    const gltf = useLoader(GLTFLoader, url);
+    const gltf = useGLTF(url);
 
-    console.log(gltf)
+    const { nodes, materials, animations } = useGLTF(url);
+    const { actions } = useAnimations(animations, group);
     
+    console.log(actions);
+
+
+
     
+    useEffect(() => {
+        actions[0]?.reset().play();
+      }, [actions]);
+/*
     useEffect(() => {
         if (gltf.animations.length > 0 && modelRef.current) {
             mixerRef.current = new AnimationMixer(modelRef.current);
@@ -61,7 +73,18 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating }) => {
         }
     });
 
-    return <primitive ref={modelRef} object={gltf.scene}/>;
+    //<primitive ref={modelRef} object={gltf.scene}/>{wireframe && <Wireframe /> }
+
+*/
+
+    return (
+        <>
+            <group ref={group}>
+                <primitive ref={modelRef} object={gltf.scene}>
+                    </primitive>
+            </group>
+        </>
+    );
 };
 
 export default Model;

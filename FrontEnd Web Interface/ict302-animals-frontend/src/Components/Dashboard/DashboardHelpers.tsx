@@ -1,0 +1,131 @@
+import React from 'react';
+import About from '../../Pages/About';
+import Account from '../../Pages/Account';
+import Completed from '../../Pages/Completed';
+import Feedback from '../../Pages/Feedback';
+import Help from '../../Pages/Help';
+import Queue from '../../Pages/Queue';
+import Upload from '../../Pages/Upload';
+import Settings from '../../Pages/Settings';
+import Contact from '../../Pages/Contact';
+import SignIn from '../../Pages/SignIn';
+import SignUp from '../../Pages/SignUp';
+import SignOut from '../../Pages/SignOut';
+import MainGrid from './MainGrid';
+
+
+
+enum DashboardPages {
+    Home, Upload, Queue, Completed, Settings, About, Feedback, Help, Account
+}
+
+export function getDashboardPageFromName(page: string): DashboardPages {
+    switch (page) {
+        case 'home':
+            return DashboardPages.Home;
+        case 'upload':
+            return DashboardPages.Upload;
+        case 'queue':
+            return DashboardPages.Queue;
+        case 'completed':
+            return DashboardPages.Completed;
+        case 'settings':
+            return DashboardPages.Settings;
+        case 'about':
+            return DashboardPages.About;
+        case 'feedback':
+            return DashboardPages.Feedback;
+        case 'help':
+            return DashboardPages.Help;
+        case 'account':
+            return DashboardPages.Account;
+        default:
+            return DashboardPages.Home;
+    }
+}
+
+export function getNameFromDashboardPage(page: DashboardPages) {
+    switch (page) {
+        case DashboardPages.Home:
+            return 'home';
+        case DashboardPages.Upload:
+            return 'upload';
+        case DashboardPages.Queue:
+            return 'queue';
+        case DashboardPages.Completed:
+            return 'completed';
+        case DashboardPages.Settings:
+            return 'settings';
+        case DashboardPages.About:
+            return 'about';
+        case DashboardPages.Feedback:
+            return 'feedback';
+        case DashboardPages.Help:
+            return 'help';
+        case DashboardPages.Account:
+            return 'account';
+    }
+}
+
+export function getPrettyNameFromDashboardPage(page: DashboardPages) {
+    switch (page) {
+        case DashboardPages.Home:
+            return 'Home';
+        case DashboardPages.Upload:
+            return 'Upload';
+        case DashboardPages.Queue:
+            return 'Queue';
+        case DashboardPages.Completed:
+            return 'Completed';
+        case DashboardPages.Settings:
+            return 'Settings';
+        case DashboardPages.About:
+            return 'About';
+        case DashboardPages.Feedback:
+            return 'Feedback';
+        case DashboardPages.Help:
+            return 'Help';
+        case DashboardPages.Account:
+            return 'Account';
+    }
+}
+
+export function getDashboardPageFromPath(path: string): DashboardPages {
+    const page = path.split('/').pop();
+    if (page) {
+        return getDashboardPageFromName(page);
+    }
+    return DashboardPages.Home;
+}
+
+export function getDashboardPageRenderFromDashboardPage(page: DashboardPages, alertQueue: React.ReactNode[], setAlertsQueue: any) {
+    switch (page) {
+        case DashboardPages.Home:
+            return <MainGrid />;
+        case DashboardPages.Upload:
+            return <Upload alertQueue={alertQueue} setAlertQueue={setAlertsQueue}/>;
+        case DashboardPages.Queue:
+            return <Queue />;
+        case DashboardPages.Completed:
+            return <Completed />;
+        case DashboardPages.Settings:
+            return <Settings />;
+        case DashboardPages.About:
+            return <About />;
+        case DashboardPages.Feedback:
+            return <Feedback />;
+        case DashboardPages.Help:
+            return <Help />;
+        case DashboardPages.Account:
+            return <Account />;
+        default:
+            return <MainGrid />;
+    }
+}
+
+export interface DashboardMenuProps {
+    currentDashboardPage: DashboardPages;
+    setCurrentDashboardPage: any;
+}
+
+export default DashboardPages;

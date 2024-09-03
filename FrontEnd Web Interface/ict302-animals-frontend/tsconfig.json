@@ -21,9 +21,15 @@
     "noImplicitThis": true,
     "strictNullChecks": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react"
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/react-model-viewer",
+    "./src/react-model-viewer/**/*.stories.tsx",
+    "./src/react-model-viewer/**/*.spec.tsx"
   ]
 }
