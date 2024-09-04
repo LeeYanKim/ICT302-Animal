@@ -2,27 +2,45 @@ import React, {useContext} from 'react';
 
 import { UserProfileContext } from "../Internals/ContextStore";
 
+import QueueCard from '../Components/Queue/QueueCard';
+
+import {Box, Stack, Grid2 as Grid, alpha} from '@mui/material';
+
 const Queue: React.FC = () => {
   const userContext = useContext(UserProfileContext);
 
+  //TODO Add queue update logic
+
   return (
-    <div>
-      <h1>Queue</h1>
-      <p>
-      Pellentesque habitant morbi tristique senectus et netus et malesuada
-      fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
-      ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam
-      egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend
-      leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum
-      erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean
-      fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci,
-      sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar
-      facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor
-      neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat
-      volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis
-      luctus, metus
-      </p>
-    </div>
+    <Box sx={{ display: 'flex' }}>
+          <Box
+              component="main"
+              sx={(theme) => ({
+                flexGrow: 1,
+                backgroundColor: alpha(theme.palette.background.default, 1),
+                overflow: 'auto',
+              })}
+          >
+            Items in Queue : {userContext.contextRef?.current.currentItemsInQueue}
+            <Grid container
+                spacing={2}
+                sx={{
+                  alignItems: 'center',
+                  mx: 3,
+                  pb: 10,
+                  mt: { xs: 8, md: 0 },
+                }}
+            >
+              
+                {userContext.contextRef?.current.currentItemsInQueue > 0 && userContext.contextRef?.current.currentItemsInProcessQueue.map((item, index) => (
+                  <Grid>
+                    <QueueCard key={index} title={item.name} position={index} progress={item.progress}/>
+                  </Grid>
+                ))} 
+              
+            </Grid>
+          </Box>
+        </Box>
   );
 }
 

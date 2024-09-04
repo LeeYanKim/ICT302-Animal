@@ -13,7 +13,7 @@ const UserAlert: React.FC<AlertProps> = ({ icon, severity, message, progress}) =
   return (
     <div>    
       { severity &&
-        <Alert icon={icon} severity={severity} color={severity} variant="filled">
+        <Alert sx={{ position: 'absolute', left: '50%', top: 100}} icon={icon} severity={severity} color={severity} variant="filled">
           {message}
           {progress && <progress value={progress} max="100" />}
         </Alert>

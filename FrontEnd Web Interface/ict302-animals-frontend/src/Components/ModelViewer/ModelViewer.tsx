@@ -3,9 +3,11 @@ import React from "react";
 
 import ModelRenderer from "./components/ModelRenderer";
 
-export default function ModelViewer() {
+interface ModelViewerProps {
+    modelPath: string;
+}
 
-    const modelPath = "/3d_test_files/horse_walk.glb";
+const ModelViewer: React.FC<ModelViewerProps> = ( {modelPath} ) => {
 
     return (
         <div>
@@ -13,3 +15,5 @@ export default function ModelViewer() {
         </div>
     );
 }
+
+export default ModelViewer;

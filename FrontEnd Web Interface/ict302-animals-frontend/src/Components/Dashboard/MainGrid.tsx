@@ -44,7 +44,7 @@ export default function MainGrid() {
           </Grid>
         ))}
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <ModelViewer />
+              <ModelViewer  modelPath={'/3d_test_files/koi_fish.glb'}/>
           </Grid>
       </Grid>
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>

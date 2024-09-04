@@ -2,27 +2,30 @@ import React, {useContext} from 'react';
 
 import { UserProfileContext } from "../Internals/ContextStore";
 
+import { Box, Grid2 as Grid, Stack, Typography } from '@mui/material';
+import ModelViewer from '../Components/ModelViewer/ModelViewer';
+
+import CompletedCard from '../Components/Completed/CompletedCard';
+
+
 const Completed: React.FC = () => {
   const userContext = useContext(UserProfileContext);
 
   return (
-    <div>
-      <h1>Completed</h1>
-      <p>
-      Pellentesque habitant morbi tristique senectus et netus et malesuada
-      fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
-      ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam
-      egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend
-      leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum
-      erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean
-      fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci,
-      sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar
-      facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor
-      neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat
-      volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis
-      luctus, metus
-      </p>
-    </div>
+    <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+      <Grid
+        container
+        spacing={2}
+        columns={12}
+        sx={{ mb: (theme) => theme.spacing(2) }}
+      >
+        {userContext.contextRef.current.completedItems.map((items, index) => (
+          <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <CompletedCard title={items.name} status={items.status} modelPath={items.modelPath}/>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 }
 
