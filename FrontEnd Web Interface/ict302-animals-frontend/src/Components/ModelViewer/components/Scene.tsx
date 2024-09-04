@@ -15,21 +15,26 @@ const Scene: React.FC<SceneProps> = ({ children }) => {
 
 
 /*
-    <Canvas
-        camera={{ position: [0, 1, 5], fov: 75 }}>
+    <Canvas camera={{ position: [0, 1, 5], fov: 75 }}>
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <OrbitControls enableZoom={true} />
-        <Suspense fallback={null}>
-          <ContactShadows position-y-={-1.5} opacity={0.3} blur={3} />
+        <ContactShadows position-y-={-1.5} opacity={0.3} blur={3} />
+        <Suspense>
+          
+          {children}
         </Suspense>
+
     </Canvas>
+
+
+        
+
 */
 
   return (
-      <Canvas>
-        <CameraControls makeDefault />
-        <PerspectiveCamera makeDefault fov={75} />
+      <Canvas >
+        <PerspectiveCamera makeDefault fov={75} position={[0, 1, 5]} />
 
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />

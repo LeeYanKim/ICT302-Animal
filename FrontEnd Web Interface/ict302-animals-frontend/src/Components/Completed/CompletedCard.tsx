@@ -21,7 +21,7 @@ const CompletedCard: React.FC<CompletedCardProps> = ({ title, status, modelPath}
   const theme = useTheme();
 
   return (
-    <Card variant="outlined" sx={{ height: '100%',  width: '100%', flexGrow: 1 }}>
+    <Card variant="outlined" sx={{ height: '100%',minWidth: 450, flexGrow: 1}}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
           Item: {title}
@@ -39,7 +39,7 @@ const CompletedCard: React.FC<CompletedCardProps> = ({ title, status, modelPath}
                 Status: {status === "Complete" ? <Chip label="Complete" color="success" /> : <Chip label="In Progress" color="warning" />}
               </Typography>
             </Stack>
-            <Stack direction="row" sx={{ justifyContent: 'space-between' }}>
+            <Stack direction="row" sx={{ justifyContent: 'center' }}>
                 
                 <ModelViewer modelPath={modelPath}/>
             </Stack>

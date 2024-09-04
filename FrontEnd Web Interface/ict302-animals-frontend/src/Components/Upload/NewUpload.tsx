@@ -9,7 +9,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 
 interface NewUploadProps {
   open: boolean;
-  handleClose: () => void;
+  handleClose: (canceled: boolean) => void;
 }
 
 export default function NewUpload({ open, handleClose }: NewUploadProps) {
@@ -21,7 +21,7 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
         component: 'form',
         onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
           event.preventDefault();
-          handleClose();
+          handleClose(false);
         },
       }}
     >
@@ -37,7 +37,7 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
         </Button>
     </DialogContent>
         <DialogActions sx={{ pb: 3, px: 3 }}>
-            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={() => handleClose(true)}>Cancel</Button>
             <Button variant="contained" type="submit">
                 Continue
             </Button>

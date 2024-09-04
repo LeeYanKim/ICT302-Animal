@@ -9,10 +9,12 @@ import { Play, Pause, PlusCircle, MinusCircle, Repeat, RotateCw, Settings } from
 
 interface ControlsProps {
     isAnimating: boolean;
+    setIsAnimating?: any;
     toggleWireframe: boolean;
+    setToggleWireframe?: any;
 }
 
-const Controls: React.FC<ControlsProps> = ({isAnimating, toggleWireframe}) => {
+const Controls: React.FC<ControlsProps> = ({isAnimating, setIsAnimating, toggleWireframe, setToggleWireframe}) => {
 
     return (
         <Box sx={{ 
@@ -23,14 +25,14 @@ const Controls: React.FC<ControlsProps> = ({isAnimating, toggleWireframe}) => {
             <Stack spacing={2} direction="column" sx={{ alignItems: 'center', mb: 1 }}>
                 <Slider defaultValue={50} aria-label="Animition Position" />
                 <ButtonGroup variant="contained" aria-label="3D Model View Controls">
-                    <Button>{ isAnimating ? <Pause/> : <Play/>} </Button>
+                    <Button onClick={() => {setIsAnimating(!isAnimating)}}>{ isAnimating ? <Pause/> : <Play/>} </Button>
                     <Button><PlusCircle/></Button>
                     <Button><MinusCircle/></Button>
                     <Button><Repeat/></Button>
                     <Button><RotateCw/></Button>
                     { toggleWireframe ? 
-                        <Button variant="contained" color='secondary'><Settings/></Button> : 
-                        <Button color='secondary'><Settings/></Button>}
+                        <Button variant="contained" color='secondary' onClick={() =>{setToggleWireframe(false)}}><Settings/></Button> : 
+                        <Button color='secondary' onClick={() =>{setToggleWireframe(true)}}><Settings/></Button>}
                 </ButtonGroup>
             </Stack>
         </Box>

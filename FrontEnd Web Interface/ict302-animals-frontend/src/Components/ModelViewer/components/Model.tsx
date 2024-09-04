@@ -25,10 +25,10 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe }) => {
 
 
     
-    useEffect(() => {
+    /*useEffect(() => {
         actions[0]?.reset().play();
-      }, [actions]);
-/*
+      }, [actions]);*/
+
     useEffect(() => {
         if (gltf.animations.length > 0 && modelRef.current) {
             mixerRef.current = new AnimationMixer(modelRef.current);
@@ -73,16 +73,21 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe }) => {
         }
     });
 
-    //<primitive ref={modelRef} object={gltf.scene}/>{wireframe && <Wireframe /> }
+    
 
-*/
-
-    return (
-        <>
+/*
+<>
             <group ref={group}>
                 <primitive ref={modelRef} object={gltf.scene}>
                     </primitive>
             </group>
+        </>
+        */
+
+    return (
+        <>
+        <primitive ref={modelRef} object={gltf.scene}/>
+        {wireframe && <></>/*<Wireframe />*/ }
         </>
     );
 };

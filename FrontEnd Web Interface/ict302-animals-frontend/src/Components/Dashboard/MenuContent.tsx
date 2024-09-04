@@ -13,7 +13,7 @@ import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
-
+import PetsIcon from '@mui/icons-material/Pets';
 
 
 import { UserProfileContext } from "../../Internals/ContextStore";
@@ -27,6 +27,7 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
     { text: 'Upload', icon: <CloudUploadIcon /> },
     { text: 'Queue', icon: <QueueIcon />},
     { text: 'Completed', icon: <LibraryAddCheckIcon /> },
+    { text: 'Animals', icon: <PetsIcon /> },
   ];
   
   const secondaryListItems = [

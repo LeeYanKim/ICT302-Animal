@@ -20,8 +20,10 @@ const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
         setOpen(true);
     };
 
-    const handleClose = () => {
+    const handleClose = (canceled: boolean) => {
         setOpen(false);
+        if(canceled) return;
+
         setAlertQueue([...alertQueue, <UserAlert icon={<CheckIcon/>} severity='success' message="Upload Successful" progress={null}/>]);
         userContext.contextRef.current.currentItemsInQueue += 1;
         userContext.contextRef.current.currentItemsInProcessQueue.push({id: '0', name: 'Test', size: 100, type: 'image', progress: 0, status: 'Uploading'});

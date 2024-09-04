@@ -12,11 +12,13 @@ import SignIn from '../../Pages/SignIn';
 import SignUp from '../../Pages/SignUp';
 import SignOut from '../../Pages/SignOut';
 import MainGrid from './MainGrid';
+import Animals from '../../Pages/Animals';
+
 
 
 
 enum DashboardPages {
-    Home, Upload, Queue, Completed, Settings, About, Feedback, Help, Account
+    Home, Upload, Queue, Completed, Settings, About, Feedback, Help, Account, Animals
 }
 
 export function getDashboardPageFromName(page: string): DashboardPages {
@@ -39,6 +41,8 @@ export function getDashboardPageFromName(page: string): DashboardPages {
             return DashboardPages.Help;
         case 'account':
             return DashboardPages.Account;
+        case 'animals':
+            return DashboardPages.Animals;
         default:
             return DashboardPages.Home;
     }
@@ -64,6 +68,8 @@ export function getNameFromDashboardPage(page: DashboardPages) {
             return 'help';
         case DashboardPages.Account:
             return 'account';
+        case DashboardPages.Animals:
+            return 'animals';
     }
 }
 
@@ -87,6 +93,8 @@ export function getPrettyNameFromDashboardPage(page: DashboardPages) {
             return 'Help';
         case DashboardPages.Account:
             return 'Account';
+        case DashboardPages.Animals:
+            return 'Animals';
     }
 }
 
@@ -118,6 +126,8 @@ export function getDashboardPageRenderFromDashboardPage(page: DashboardPages, al
             return <Help />;
         case DashboardPages.Account:
             return <Account />;
+        case DashboardPages.Animals:
+            return <Animals />;
         default:
             return <MainGrid />;
     }

@@ -6,6 +6,8 @@ import Scene from './Scene';
 import Model from './Model';
 import { OrbitControls, CameraControls, ContactShadows, PerspectiveCamera } from '@react-three/drei';
 
+import {Stack} from '@mui/material';
+
 interface ModelRendererProps {
     modelPath: string;
 }
@@ -14,18 +16,15 @@ const ModelRenderer: React.FC<ModelRendererProps> = ({ modelPath }) => {
     const [isAnimating, setIsAnimating] = useState(true);
     const [isWireframe, setIsWireframe] = useState(false);
 
-    const handlePlayPause = () => {
-      setIsAnimating(!isAnimating);
-    };
-
-
     return (
         <div>
-            <Scene>
-                <Model url={modelPath} isAnimating={isAnimating} wireframe={isWireframe} />
-            </Scene>
-            
-            <Controls isAnimating={isAnimating} toggleWireframe={isWireframe}/>
+            <Stack direction="column" spacing={2}>
+                <Scene>
+                    <Model url={modelPath} isAnimating={isAnimating} wireframe={isWireframe} />
+                </Scene>
+                
+                <Controls isAnimating={isAnimating} setIsAnimating={setIsAnimating} toggleWireframe={isWireframe} setToggleWireframe={setIsWireframe}/>
+            </Stack>
         </div>
     );
 }
