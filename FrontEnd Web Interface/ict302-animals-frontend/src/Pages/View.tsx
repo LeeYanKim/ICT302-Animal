@@ -8,7 +8,7 @@ const View: React.FC = () => {
   const userContext = useContext(UserProfileContext);
   return (
     <div>
-      <ModelViewer modelPath={'/3d_test_files/koi_fish.glb'}/>
+      <ModelViewer modelPath={'/3d_test_files/toon_cat_free.glb'}/>
     </div>
   );
 }

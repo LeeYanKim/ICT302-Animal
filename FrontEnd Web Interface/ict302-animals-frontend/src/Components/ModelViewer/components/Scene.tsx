@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useRef, createRef, Suspense } from 'react';
 import { Canvas, useThree  } from '@react-three/fiber';
-import { OrbitControls, CameraControls, ContactShadows, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls, CameraControls, ContactShadows, PerspectiveCamera, Html, useProgress } from '@react-three/drei';
 import {Group, Object3DEventMap} from 'three';
 import { stat } from 'fs';
 
@@ -13,34 +13,18 @@ interface SceneProps {
 
 const Scene: React.FC<SceneProps> = ({ children }) => {
 
-
-/*
-    <Canvas camera={{ position: [0, 1, 5], fov: 75 }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <OrbitControls enableZoom={true} />
-        <ContactShadows position-y-={-1.5} opacity={0.3} blur={3} />
-        <Suspense>
-          
-          {children}
-        </Suspense>
-
-    </Canvas>
-
-
-        
-
-*/
-
+function Loader() {
+    const { progress } = useProgress()
+    return <Html center>{progress} % loaded</Html>
+  }
+// position={[0, 1, 5]} <PerspectiveCamera makeDefault fov={75}/>
   return (
       <Canvas >
-        <PerspectiveCamera makeDefault fov={75} position={[0, 1, 5]} />
-
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         
         <OrbitControls enableZoom={true} />
-        <Suspense>
+        <Suspense fallback={<Loader />}>
           {children}
         </Suspense>
     </Canvas>

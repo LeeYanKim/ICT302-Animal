@@ -116,7 +116,7 @@ const App: React.FC = () => {
                             <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
                             <Route path="/signout" element={<SignOut />} /> {/* This is the sign in page */}
                             {dashboardPaghPaths.map((dashboardPath, index) => (
-                                <Route path={dashboardPath} element={userContext.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
+                                <Route key={index} path={dashboardPath} element={userContext.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
 
                             
