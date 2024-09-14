@@ -40,8 +40,6 @@ const LandingNav: React.FC= () => {
         setAnchorElUser(null);
     };
 
-    console.log(userContext)
-
     return (
             <AppBar position="static">
                 <Container maxWidth="xl">

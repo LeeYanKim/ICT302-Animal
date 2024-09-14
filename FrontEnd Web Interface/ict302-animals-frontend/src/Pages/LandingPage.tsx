@@ -1,7 +1,6 @@
 import React, {useContext} from 'react';
-import { Typography, Container, Button, Card, CardContent } from '@mui/material';
-import Grid  from '@mui/material/Grid2';
-import { Box } from '@mui/system';
+import { Box, Typography, Container, Button, Card, CardContent, Grid2 as Grid} from '@mui/material';
+import { Link } from 'react-router-dom';
 
 // Import of the LandingPage CSS file
 import './LandingPage.css';
@@ -38,7 +37,7 @@ const LandingPage: React.FC = () => {
                     <Typography variant="h5" component="p" gutterBottom>
                         Automatic 3D Model Generation from Images and Videos
                     </Typography>
-                    <Button variant="contained" color="primary" size="large">
+                    <Button component={Link} variant="contained" color="primary" size="large" to={userContext.valid && userContext.contextRef.current.loggedInState ? '/dashboard/upload' : '/signin'}>
                         Get Started
                     </Button>
                 </Container>
