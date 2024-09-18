@@ -19,6 +19,7 @@ import Dashboard from './Pages/Dashboard';
 
 // Imports of testing pages
 import View from './Pages/View';
+import BackendTest from './Pages/Test/BackendTest';
 
 import UserProfile from './Internals/UserProfile';
 import {UserProfileContext} from './Internals/ContextStore';
@@ -125,6 +126,7 @@ const App: React.FC = () => {
 
                             {/* TODO Remove testing routes*/}
                             <Route path={"/test/viewer"} element={<View />} />
+                            <Route path={"/test/backend"} element={<BackendTest />} />
 
                         </Routes>
                     </div>
