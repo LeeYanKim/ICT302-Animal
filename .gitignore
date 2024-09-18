@@ -5,9 +5,17 @@
 # Jetbrains idea files
 .idea
 # Compiled files
-Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin
-Backend API/ICT302-BackendAPI/ICT302-BackendAPI/obj/Debug
-Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/Release
+Backend API/ICT302-BackendAPI/obj/
+
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI/obj/
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/
+
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.Database/bin/
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.Database/obj/
+
+# Visual Studio Ignore Files
+.vs
+**.nuget
 
 # Frontend API Ignore files
 
@@ -15,3 +23,7 @@ Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/Release
 /node_modules
 /dist
 
+
+
+
+Backend API/ICT302-BackendAPI/obj/
