@@ -7,6 +7,8 @@
 # Compiled files
 Backend API/ICT302-BackendAPI/obj/
 
+
+
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI/obj/
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/
 
@@ -15,7 +17,6 @@ Backend API/ICT302-BackendAPI/ICT302-BackendAPI.Database/obj/
 
 # Visual Studio Ignore Files
 .vs
-**.nuget
 
 # Frontend API Ignore files
 

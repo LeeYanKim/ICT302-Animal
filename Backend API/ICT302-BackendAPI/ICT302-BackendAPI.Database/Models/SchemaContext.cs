@@ -8,8 +8,7 @@ public class SchemaContext : DbContext
     //private readonly IConfiguration _configuration;
 
     // TODO: Update this back to reading appsettings file rather than hard code a connection string
-    private readonly string _connectionString = "server=VGPU-IT01.ad.murdoch.edu.au;port=3306;user=api;password=APIPass!;database=dev-it01-animals"; // Main MySQL VM server
-    private readonly string _devconnectionString = "server=localhost;database=dev-it01-animals;user=root;password=Password!"; // Local server hosted on my local computer for testing
+    private readonly string _connectionString = "server=VGPU-IT01.ad.murdoch.edu.au;port=3306;user=api;password=APIPass!;database=it01-animals"; // Main MySQL VM server
 
     public SchemaContext()
     {
