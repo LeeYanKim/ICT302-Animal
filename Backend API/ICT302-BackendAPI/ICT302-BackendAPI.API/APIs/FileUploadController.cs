@@ -40,7 +40,7 @@ public class FileUploadController : ControllerBase
         var allowedFileTypes = _configuration.GetSection("AllowedFileUploadTypes");
         foreach (var fileType in allowedFileTypes.GetChildren())
         {
-            Console.WriteLine("Key: {0}  Value: {1}", fileType.Key, fileType.Value);
+            //Console.WriteLine("Key: {0}  Value: {1}", fileType.Key, fileType.Value);
             types.Add(new AllowedFileTypes(fileType.Key, fileType.Value!));
         }
 
@@ -65,15 +65,18 @@ public class FileUploadController : ControllerBase
         long size = files.Sum(f => f.Length);
         int totalUploadedFiles = 0;
         
+        Console.WriteLine(files);
+        
         foreach (var formFile in files)
         {
             if (formFile.Length > 0)
             {
-                var filePath = Path.Combine(_configuration["dev_StoredFilesPath"]!, formFile.FileName); // TODO: Update this to the VM upload path
-                Console.WriteLine(filePath);
-
+                Console.WriteLine(formFile.FileName);
                 if (isFileTypeAllowed(formFile.ContentType))
                 {
+                    var filePath = Path.Combine(_configuration["dev_StoredFilesPath"]!, formFile.FileName); // TODO: Update this to the VM upload path
+                    Console.WriteLine(filePath);
+                    
                     Console.WriteLine($"Uploaded file: {formFile.FileName} is allowed");
                     totalUploadedFiles++;
                     await using (var stream = System.IO.File.Create(filePath))

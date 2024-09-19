@@ -207,6 +207,7 @@ public class JobDetails
 
     [ForeignKey("JobID")]
     public virtual JobsCompleted Job { get; set; }
+    
 }
 
 [Table("jobspending")]

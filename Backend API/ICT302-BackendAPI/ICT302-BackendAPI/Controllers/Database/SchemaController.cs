@@ -17,6 +17,30 @@ public class SchemaController : ControllerBase
         _schemaRepo = schemaRepo;
         _logger = logger;
     }
+    
+    [HttpPost("animals/{animalName}&{animalType}&{animalDOB}")]
+    public async Task<ActionResult> AddAnimalAsync(string animalName, string animalType, DateTime animalDOB)
+    {
+        try
+        {
+            var animal = new Animal();
+            animal.AnimalID = Guid.NewGuid();
+            animal.AnimalName = animalName;
+            animal.AnimalType = animalType;
+            animal.AnimalDOB = animalDOB;
+            return Ok(await _schemaRepo.CreateAnimalAsync(animal));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                statusCode = 500,
+                message = ex.Message
+            });
+        }
+    }
 
     [HttpGet("animals")]
     public async Task<ActionResult> GetAnimalsAsync()
