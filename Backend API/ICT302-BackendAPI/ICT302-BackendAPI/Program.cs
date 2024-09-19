@@ -1,12 +1,8 @@
-
-using ICT302_BackendAPI.Backend_API;
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 var  cors = "_localCORSOrigins";
 var builder = WebApplication.CreateBuilder(args);
-
 
 // Allowing Cross Origin from frontend to api via local host on different ports
 builder.Services.AddCors(options =>
@@ -23,7 +19,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Adding Access to our custom Context
+//Adding Access to our custom DB Context
 builder.Services.AddTransient<SchemaContext>();
 builder.Services.AddTransient<ISchemaRepository, SchemaRepository>();
 builder.Services.AddControllers();
@@ -42,17 +38,12 @@ app.UseCors(cors);
 
 app.UseRouting();
 
+#pragma warning disable ASP0014
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
 
-
-//Setting up backend and database endpoints. In separate classes to keep this main program entry file short
-//var backendEndPoints = new BackendEndPoints(app);
-
-
-//var dbEndpoints = new DatabaseEndPoints(app);
 
 
 app.Run();

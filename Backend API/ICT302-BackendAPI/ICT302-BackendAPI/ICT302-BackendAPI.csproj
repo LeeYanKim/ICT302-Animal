@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\ICT302-BackendAPI.API\ICT302-BackendAPI.API.csproj" />
       <ProjectReference Include="..\ICT302-BackendAPI.Database\ICT302-BackendAPI.Database.csproj" />
     </ItemGroup>
 

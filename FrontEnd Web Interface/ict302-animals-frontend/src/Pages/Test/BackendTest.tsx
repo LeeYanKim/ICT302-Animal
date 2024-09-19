@@ -20,7 +20,7 @@ const BackendTest: React.FC = () => {
 
     const handelDBConnectionTest = async () => {
         try {
-            const response = await fetch('http://localhost:5173/api/db/animals');
+            const response = await fetch('http://10.51.33.25:5000/api/db/animals');
             const data = await response.json();
             console.log(data);
         } catch (error) {
