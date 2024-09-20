@@ -15,6 +15,9 @@ Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI.Database/bin/
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI.Database/obj/
 
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.API/bin/
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.API/obj/
+
 # Visual Studio Ignore Files
 .vs
 
