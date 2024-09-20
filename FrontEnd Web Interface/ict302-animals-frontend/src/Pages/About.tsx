@@ -6,21 +6,22 @@ const About: React.FC = () => {
   const userContext = useContext(UserProfileContext);
 
   return (
-    <div>
+    <div style={{ padding: '0 20px' }}>
       <h1>About</h1>
       <p>
-      Pellentesque habitant morbi tristique senectus et netus et malesuada
-      fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
-      ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam
-      egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend
-      leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum
-      erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean
-      fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci,
-      sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar
-      facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor
-      neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat
-      volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis
-      luctus, metus
+        Welcome to <strong>WildVision</strong>, where the beauty and complexity of the animal kingdom come to life in 3D. Our platform empowers users to explore and learn about wildlife like never before, using cutting-edge technology to generate realistic 3D models from simple videos.
+      </p>
+      <h2>Our Mission</h2>
+      <p>
+        At WildVision, we aim to help users learn more about the animals based on the 3D Models generated.
+      </p>
+      <h2>What We Do</h2>
+      <p>
+        By utilizing advanced 3D modeling technology and data analysis, WildVision transforms ordinary photos and videos into lifelike animal models. Whether you're a wildlife enthusiast, a student, or a researcher, our platform allows you to dive into the details of various animals, offering insights and interactive experiences.
+      </p>
+      <h2>Why WildVision?</h2>
+      <p>
+        We combine technology and everyday life aiming to make it more convenient for users who are interested to get a scan of their animals. 
       </p>
     </div>
   );

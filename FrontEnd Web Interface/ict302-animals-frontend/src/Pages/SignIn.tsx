@@ -5,6 +5,9 @@ import {Link, useNavigate} from 'react-router-dom';
 import ForgotPassword from '../Components/SignIn/ForgotPassword';
 import getSignInTheme from '../Components/SignIn/theme/getSignInTheme';
 
+import FacebookIcon from '@mui/icons-material/Facebook';
+import GoogleIcon from '@mui/icons-material/Google';
+
 
 import { ProjectLogoMin } from '../Components/UI/ProjectLogo';
 import UserProfile from '../Internals/UserProfile';
@@ -111,6 +114,17 @@ const SignIn: React.FC = () => {
     return isValid;
   };
 
+  const handleGoogleSignIn = () => {
+    // TODO: Implement Google OAuth sign-in logic
+    alert('Sign in with Google');
+  };
+  
+  const handleFacebookSignIn = () => {
+    // TODO: Implement Facebook OAuth sign-in logic
+    alert('Sign in with Facebook');
+  };
+  
+
   return (
         <SignInContainer direction="column" justifyContent="space-between">
           <Card variant="outlined">
@@ -189,6 +203,28 @@ const SignIn: React.FC = () => {
               >
                 Sign in
               </Button>
+              <Divider sx={{ my: 2 }}>
+                  <Typography sx={{ color: 'text.secondary' }}>or</Typography>
+              </Divider>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={handleGoogleSignIn}
+                  startIcon={<GoogleIcon />}
+                >
+                  Sign in with Google
+                </Button>
+
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={handleFacebookSignIn}
+                  startIcon={<FacebookIcon />}
+                >
+                Sign in with Facebook
+                </Button>
+              </Box>
               <Typography sx={{ textAlign: 'center' }}>
                 Don&apos;t have an account?{' '}
                 <span>

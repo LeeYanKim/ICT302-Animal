@@ -16,92 +16,130 @@ import { UserProfileContext } from "../Internals/ContextStore";
 const LandingPage: React.FC = () => {
     const userContext = useContext(UserProfileContext);
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
-
+        <Container sx={{ my: 5 }}>
             <Box
                 sx={{
-                    height: '50vh',
-                    backgroundImage: 'url(./assets/images/landing/landing_header_2.jpg)',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    textAlign: 'center',
+                    justifyContent: 'space-between',
                 }}
             >
-                <Container>
-                    <Typography variant="h2" component="h1" gutterBottom>
-                        Get Started
+                {/* Left side with 2x2 grid of GIFs */}
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)', // Creates 2 columns
+                        gap: 2, // Gap between GIFs
+                        width: '65%', // Takes 65% of the space
+                    }}
+                >
+                    <Box>
+                        <img
+                            src="./assets/images/landing/wire_no_background.png"
+                            alt="GIF 1"
+                            style={{ width: 'auto', height: 'auto' }}
+                        />
+                    </Box>
+                    <Box>
+                        <img
+                            src="./assets/images/landing/model_no_background.png"
+                            alt="GIF 2"
+                            style={{ width: 'auto', height: 'auto' }}
+                        />
+                    </Box>
+                    <Box>
+                        <img
+                            src="./assets/images/landing/model_no_background.png"
+                            alt="GIF 3"
+                            style={{ width: 'auto', height: 'auto' }}
+                        />
+                    </Box>
+                    <Box>
+                        <img
+                            src="./assets/images/landing/wire_no_background.png"
+                            alt="GIF 4"
+                            style={{ width: 'auto', height: 'auto' }}
+                        />
+                    </Box>
+                </Box>
+
+                {/* Right side with the quote */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '30%',
+                        textAlign: 'center',
+                        padding: '20px', // Add padding for breathing space
+                        backgroundColor: '#f2f0e8', // Optional: add background color for contrast
+                        borderRadius: '8px', // Rounded corners for a softer look
+                    }}
+                >
+                    {/* Upper Divider */}
+                    <Box
+                        sx={{
+                            width: '80%', // Make it slightly smaller for better visual hierarchy
+                            borderBottom: 4,
+                            borderColor: '#ae0001',
+                            mb: 3, // More space below the divider
+                        }}
+                    />
+
+                    {/* Title */}
+                    <Typography
+                        variant="h4"
+                        gutterBottom
+                        sx={{
+                            fontFamily: 'Poppins, sans-serif', // Custom font
+                            fontWeight: 'bold', // Make it bold for emphasis
+                            textAlign: 'center', // Center the text
+                            mb: 1, // Reduce bottom margin for better spacing
+                        }}
+                    >
+                        Building 3D Models
                     </Typography>
-                    <Typography variant="h5" component="p" gutterBottom>
-                        Automatic 3D Model Generation from Images and Videos
+
+                    <Typography
+                        variant="h4"
+                        component="p"
+                        sx={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontWeight: 'normal', // Keep normal weight for contrast
+                            textAlign: 'center',
+                            mb: 1, // Adjust spacing
+                        }}
+                    >
+                        using
                     </Typography>
-                    <Button variant="contained" color="primary" size="large">
-                        Get Started
-                    </Button>
-                </Container>
+
+                    <Typography
+                        variant="h4"
+                        gutterBottom
+                        sx={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            mb: 3, // Add some margin to balance with the lower divider
+                        }}
+                    >
+                        Artificial Intelligence
+                    </Typography>
+
+                    {/* Lower Divider */}
+                    <Box
+                        sx={{
+                            width: '80%',
+                            borderTop: 4,
+                            borderColor: '#ae0001',
+                            mt: 3, // Adjust margin for consistent spacing
+                        }}
+                    />
+                </Box>
+
+
             </Box>
-
-            <Container sx={{ my: 5 }}>
-                <Grid container spacing={4}>
-                    <Grid size={4}>
-                        <Card>
-                            <CardContent sx={{ textAlign: 'center' }}>
-                                <img
-                                    src="./assets/images/landing/landing_generation.gif"
-                                    alt="Upload Media"
-                                    style={{ width: '250px', height: 'auto' }}
-                                />
-                                <Typography variant="h5" component="h2" gutterBottom>
-                                    Upload Media
-                                </Typography>
-                                <Typography component="p">
-                                    Use images and videos to generate 3D models.
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-
-                    <Grid size={4}>
-                        <Card>
-                            <CardContent sx={{ textAlign: 'center' }}>
-                                <img
-                                    src="./assets/images/landing/landing_generation.gif"
-                                    alt="Generate 3D Models"
-                                    style={{ width: '250px', height: 'auto' }}
-                                />
-                                <Typography variant="h5" component="h2" gutterBottom>
-                                    Generate 3D Models
-                                </Typography>
-                                <Typography component="p">
-                                    Create detailed 3D models from your media files.
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-
-                    <Grid size={4}>
-                        <Card>
-                            <CardContent sx={{ textAlign: 'center' }}>
-                                <img
-                                    src="./assets/images/landing/landing_generation.gif"
-                                    alt="Visualize Results"
-                                    style={{ width: '250px', height: 'auto' }}
-                                />
-                                <Typography variant="h5" component="h2" gutterBottom>
-                                    Visualize Results
-                                </Typography>
-                                <Typography component="p">
-                                    View and interact with the generated 3D models.
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
-            </Container>
-        </Box>
+        </Container>
     );
 };
 

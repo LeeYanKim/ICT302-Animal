@@ -25,16 +25,16 @@ declare module '@mui/material/styles/createPalette' {
 const customTheme = createTheme();
 
 export const brand = {
-  50: 'hsl(210, 100%, 95%)',
-  100: 'hsl(210, 100%, 92%)',
-  200: 'hsl(210, 100%, 80%)',
-  300: 'hsl(210, 100%, 65%)',
-  400: 'hsl(210, 98%, 48%)',
-  500: 'hsl(210, 98%, 42%)',
-  600: 'hsl(210, 98%, 55%)',
-  700: 'hsl(210, 100%, 35%)',
-  800: 'hsl(210, 100%, 16%)',
-  900: 'hsl(210, 100%, 21%)',
+  50: 'hsl(351, 100%, 85%)',   // Very light vivid red
+  100: 'hsl(351, 100%, 75%)',  // Light vivid red
+  200: 'hsl(351, 100%, 65%)',  // Soft vivid red
+  300: 'hsl(351, 100%, 55%)',  // Vivid red
+  400: 'hsl(351, 100%, 50%)',  // Bright vivid red
+  500: 'hsl(351, 100%, 45%)',  // **Base Color** (#E12945)
+  600: 'hsl(351, 100%, 35%)',  // Deep vivid red
+  700: 'hsl(351, 100%, 25%)',  // Dark vivid red
+  800: 'hsl(351, 100%, 15%)',  // Very dark vivid red
+  900: 'hsl(351, 100%, 10%)',  // Darkest vivid red
 };
 
 export const gray = {
@@ -93,7 +93,7 @@ export const getDesignTokens = (mode: PaletteMode) => ({
   palette: {
     mode,
     primary: {
-      light: brand[200],
+      light: brand[500],
       main: brand[400],
       dark: brand[700],
       contrastText: brand[50],
@@ -151,23 +151,27 @@ export const getDesignTokens = (mode: PaletteMode) => ({
     },
     divider: mode === 'dark' ? alpha(gray[700], 0.6) : alpha(gray[300], 0.4),
     background: {
-      default: 'hsl(0, 0%, 99%)',
-      paper: 'hsl(220, 35%, 97%)',
-      ...(mode === 'dark' && { default: gray[900], paper: 'hsl(220, 30%, 7%)' }),
+      default: '#f2f0e8', // Set your new background color here
+      paper: '#f2f0e8', // Set the paper background to match
+      ...(mode === 'dark' && { 
+        default: gray[900], // Dark mode background (keeping the same)
+        paper: 'hsl(220, 30%, 7%)', 
+      }),
     },
     text: {
-      primary: gray[800],
-      secondary: gray[600],
+      primary: mode === 'dark' ? 'hsl(0, 0%, 100%)' : gray[800],
+      secondary: mode === 'dark' ? gray[400] : gray[600],
       warning: orange[400],
-      ...(mode === 'dark' && { primary: 'hsl(0, 0%, 100%)', secondary: gray[400] }),
     },
     action: {
-      hover: alpha(gray[200], 0.2),
-      selected: `${alpha(gray[200], 0.3)}`,
-      ...(mode === 'dark' && {
-        hover: alpha(gray[600], 0.2),
-        selected: alpha(gray[600], 0.3),
-      }),
+      hover: alpha(
+        mode === 'dark' ? gray[600] : gray[200],
+        0.2
+      ),
+      selected: alpha(
+        mode === 'dark' ? gray[600] : gray[200],
+        0.3
+      ),
     },
   },
   typography: {
