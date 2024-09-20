@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using System.Web;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace ICT302_BackendAPI.API.APIs;
 
@@ -21,15 +22,18 @@ public class FileController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("{fileName}&{contentType}")]
-    public async Task<FileStreamResult> GetUserFileAsync(string fileName, string contentType)
+    [HttpGet("{fileName}")]
+    public async Task<FileStreamResult> GetUserFileAsync(string fileName)
     {
         // TODO: Get user context and get file from storage 
-        Console.WriteLine("{0}, {1}", fileName, HttpUtility.UrlDecode(contentType));
-        
+        //Console.WriteLine("{0}, {1}", fileName, HttpUtility.UrlDecode(contentType));
+
+
+        string contentType;
         var filePath = Path.Combine(_configuration["dev_StoredFilesPath"]!, fileName);
+        new FileExtensionContentTypeProvider().TryGetContentType(filePath, out contentType);
         var stream = new FileStream(filePath, FileMode.Open);
-        return new FileStreamResult(stream, HttpUtility.UrlDecode(contentType));
+        return new FileStreamResult(stream, contentType);
         
 
     }

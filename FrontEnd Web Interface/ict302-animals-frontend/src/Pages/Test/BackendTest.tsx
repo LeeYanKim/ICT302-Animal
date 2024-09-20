@@ -9,6 +9,7 @@ const BackendTest: React.FC = () => {
     const userContext = useContext(UserProfileContext);
 
     const [img, setImg] = useState<string>('');
+    const [animals, setAnimals] = useState<[]>([]);
 
     const handelConnectionTest = async () => {
         try {
@@ -23,8 +24,9 @@ const BackendTest: React.FC = () => {
 
     const handelDBConnectionTest = async () => {
         try {
-            const response = await fetch('http://10.51.33.25:5000/api/db/animals');
+            const response = await fetch('http://localhost:5173/api/db/animals');
             const data = await response.json();
+            setAnimals(data);
             console.log(data);
         } catch (error) {
             console.error(error);
@@ -34,7 +36,7 @@ const BackendTest: React.FC = () => {
 
     const handleGetVideoTest = async () => {
         try {
-            const response = await fetch('http://localhost:5173/api/user/files/Recording 2024-08-28 181442.mp4&video%2Fmp4');
+            const response = await fetch('http://localhost:5173/api/user/files/videoTest.mp4');
             const data = await response.blob();
             let d = URL.createObjectURL(data);
             setImg(d);
@@ -49,9 +51,23 @@ const BackendTest: React.FC = () => {
         <div>
             <h1>Backend Test</h1>
             <div>
-                <Button onClick={handelConnectionTest}>Test Backend Connection</Button>
-                <Button onClick={handelDBConnectionTest}>Test DB Connection</Button>
-                <Button onClick={handleGetVideoTest}>Test Video Get</Button>
+                <Button variant='contained' onClick={handelConnectionTest}>Test Backend Connection</Button>
+                <Button variant='contained' onClick={handelDBConnectionTest}>Test DB Connection</Button>
+                <Button variant='contained' onClick={handleGetVideoTest}>Test Video Get</Button>
+            </div>
+            <div>
+                {
+                    animals && animals.map((animal: any, index: number) => {
+                        return (
+                            <div key={index}>
+                                <p>{animal.animalID}</p>
+                                <p>{animal.animalName}</p>
+                                <p>{animal.animalType}</p>
+                                <p>{animal.animalDOB}</p>
+                            </div>
+                        )
+                    })
+                }
             </div>
             {
                 img && <video src={img} controls/>

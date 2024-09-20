@@ -1,4 +1,4 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 import { UserProfileContext } from "../Internals/ContextStore";
 import AnimalCard from "../Components/Animal/AnimalCard";
@@ -8,14 +8,14 @@ import {Grid2 as Grid, Box} from "@mui/material";
 const Animals: React.FC = () => {
   const userContext = useContext(UserProfileContext);
 
-  let animals: any[] = [];
+  const [animals, setAnimals] = useState<[]>([]);
 
     const handelDBConnectionTest = async () => {
         try {
             const response = await fetch('http://10.51.33.25:5000/api/db/animals');
             const data = await response.json();
-
-            animals = data;
+            setAnimals([]);
+            setAnimals(data);
             console.log(animals);
         } catch (error) {
             console.error(error);
@@ -36,12 +36,14 @@ const Animals: React.FC = () => {
                 columns={12}
                 sx={{ mb: (theme) => theme.spacing(2) }}
             >
-        {animals.map((item, index) => (
-            <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
-                <AnimalCard animalName={item.animalName} animalDOB={item.animalDOB} animalType={item.animalType}/>
-            </Grid>
-        ))
-        }
+                {animals && animals.map((animal: any, index: number) => {
+                        return (
+                        <Grid key={index}>
+                            <AnimalCard animalName={animal.animalName} animalDOB={animal.animalDOB} animalType={animal.animalType}/>
+                        </Grid>
+                        )
+                    })
+                }
             </Grid>
         </Box>
     </div>
