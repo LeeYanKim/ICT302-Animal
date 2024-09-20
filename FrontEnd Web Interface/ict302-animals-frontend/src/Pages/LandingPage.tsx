@@ -1,7 +1,6 @@
 import React, {useContext} from 'react';
-import { Typography, Container, Button, Card, CardContent } from '@mui/material';
-import Grid  from '@mui/material/Grid2';
-import { Box } from '@mui/system';
+import { Box, Typography, Container, Button, Card, CardContent, Grid2 as Grid} from '@mui/material';
+import { Link } from 'react-router-dom';
 
 // Import of the LandingPage CSS file
 import './LandingPage.css';
@@ -125,7 +124,6 @@ const LandingPage: React.FC = () => {
                     >
                         Artificial Intelligence
                     </Typography>
-
                     {/* Lower Divider */}
                     <Box
                         sx={{

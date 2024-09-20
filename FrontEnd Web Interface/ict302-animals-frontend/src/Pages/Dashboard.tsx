@@ -27,7 +27,7 @@ const Dashboard: React.FC<DashboardProps> = ({ renderedPage }) => {
   const [currentDashboardPage, setCurrentDashboardPage] = React.useState<DashboardPages>(renderedPage ? getDashboardPageFromPath(renderedPage) : DashboardPages.Home);
   const [alertQueue, setAlertQueue] = React.useState<React.ReactNode[]>(alerts);
 
-  console.log("Dashboard Page: ", getNameFromDashboardPage(currentDashboardPage));
+  //console.log("Dashboard Page: ", getNameFromDashboardPage(currentDashboardPage));
 
   //This removes alerts after 5 seconds
   useEffect(() => {

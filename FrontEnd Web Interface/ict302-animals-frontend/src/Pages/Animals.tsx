@@ -1,27 +1,51 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 
 import { UserProfileContext } from "../Internals/ContextStore";
+import AnimalCard from "../Components/Animal/AnimalCard";
+import CompletedCard from "../Components/Completed/CompletedCard";
+import {Grid2 as Grid, Box} from "@mui/material";
 
 const Animals: React.FC = () => {
   const userContext = useContext(UserProfileContext);
 
+  const [animals, setAnimals] = useState<[]>([]);
+
+    const handelDBConnectionTest = async () => {
+        try {
+            const response = await fetch('http://10.51.33.25:5000/api/db/animals');
+            const data = await response.json();
+            setAnimals([]);
+            setAnimals(data);
+            console.log(animals);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    useEffect(() => {
+        handelDBConnectionTest();
+    }, []);
+
   return (
     <div>
       <h1>Animals</h1>
-      <p>
-      Pellentesque habitant morbi tristique senectus et netus et malesuada
-      fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae,
-      ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam
-      egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend
-      leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum
-      erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean
-      fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci,
-      sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar
-      facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor
-      neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat
-      volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis
-      luctus, metus
-      </p>
+        <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+            <Grid
+                container
+                spacing={2}
+                columns={12}
+                sx={{ mb: (theme) => theme.spacing(2) }}
+            >
+                {animals && animals.map((animal: any, index: number) => {
+                        return (
+                        <Grid key={index}>
+                            <AnimalCard animalName={animal.animalName} animalDOB={animal.animalDOB} animalType={animal.animalType}/>
+                        </Grid>
+                        )
+                    })
+                }
+            </Grid>
+        </Box>
     </div>
   );
 }

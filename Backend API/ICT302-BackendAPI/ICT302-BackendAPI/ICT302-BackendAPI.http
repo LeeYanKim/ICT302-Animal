@@ -1,6 +1,9 @@
 @ICT302_BackendAPI_HostAddress = http://localhost:5173
 
-GET {{ICT302_BackendAPI_HostAddress}}/weatherforecast/
+GET {{ICT302_BackendAPI_HostAddress}}/api/test/
+Accept: application/json
+
+GET {{ICT302_BackendAPI_HostAddress}}/api/db/animal
 Accept: application/json
 
 ###

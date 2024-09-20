@@ -1,12 +1,13 @@
-import React, {useContext} from 'react';
+import React, {ChangeEvent, useContext} from 'react';
 
 import { UserProfileContext } from "../../Internals/ContextStore";
 
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Box, FormLabel} from '@mui/material';
+import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Box, FormLabel, styled} from '@mui/material';
 
 import NewUpload from './NewUpload';
 
 import CheckIcon from '@mui/icons-material/Check';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 import {UploadProps} from './UploadProps';
 import  UserAlert  from '../../Internals/components/Alerts/Alert';
@@ -31,6 +32,7 @@ const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
 
     const HandleSubmit = () => {
         console.log('Submit');
+
     }
 
   return (
@@ -50,8 +52,8 @@ const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
             <FormControl>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignSelf: 'center'}}>
                     <Button
-                        variant='contained'
                         onClick={handleClickOpen}
+                        variant={'contained'}
                         sx={{ alignSelf: 'baseline' }}
                         >
                         Upload Media
