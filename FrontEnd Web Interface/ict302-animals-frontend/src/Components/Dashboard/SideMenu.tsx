@@ -10,6 +10,16 @@ import ProjectLogo from '../UI/ProjectLogo';
 import { UserProfileContext } from "../../Internals/ContextStore";
 import DashboardPages, {DashboardMenuProps}  from './DashboardHelpers';
 
+//This is to make it possible for the side menu props to be optional
+interface SideMenuProps {
+  currentDashboardPage: DashboardPages;
+  setCurrentDashboardPage: React.Dispatch<React.SetStateAction<DashboardPages>>;
+  variant?: 'permanent' | 'temporary';
+  open?: boolean;
+  onClose?: () => void;
+}
+
+
 const drawerWidth = 240;
 
 const Drawer = styled(MuiDrawer)({
@@ -23,18 +33,28 @@ const Drawer = styled(MuiDrawer)({
   },
 });
 
-const SideMenu: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCurrentDashboardPage}) => {
+const SideMenu: React.FC<SideMenuProps> = ({
+  currentDashboardPage,
+  setCurrentDashboardPage,
+  variant = 'permanent', // Default to permanent for larger screens
+  open = true, // For permanent, the drawer is always open
+  onClose = () => {} // No-op for permanent drawer
+}) => {
   const userContext = useContext(UserProfileContext);
 
   return (
     <Drawer
-      variant="permanent"
-      sx={{
-        display: { xs: 'none', md: 'block' },
-        [`& .${drawerClasses.paper}`]: {
-          backgroundColor: 'background.paper',
-        },
-      }}
+    variant={variant}
+    open={open}
+    onClose={onClose}
+    sx={{
+      width: drawerWidth,
+      flexShrink: 0,
+      [`& .MuiDrawer-paper`]: {
+        width: drawerWidth,
+        boxSizing: 'border-box',
+      },
+    }}
     >
       <ProjectLogo />
       <Box
