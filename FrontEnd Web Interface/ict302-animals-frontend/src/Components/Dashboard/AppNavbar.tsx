@@ -8,9 +8,10 @@ import { tabsClasses } from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
+import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import MenuButton from './MenuButton';
-
-import DashboardPages, {DashboardMenuProps, getPrettyNameFromDashboardPage}  from './DashboardHelpers';
+import SideMenu from './SideMenu';
+import DashboardPages, { DashboardMenuProps, getPrettyNameFromDashboardPage } from './DashboardHelpers';
 
 const Toolbar = styled(MuiToolbar)({
   width: '100%',
@@ -28,11 +29,15 @@ const Toolbar = styled(MuiToolbar)({
   },
 });
 
-const AppNavbar: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCurrentDashboardPage}) => {
+const AppNavbar: React.FC<DashboardMenuProps> = ({ currentDashboardPage, setCurrentDashboardPage }) => {
   const [open, setOpen] = React.useState(false);
 
+
+
+  //this is the menu button when website is in mobile dimensions
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
+
   };
 
   return (
@@ -59,17 +64,26 @@ const AppNavbar: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCurre
           }}
         >
           <Stack direction="row" spacing={1} sx={{ justifyContent: 'center' }}>
-            <CustomIcon />
+            <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
+              <MenuRoundedIcon />
+            </MenuButton>
             <Typography variant="h4" component="h1" sx={{ color: 'text.primary' }}>
               {getPrettyNameFromDashboardPage(currentDashboardPage)}
             </Typography>
           </Stack>
-          <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
-            <MenuRoundedIcon />
-          </MenuButton>
-          
+
+
         </Stack>
       </Toolbar>
+      {/* Mobile drawer */}
+      <SwipeableDrawer
+        anchor="left"
+        open={open}
+        onClose={toggleDrawer(false)}
+        onOpen={toggleDrawer(true)}
+      >
+        <SideMenu currentDashboardPage={currentDashboardPage} setCurrentDashboardPage={setCurrentDashboardPage} />
+      </SwipeableDrawer>
     </AppBar>
   );
 }
