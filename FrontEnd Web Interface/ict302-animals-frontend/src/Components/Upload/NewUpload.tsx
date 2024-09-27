@@ -10,11 +10,17 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {styled} from "@mui/material";
 import {ChangeEvent} from "react";
 import {Form} from "react-bootstrap";
+import Tagging from "./Tagging";
+
+
+
 
 interface NewUploadProps {
   open: boolean;
   handleClose: (canceled: boolean) => void;
 }
+
+
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -28,7 +34,11 @@ const VisuallyHiddenInput = styled('input')({
     width: 1,
 });
 
+
+
 export default function NewUpload({ open, handleClose }: NewUploadProps) {
+
+    const [isTaggingOpen, setIsTaggingOpen] = React.useState(false); // State for Tagging dialog
 
     const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         console.log('File Upload', e.target.files);
@@ -48,13 +58,22 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
             });
             const data = await response.json();
             console.log(data);
-            handleClose(true)
+            //open new UI element here
+            setIsTaggingOpen(true);
+
+            
         } catch (error) {
             console.error(error);
         }
+    };
+
+
+    const handleTaggingClose = () => {
+        setIsTaggingOpen(false);
     }
 
   return (
+    <>
     <Dialog
       open={open}
       onClose={handleClose}
@@ -91,5 +110,8 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
             <Button onClick={() => handleClose(true)}>Cancel</Button>
         </DialogActions>
     </Dialog>
+
+<Tagging open={isTaggingOpen} handleClose={handleTaggingClose} />
+</>
     );
 }
