@@ -97,16 +97,16 @@ public class Billing
     [Column("Subscription_ID", TypeName = "binary(16)")]
     public Guid SubscriptionID { get; set; }
 
-    [ForeignKey("GPC_ID")]
+    [ForeignKey("GPCID")]
     public virtual Graphic Graphic { get; set; }
 
-    [ForeignKey("Job_ID")]
+    [ForeignKey("JobID")]
     public virtual JobsCompleted JobsCompleted { get; set; }
 
-    [ForeignKey("User_ID")]
+    [ForeignKey("UserID")]
     public virtual User User { get; set; }
 
-    [ForeignKey("Subscription_ID")]
+    [ForeignKey("SubscriptionID")]
     public virtual Subscription Subscription { get; set; }
 }
 
@@ -168,12 +168,12 @@ public class JobDetails
 
     [Required]
     [Column("Model_Gen_Type", TypeName = "varchar(45)")]
-    public Guid ModelGenType { get; set; }
+    public string ModelGenType { get; set; }
 
-    [ForeignKey("GPC_ID")]
+    [ForeignKey("GPCID")]
     public virtual Graphic Graphic { get; set; }
 
-    [ForeignKey("Model_ID")]
+    [ForeignKey("ModelID")]
     public virtual Model3D Model3D { get; set; }
     
 }
@@ -208,7 +208,7 @@ public class JobsCompleted
     [Column("JD_ID", TypeName = "binary(16)")]
     public Guid JDID { get; set; }
 
-    [ForeignKey("JD_ID")]
+    [ForeignKey("JDID")]
     public virtual JobDetails JobDetails { get; set; }
 }
 
@@ -236,7 +236,7 @@ public class JobsPending
     [Column("JD_ID", TypeName = "binary(16)")]
     public Guid JDID { get; set; }
 
-    [ForeignKey("JD_ID")]
+    [ForeignKey("JDID")]
     public virtual JobDetails JobDetails { get; set; }
 }
 
@@ -297,7 +297,7 @@ public class OrgRequests
 
     [Column("Status", TypeName = "varchar(45)")]
     [StringLength(45)]
-    public string? Status { get; set; }
+    public string Status { get; set; }
 
     [ForeignKey("OrgID")]
     public virtual Organisation Organisation { get; set; }
@@ -348,10 +348,10 @@ public class OrganisationAccess
     [Column("Access_ID", TypeName = "binary(16)")]
     public Guid AccessID { get; set; }
 
-    [ForeignKey("Org_ID")]
+    [ForeignKey("OrgID")]
     public virtual Organisation Organisation { get; set; }
 
-    [ForeignKey("Access_ID")]
+    [ForeignKey("AccessID")]
     public virtual AnimalAccess AnimalAccess { get; set; }
 }
 
@@ -396,13 +396,13 @@ public class Transaction
     [Column("Animal_ID", TypeName = "binary(16)")]
     public Guid AnimalID { get; set; }
 
-    [ForeignKey("TransType_ID")]
+    [ForeignKey("TransTypeID")]
     public virtual TransactionType TransactionType { get; set; }
 
-    [ForeignKey("User_ID")]
+    [ForeignKey("UserID")]
     public virtual User User { get; set; }
 
-    [ForeignKey("Animal_ID")]
+    [ForeignKey("AnimalID")]
     public virtual Animal Animal { get; set; }
 }
 
@@ -473,13 +473,13 @@ public class UserAccess
     [Column("AccessType_ID", TypeName = "binary(16)")]
     public Guid AccessTypeID { get; set; }
 
-    [ForeignKey("Org_ID")]
+    [ForeignKey("OrgID")]
     public virtual Organisation Organisation { get; set; }
 
-    [ForeignKey("User_ID")]
+    [ForeignKey("UserID")]
     public virtual User User { get; set; }
 
-    [ForeignKey("AccessType_ID")]
+    [ForeignKey("AccessTypeID")]
     public virtual AccessType AccessType { get; set; }
 }
 
