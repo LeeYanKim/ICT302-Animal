@@ -1,10 +1,11 @@
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 
-var  cors = "_localCORSOrigins";
+
+var cors = "_localCORSOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
-// Allowing Cross Origin from frontend to api via local host on different ports
+// Allowing Cross-Origin from frontend to API via localhost on different ports
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: cors, policy =>
@@ -13,15 +14,33 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Adding Access to our custom DB Context
+// Adding Access to our custom DB Context
 builder.Services.AddTransient<SchemaContext>();
-builder.Services.AddTransient<ISchemaRepository, SchemaRepository>();
+
+// Register repositories for Animal, Model3D, and AccessType
+builder.Services.AddTransient<ISchemaRepository, SchemaRepository>(); // Animal Repository
+builder.Services.AddTransient<IModel3DRepository, Model3DRepository>();
+builder.Services.AddTransient<IAccessTypeRepository, AccessTypeRepository>(); // AccessType Repository
+builder.Services.AddTransient<IAnimalAccessRepository, AnimalAccessRepository>();
+builder.Services.AddTransient<IBillingRepository, BillingRepository>();
+builder.Services.AddTransient<IGraphicRepository, GraphicRepository>();
+builder.Services.AddTransient<IJobsCompletedRepository, JobsCompletedRepository>();
+builder.Services.AddTransient<IJobDetailsRepository, JobDetailsRepository>();
+builder.Services.AddTransient<IJobsPendingRepository, JobsPendingRepository>();
+builder.Services.AddTransient<IOrgRequestsRepository, OrgRequestsRepository>();
+builder.Services.AddTransient<IOrganisationRepository, OrganisationRepository>();
+builder.Services.AddTransient<IOrganisationAccessRepository, OrganisationAccessRepository>();
+builder.Services.AddTransient<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddTransient<ITransactionRepository, TransactionRepository>();
+builder.Services.AddTransient<ITransactionTypeRepository, TransactionTypeRepository>();
+builder.Services.AddTransient<IUserRepository, UserRepository>();
+builder.Services.AddTransient<IUserAccessRepository, UserAccessRepository>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -43,7 +62,5 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
-
-
 
 app.Run();
