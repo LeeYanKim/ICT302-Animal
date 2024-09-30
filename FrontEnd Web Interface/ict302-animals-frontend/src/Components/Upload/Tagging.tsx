@@ -4,22 +4,20 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { MenuItem, Select, FormControl, InputLabel, Typography, Box, SelectChangeEvent } from '@mui/material';
+import { MenuItem, Select, FormControl, InputLabel, Typography, Box, SelectChangeEvent, Snackbar, Alert } from '@mui/material';
+import NewAnimal from './NewAnimal';
 
 interface TaggingProps {
   open: boolean;
   handleClose: () => void;
+  closeUploadDialog: () => void; // Close the upload dialog as well
 }
 
-//TODO 
-//Don't upload media until tagging is done
-//Implement new animal page
-//Make it look not crap
-
-export default function Tagging({ open, handleClose }: TaggingProps) {
+export default function Tagging({ open, handleClose, closeUploadDialog }: TaggingProps) {
   const [selectedAnimal, setSelectedAnimal] = React.useState('name1');
   const [generator, setGenerator] = React.useState('GART');
-
+  const [isNewAnimalOpen, setIsNewAnimalOpen] = React.useState(false);
+  const [isSnackbarOpen, setIsSnackbarOpen] = React.useState(false);
 
   const handleAnimalChange = (event: SelectChangeEvent<string>) => {
     setSelectedAnimal(event.target.value);
@@ -29,61 +27,88 @@ export default function Tagging({ open, handleClose }: TaggingProps) {
     setGenerator(event.target.value);
   };
 
+  const handleNewAnimalClose = () => {
+    setIsNewAnimalOpen(false);
+  };
+
+  const handleGenerate = () => {
+    // Open Snackbar to confirm generation
+    setIsSnackbarOpen(true);
+    
+    // Close both the tagging dialog and the upload dialog
+    handleClose(); // Close tagging dialog
+    closeUploadDialog(); // Close upload video dialog
+  };
+
+  const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setIsSnackbarOpen(false);
+  };
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Upload Successful</DialogTitle>
-      <DialogContent>
-        {/* Informational text */}
-        <Typography variant="body1" gutterBottom>
-          Your file has been uploaded successfully! Please enter animal details to continue.
-        </Typography>
+    <>
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Upload Successful</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            Your file has been uploaded successfully! Please enter animal details to continue.
+          </Typography>
 
-        {/* Animal selection */}
-        <Box mt={2}>
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="animal-select-label">Animal Name</InputLabel>
-            <Select
-              labelId="animal-select-label"
-              id="animals"
-              value={selectedAnimal}
-              onChange={handleAnimalChange}
-            >
-              <MenuItem value="Jax">Jax</MenuItem>
-              <MenuItem value="Max">Max</MenuItem>
-              <MenuItem value="Fernet">Fernet</MenuItem>
-              <MenuItem value="Aqua">Aqua</MenuItem>
-            </Select>
-          </FormControl>
-          <Button color="primary" variant="outlined" style={{ marginTop: '10px' }}>
-            Add new Animal
+          <Box mt={2}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="animal-select-label">Animal Name</InputLabel>
+              <Select
+                labelId="animal-select-label"
+                id="animals"
+                value={selectedAnimal}
+                onChange={handleAnimalChange}
+              >
+                <MenuItem value="Jax">Jax</MenuItem>
+                <MenuItem value="Max">Max</MenuItem>
+                <MenuItem value="Fernet">Fernet</MenuItem>
+                <MenuItem value="Aqua">Aqua</MenuItem>
+              </Select>
+            </FormControl>
+            <Button onClick={() => setIsNewAnimalOpen(true)} color="primary" variant="outlined" style={{ marginTop: '10px' }}>
+              Add new Animal
+            </Button>
+          </Box>
+
+          <Box mt={3}>
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="generator-select-label">Generator</InputLabel>
+              <Select
+                labelId="generator-select-label"
+                id="Generators"
+                value={generator}
+                onChange={handleGeneratorChange}
+              >
+                <MenuItem value="GART">GART</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleGenerate} color="primary" variant="contained">
+            Generate
           </Button>
-        </Box>
+          <Button onClick={handleClose} color="primary" variant="outlined">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        {/* Generator selection */}
-        <Box mt={3}>
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="generator-select-label">Generator</InputLabel>
-            <Select
-              labelId="generator-select-label"
-              id="Generators"
-              value={generator}
-              onChange={handleGeneratorChange}
-            >
-              <MenuItem value="GART">GART</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </DialogContent>
+      <NewAnimal open={isNewAnimalOpen} handleClose={handleNewAnimalClose} />
 
-      <DialogActions>
-        {/* Actions */}
-        <Button onClick={handleClose} color="primary" variant="contained">
-          Generate
-        </Button>
-        <Button onClick={handleClose} color="primary" variant="outlined">
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+      {/* Snackbar for confirmation */}
+      <Snackbar open={isSnackbarOpen} autoHideDuration={4000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+          Animal details saved successfully!
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

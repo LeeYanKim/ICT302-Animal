@@ -12,7 +12,7 @@ import {ChangeEvent} from "react";
 import {Form} from "react-bootstrap";
 import Tagging from "./Tagging";
 import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert'; // For displaying alert styles
+import Alert from '@mui/material/Alert'; 
 
 
 
@@ -127,7 +127,8 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
         </DialogActions>
     </Dialog>
 
-<Tagging open={isTaggingOpen} handleClose={handleTaggingClose} />
+    <Tagging open={isTaggingOpen} handleClose={handleTaggingClose} closeUploadDialog={() => handleClose(true)} />
+
 
 
         {/* Snackbar for error messages */}
