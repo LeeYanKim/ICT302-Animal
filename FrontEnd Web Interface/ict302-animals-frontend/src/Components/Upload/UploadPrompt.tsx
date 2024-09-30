@@ -37,7 +37,7 @@ const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
 
   return (
     <div>
-      <h1>Get Started Uploading!</h1>
+      <h1>Get Started Uploading Videos!</h1>
       <Box
         component="form"
         onSubmit={HandleSubmit}
@@ -56,7 +56,7 @@ const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
                         variant={'contained'}
                         sx={{ alignSelf: 'baseline' }}
                         >
-                        Upload Media
+                        Upload Video
                     </Button>
                 </Box>
             </FormControl>

@@ -11,6 +11,8 @@ import {styled} from "@mui/material";
 import {ChangeEvent} from "react";
 import {Form} from "react-bootstrap";
 import Tagging from "./Tagging";
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert'; // For displaying alert styles
 
 
 
@@ -39,6 +41,9 @@ const VisuallyHiddenInput = styled('input')({
 export default function NewUpload({ open, handleClose }: NewUploadProps) {
 
     const [isTaggingOpen, setIsTaggingOpen] = React.useState(false); // State for Tagging dialog
+    const [errorMessage, setErrorMessage] = React.useState(''); // State for error message
+    const [isSnackbarOpen, setIsSnackbarOpen] = React.useState(false); // State for snackbar visibility
+
 
     const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         console.log('File Upload', e.target.files);
@@ -55,16 +60,27 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
             const response = await fetch('http://localhost:5173/api/upload', {
                 method: 'POST',
                 body: formData,
-            });
-            const data = await response.json();
-            console.log(data);
-            //open new UI element here
-            setIsTaggingOpen(true);
-
+            });        
+            if (!response.ok) {
+                // If the response is not OK (e.g., 400), show an error
+                const errorData = await response.json();
+                setErrorMessage(errorData.message || 'Upload failed. Unsupported file type.');
+                setIsSnackbarOpen(true);
+            } else {
+                const data = await response.json();
+                console.log(data);
+                setIsTaggingOpen(true);  // Proceed if upload is successful
+            }
             
         } catch (error) {
             console.error(error);
+            setErrorMessage('Upload failed. Please try again.');
+            setIsSnackbarOpen(true);  // Open the Snackbar
         }
+    };
+
+    const handleSnackbarClose = () => {
+        setIsSnackbarOpen(false);
     };
 
 
@@ -90,7 +106,7 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
         <DialogContentText>
             This application is a work in progress. Please do not upload any sensitive or personal information.
             <br/>
-            Accepted file types: png, jpg, jpeg, mp4, mkv, mov
+            Accepted file types: mp4, mkv, mov
         </DialogContentText>
         <Button component='label'
                 role={undefined}
@@ -98,7 +114,7 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
                 tabIndex={-1}
                 startIcon={<CloudUploadIcon />}
         >
-            Upload Media
+            Upload Video
             <VisuallyHiddenInput
                 type='file'
                 onChange={handleFileUpload}
@@ -112,6 +128,19 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
     </Dialog>
 
 <Tagging open={isTaggingOpen} handleClose={handleTaggingClose} />
+
+
+        {/* Snackbar for error messages */}
+        <Snackbar
+            open={isSnackbarOpen}
+            autoHideDuration={6000}
+            onClose={handleSnackbarClose}
+        >
+            <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
+                {errorMessage}
+            </Alert>
+        </Snackbar>
+
 </>
     );
 }
