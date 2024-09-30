@@ -135,7 +135,6 @@ namespace ICT302_BackendAPI.Controllers.Database
                 existingJob.JobsStart = jobToUpdate.JobsStart;
                 existingJob.JobsEnd = jobToUpdate.JobsEnd;
                 existingJob.JobSize = jobToUpdate.JobSize;
-                existingJob.ModelID = jobToUpdate.ModelID;
 
                 await _jobsCompletedRepo.UpdateJobsCompletedAsync(existingJob);
                 return NoContent();

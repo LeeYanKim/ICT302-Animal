@@ -131,7 +131,7 @@ namespace ICT302_BackendAPI.Controllers.Database
                     });
                 }
 
-                existingJobDetails.JobID = jobDetailsToUpdate.JobID;
+                existingJobDetails.JDID = jobDetailsToUpdate.JDID;
 
                 await _jobDetailsRepo.UpdateJobDetailsAsync(existingJobDetails);
                 return NoContent();

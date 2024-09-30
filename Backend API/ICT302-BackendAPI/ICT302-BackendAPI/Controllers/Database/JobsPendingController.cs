@@ -133,7 +133,7 @@ namespace ICT302_BackendAPI.Controllers.Database
 
                 existingJob.JobAdded = jobsPendingToUpdate.JobAdded;
                 existingJob.Status = jobsPendingToUpdate.Status;
-                existingJob.ModelID = jobsPendingToUpdate.ModelID;
+                existingJob.JobDetails = jobsPendingToUpdate.JobDetails;
 
                 await _jobsPendingRepo.UpdateJobsPendingAsync(existingJob);
                 return NoContent();

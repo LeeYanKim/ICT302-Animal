@@ -42,4 +42,5 @@ public class SchemaContext : DbContext
     public DbSet<Transaction> Transaction { get; set; }
     public DbSet<TransactionType> TransactionType { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<UserAccess> UserAccess { get; set; }
 }
