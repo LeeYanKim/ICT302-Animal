@@ -37,13 +37,11 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 
-
 export default function NewUpload({ open, handleClose }: NewUploadProps) {
-
     const [isTaggingOpen, setIsTaggingOpen] = React.useState(false); // State for Tagging dialog
     const [errorMessage, setErrorMessage] = React.useState(''); // State for error message
     const [isSnackbarOpen, setIsSnackbarOpen] = React.useState(false); // State for snackbar visibility
-
+    const [videoUrl, setVideoUrl] = React.useState<string>('');
 
     const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         console.log('File Upload', e.target.files);
@@ -54,6 +52,11 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
             for (let i = 0; i < e.target.files.length; i++) {
                 formData.append('files', e.target.files[i], e.target.files[i].name);
             }
+
+            // Generate a video URL for preview
+            const videoFile = e.target.files[0]; // Assuming you only want to preview the first file
+            const videoObjectUrl = URL.createObjectURL(videoFile);
+            setVideoUrl(videoObjectUrl); // Store the URL for preview
         }
 
         try {
@@ -62,7 +65,6 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
                 body: formData,
             });        
             if (!response.ok) {
-                // If the response is not OK (e.g., 400), show an error
                 const errorData = await response.json();
                 setErrorMessage(errorData.message || 'Upload failed. Unsupported file type.');
                 setIsSnackbarOpen(true);
@@ -83,53 +85,55 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
         setIsSnackbarOpen(false);
     };
 
-
     const handleTaggingClose = () => {
         setIsTaggingOpen(false);
-    }
+    };
 
-  return (
+    return (
     <>
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      PaperProps={{
-        component: 'form',
-        onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-          event.preventDefault();
-          handleClose(false);
-        },
-      }}
-    >
-    <DialogTitle>Warning</DialogTitle>
-    <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
-        <DialogContentText>
-            This application is a work in progress. Please do not upload any sensitive or personal information.
-            <br/>
-            Accepted file types: mp4, mkv, mov
-        </DialogContentText>
-        <Button component='label'
-                role={undefined}
-                variant='contained'
-                tabIndex={-1}
-                startIcon={<CloudUploadIcon />}
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            PaperProps={{
+                component: 'form',
+                onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+                    event.preventDefault();
+                    handleClose(false);
+                },
+            }}
         >
-            Upload Video
-            <VisuallyHiddenInput
-                type='file'
-                onChange={handleFileUpload}
-                multiple
-            />
-        </Button>
-    </DialogContent>
-        <DialogActions sx={{ pb: 3, px: 3 }}>
-            <Button onClick={() => handleClose(true)}>Cancel</Button>
-        </DialogActions>
-    </Dialog>
+            <DialogTitle>Warning</DialogTitle>
+            <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+                <DialogContentText>
+                    This application is a work in progress. Please do not upload any sensitive or personal information.
+                    <br/>
+                    Accepted file types: mp4, mkv, mov
+                </DialogContentText>
+                <Button component='label'
+                    role={undefined}
+                    variant='contained'
+                    tabIndex={-1}
+                    startIcon={<CloudUploadIcon />}
+                >
+                    Upload Video
+                    <VisuallyHiddenInput
+                        type='file'
+                        onChange={handleFileUpload}
+                        multiple
+                    />
+                </Button>
+            </DialogContent>
+            <DialogActions sx={{ pb: 3, px: 3 }}>
+                <Button onClick={() => handleClose(true)}>Cancel</Button>
+            </DialogActions>
+        </Dialog>
 
-    <Tagging open={isTaggingOpen} handleClose={handleTaggingClose} closeUploadDialog={() => handleClose(true)} />
-
-
+        <Tagging
+            open={isTaggingOpen}
+            handleClose={handleTaggingClose}
+            closeUploadDialog={() => handleClose(true)}
+            videoUrl={videoUrl} // Pass video URL for preview
+        />
 
         {/* Snackbar for error messages */}
         <Snackbar
@@ -141,7 +145,6 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
                 {errorMessage}
             </Alert>
         </Snackbar>
-
-</>
+    </>
     );
 }

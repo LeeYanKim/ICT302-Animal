@@ -10,10 +10,17 @@ import NewAnimal from './NewAnimal';
 interface TaggingProps {
   open: boolean;
   handleClose: () => void;
-  closeUploadDialog: () => void; // Close the upload dialog as well
+  closeUploadDialog: () => void;
+  videoUrl: string; // New prop to pass the video URL
+}
+interface TaggingProps {
+  open: boolean;
+  handleClose: () => void;
+  closeUploadDialog: () => void;
+  videoUrl: string; // Add videoUrl prop to accept the video preview
 }
 
-export default function Tagging({ open, handleClose, closeUploadDialog }: TaggingProps) {
+export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl }: TaggingProps) {
   const [selectedAnimal, setSelectedAnimal] = React.useState('name1');
   const [generator, setGenerator] = React.useState('GART');
   const [isNewAnimalOpen, setIsNewAnimalOpen] = React.useState(false);
@@ -32,12 +39,9 @@ export default function Tagging({ open, handleClose, closeUploadDialog }: Taggin
   };
 
   const handleGenerate = () => {
-    // Open Snackbar to confirm generation
     setIsSnackbarOpen(true);
-    
-    // Close both the tagging dialog and the upload dialog
-    handleClose(); // Close tagging dialog
-    closeUploadDialog(); // Close upload video dialog
+    handleClose();
+    closeUploadDialog();
   };
 
   const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -89,6 +93,16 @@ export default function Tagging({ open, handleClose, closeUploadDialog }: Taggin
               </Select>
             </FormControl>
           </Box>
+
+          {/* Video Player */}
+          {videoUrl && (
+            <Box mt={3}>
+              <video width="100%" controls>
+                <source src={videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </Box>
+          )}
         </DialogContent>
 
         <DialogActions>
@@ -103,7 +117,6 @@ export default function Tagging({ open, handleClose, closeUploadDialog }: Taggin
 
       <NewAnimal open={isNewAnimalOpen} handleClose={handleNewAnimalClose} />
 
-      {/* Snackbar for confirmation */}
       <Snackbar open={isSnackbarOpen} autoHideDuration={4000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
           Animal details saved successfully!
