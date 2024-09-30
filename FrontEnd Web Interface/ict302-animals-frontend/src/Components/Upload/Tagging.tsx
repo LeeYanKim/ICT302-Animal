@@ -11,18 +11,13 @@ interface TaggingProps {
   open: boolean;
   handleClose: () => void;
   closeUploadDialog: () => void;
-  videoUrl: string; // New prop to pass the video URL
-}
-interface TaggingProps {
-  open: boolean;
-  handleClose: () => void;
-  closeUploadDialog: () => void;
-  videoUrl: string; // Add videoUrl prop to accept the video preview
+  videoUrl: string; // To pass the video URL for preview
 }
 
 export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl }: TaggingProps) {
-  const [selectedAnimal, setSelectedAnimal] = React.useState('name1');
-  const [generator, setGenerator] = React.useState('GART');
+  const [selectedAnimal, setSelectedAnimal] = React.useState(''); // Selected animal state
+  const [animals, setAnimals] = React.useState(['Jax', 'Max', 'Fernet', 'Aqua']); // Existing animals
+  const [generator, setGenerator] = React.useState('GART'); // Selected generator state
   const [isNewAnimalOpen, setIsNewAnimalOpen] = React.useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = React.useState(false);
 
@@ -38,10 +33,17 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
     setIsNewAnimalOpen(false);
   };
 
+  const handleAddNewAnimal = (newAnimal: string) => {
+    // Add the new animal to the list and set it as the selected animal
+    setAnimals([...animals, newAnimal]);
+    setSelectedAnimal(newAnimal);
+    setIsNewAnimalOpen(false); // Close the new animal dialog
+  };
+
   const handleGenerate = () => {
     setIsSnackbarOpen(true);
-    handleClose();
-    closeUploadDialog();
+    handleClose(); // Close tagging dialog
+    closeUploadDialog(); // Close upload video dialog
   };
 
   const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -60,6 +62,8 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
             Your file has been uploaded successfully! Please enter animal details to continue.
           </Typography>
 
+
+
           <Box mt={2}>
             <FormControl fullWidth margin="normal">
               <InputLabel id="animal-select-label">Animal Name</InputLabel>
@@ -69,14 +73,21 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
                 value={selectedAnimal}
                 onChange={handleAnimalChange}
               >
-                <MenuItem value="Jax">Jax</MenuItem>
-                <MenuItem value="Max">Max</MenuItem>
-                <MenuItem value="Fernet">Fernet</MenuItem>
-                <MenuItem value="Aqua">Aqua</MenuItem>
+                {animals.map((animal) => (
+                  <MenuItem key={animal} value={animal}>
+                    {animal}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
-            <Button onClick={() => setIsNewAnimalOpen(true)} color="primary" variant="outlined" style={{ marginTop: '10px' }}>
-              Add new Animal
+
+            <Button
+              onClick={() => setIsNewAnimalOpen(true)}
+              color="primary"
+              variant="outlined"
+              style={{ marginTop: '10px' }}
+            >
+              Add New Animal
             </Button>
           </Box>
 
@@ -93,17 +104,18 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
               </Select>
             </FormControl>
           </Box>
-
-          {/* Video Player */}
-          {videoUrl && (
-            <Box mt={3}>
-              <video width="100%" controls>
-                <source src={videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </Box>
-          )}
         </DialogContent>
+
+        {/* Video Preview */}
+        {videoUrl && (
+          <Box mt={2} sx={{ display: 'flex', justifyContent: 'center' }}>
+            <video width="100%" controls>
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </Box>
+        )}
+
 
         <DialogActions>
           <Button onClick={handleGenerate} color="primary" variant="contained">
@@ -115,7 +127,11 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
         </DialogActions>
       </Dialog>
 
-      <NewAnimal open={isNewAnimalOpen} handleClose={handleNewAnimalClose} />
+      <NewAnimal
+        open={isNewAnimalOpen}
+        handleClose={handleNewAnimalClose}
+        addNewAnimal={handleAddNewAnimal} // Pass the addNewAnimal function to NewAnimal
+      />
 
       <Snackbar open={isSnackbarOpen} autoHideDuration={4000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>

@@ -1,19 +1,19 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Box, SelectChangeEvent } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, TextField, Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import React, { useState } from "react";
 
 interface NewAnimalProps {
   open: boolean;
   handleClose: () => void;
+  addNewAnimal: (animalName: string) => void; // New prop to pass back the new animal
 }
 
 const animalTypesList = ["Mammal", "Bird", "Reptile", "Fish"]; // Initial animal types
 
-const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose }) => {
+const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose, addNewAnimal }) => {
   const [animalName, setAnimalName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [animalType, setAnimalType] = useState('');
   const [animalTypes, setAnimalTypes] = useState(animalTypesList);
-
   const [isAddNewTypeDialogOpen, setIsAddNewTypeDialogOpen] = useState(false);
   const [newAnimalType, setNewAnimalType] = useState('');
 
@@ -42,15 +42,15 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose }) => {
     handleAddNewTypeClose(); // Close the dialog
   };
 
-  // Generate or save animal logic
   const handleGenerate = () => {
-    // Logic to generate or save the new animal can be added here
-    handleClose();
+    if (animalName) {
+      addNewAnimal(animalName); // Pass the new animal name back to the parent (Tagging component)
+      handleClose();
+    }
   };
 
   return (
     <>
-      {/* Main Dialog for adding a new animal */}
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>Add a new animal</DialogTitle>
         <DialogContent>
@@ -82,7 +82,6 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose }) => {
             />
 
             <FormControl fullWidth margin="normal">
-              
               <Select
                 labelId="animal-type-label"
                 value={animalType}
@@ -104,7 +103,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose }) => {
               onClick={handleAddNewTypeOpen}
               color="primary"
               variant="outlined"
-              style={{ marginTop: '10px' }}
+              sx={{ marginTop: '10px' }}
             >
               Add New Animal Type
             </Button>
@@ -113,7 +112,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose }) => {
 
         <DialogActions>
           <Button onClick={handleGenerate} color="primary" variant="contained">
-            Generate
+            Add
           </Button>
           <Button onClick={handleClose} color="primary" variant="outlined">
             Close
