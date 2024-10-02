@@ -75,7 +75,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.Property<string>("AccessType")
                         .IsRequired()
                         .HasMaxLength(25)
-                        .HasColumnType("char(25)")
+                        .HasColumnType("varchar(25)")
                         .HasColumnName("Access_Type");
 
                     b.Property<byte[]>("AnimalID")
@@ -108,12 +108,34 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("binary(16)")
                         .HasColumnName("Billing_ID");
 
+                    b.Property<byte[]>("GPCID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("GPC_ID");
+
+                    b.Property<byte[]>("JobID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("Job_ID");
+
+                    b.Property<byte[]>("SubscriptionID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("Subscription_ID");
+
                     b.Property<byte[]>("UserID")
                         .IsRequired()
                         .HasColumnType("binary(16)")
                         .HasColumnName("User_ID");
 
                     b.HasKey("BillingID");
+
+                    b.HasIndex("GPCID")
+                        .IsUnique();
+
+                    b.HasIndex("JobID");
+
+                    b.HasIndex("SubscriptionID");
 
                     b.HasIndex("UserID");
 
@@ -140,7 +162,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("File_Path");
 
                     b.Property<DateTime>("GPCDateUpload")
@@ -153,7 +175,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("varchar(45)")
                         .HasColumnName("GPC_Name");
 
-                    b.Property<int?>("GPCSize")
+                    b.Property<int>("GPCSize")
                         .HasColumnType("int")
                         .HasColumnName("GPC_Size");
 
@@ -173,14 +195,26 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("binary(16)")
                         .HasColumnName("JD_ID");
 
-                    b.Property<byte[]>("JobID")
+                    b.Property<byte[]>("GPCID")
                         .IsRequired()
                         .HasColumnType("binary(16)")
-                        .HasColumnName("Job_ID");
+                        .HasColumnName("GPC_ID");
+
+                    b.Property<string>("ModelGenType")
+                        .IsRequired()
+                        .HasColumnType("varchar(45)")
+                        .HasColumnName("Model_Gen_Type");
+
+                    b.Property<byte[]>("ModelID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("Model_ID");
 
                     b.HasKey("JDID");
 
-                    b.HasIndex("JobID");
+                    b.HasIndex("GPCID");
+
+                    b.HasIndex("ModelID");
 
                     b.ToTable("jobdetails");
                 });
@@ -191,6 +225,11 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("binary(16)")
                         .HasColumnName("Job_ID");
+
+                    b.Property<byte[]>("JDID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("JD_ID");
 
                     b.Property<int>("JobSize")
                         .HasColumnType("int")
@@ -210,14 +249,9 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("date")
                         .HasColumnName("Jobs_Start");
 
-                    b.Property<byte[]>("ModelID")
-                        .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("Model_ID");
-
                     b.HasKey("JobID");
 
-                    b.HasIndex("ModelID");
+                    b.HasIndex("JDID");
 
                     b.ToTable("jobscompleted");
                 });
@@ -229,14 +263,14 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("binary(16)")
                         .HasColumnName("Queue_Number");
 
+                    b.Property<byte[]>("JDID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("JD_ID");
+
                     b.Property<DateTime>("JobAdded")
                         .HasColumnType("date")
                         .HasColumnName("Job_Added");
-
-                    b.Property<byte[]>("ModelID")
-                        .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("Model_ID");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -246,7 +280,7 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.HasKey("QueueNumber");
 
-                    b.HasIndex("ModelID");
+                    b.HasIndex("JDID");
 
                     b.ToTable("jobspending");
                 });
@@ -260,8 +294,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("File_Path");
 
                     b.Property<byte[]>("GPCID")
@@ -334,9 +368,8 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnName("Org_ID");
 
                     b.Property<string>("OrgEmail")
-                        .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Org_Email");
 
                     b.Property<string>("OrgName")
@@ -454,8 +487,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("TransDetails")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Trans_Details");
 
                     b.HasKey("TransTypeID");
@@ -487,14 +520,14 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("UserEmail")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("User_Email");
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("User_Name");
 
                     b.Property<string>("UserPassword")
@@ -531,11 +564,35 @@ namespace ICT302_BackendAPI.Database.Migrations
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Billing", b =>
                 {
+                    b.HasOne("ICT302_BackendAPI.Database.Models.Graphic", "Graphic")
+                        .WithOne()
+                        .HasForeignKey("ICT302_BackendAPI.Database.Models.Billing", "GPCID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ICT302_BackendAPI.Database.Models.JobsCompleted", "JobsCompleted")
+                        .WithMany()
+                        .HasForeignKey("JobID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ICT302_BackendAPI.Database.Models.Subscription", "Subscription")
+                        .WithMany()
+                        .HasForeignKey("SubscriptionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ICT302_BackendAPI.Database.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Graphic");
+
+                    b.Navigation("JobsCompleted");
+
+                    b.Navigation("Subscription");
 
                     b.Navigation("User");
                 });
@@ -561,35 +618,43 @@ namespace ICT302_BackendAPI.Database.Migrations
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobDetails", b =>
                 {
-                    b.HasOne("ICT302_BackendAPI.Database.Models.JobsCompleted", "Job")
+                    b.HasOne("ICT302_BackendAPI.Database.Models.Graphic", "Graphic")
                         .WithMany()
-                        .HasForeignKey("JobID")
+                        .HasForeignKey("GPCID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Job");
+                    b.HasOne("ICT302_BackendAPI.Database.Models.Model3D", "Model3D")
+                        .WithMany()
+                        .HasForeignKey("ModelID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Graphic");
+
+                    b.Navigation("Model3D");
                 });
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobsCompleted", b =>
                 {
-                    b.HasOne("ICT302_BackendAPI.Database.Models.Model3D", "Model")
+                    b.HasOne("ICT302_BackendAPI.Database.Models.JobDetails", "JobDetails")
                         .WithMany()
-                        .HasForeignKey("ModelID")
+                        .HasForeignKey("JDID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Model");
+                    b.Navigation("JobDetails");
                 });
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobsPending", b =>
                 {
-                    b.HasOne("ICT302_BackendAPI.Database.Models.Model3D", "Model")
+                    b.HasOne("ICT302_BackendAPI.Database.Models.JobDetails", "JobDetails")
                         .WithMany()
-                        .HasForeignKey("ModelID")
+                        .HasForeignKey("JDID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Model");
+                    b.Navigation("JobDetails");
                 });
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Model3D", b =>

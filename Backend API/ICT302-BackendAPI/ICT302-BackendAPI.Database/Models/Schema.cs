@@ -5,36 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ICT302_BackendAPI.Database.Models;
 
-[Table("model3d")]
-public class Model3D
-{
-    [Key]
-    [Column("Model_ID", TypeName = "binary(16)")]
-    public Guid ModelID { get; set; }
-
-    [Required]
-    [Column("Model_Title", TypeName = "varchar(45)")]
-    [StringLength(45)]
-    public string ModelTitle { get; set; }
-
-    [Required]
-    [Column("Model_Date_Gen", TypeName = "date")]
-    [DataType(DataType.Date)]
-    public DateTime ModelDateGen { get; set; }
-
-    [Required]
-    [Column("File_Path", TypeName = "varchar(45)")]
-    [StringLength(45)]
-    public string FilePath { get; set; }
-
-    [Required]
-    [Column("GPC_ID", TypeName = "binary(16)")]
-    public Guid GPCID { get; set; }
-
-    [ForeignKey("GPCID")]
-    public virtual Graphic Graphic { get; set; }
-}
-
 [Table("accesstype")]
 public class AccessType
 {
@@ -79,7 +49,7 @@ public class AnimalAccess
     public Guid AccessID { get; set; }
 
     [Required]
-    [Column("Access_Type", TypeName = "char(25)")]
+    [Column("Access_Type", TypeName = "varchar(25)")]
     [StringLength(25)]
     public string AccessType { get; set; }
 
@@ -112,11 +82,32 @@ public class Billing
     public Guid BillingID { get; set; }
 
     [Required]
+    [Column("GPC_ID", TypeName = "binary(16)")]
+    public Guid GPCID { get; set; }
+
+    [Required]
+    [Column("Job_ID", TypeName = "binary(16)")]
+    public Guid JobID { get; set; }
+
+    [Required]
     [Column("User_ID", TypeName = "binary(16)")]
     public Guid UserID { get; set; }
 
+    [Required]
+    [Column("Subscription_ID", TypeName = "binary(16)")]
+    public Guid SubscriptionID { get; set; }
+
+    [ForeignKey("GPCID")]
+    public virtual Graphic Graphic { get; set; }
+
+    [ForeignKey("JobID")]
+    public virtual JobsCompleted JobsCompleted { get; set; }
+
     [ForeignKey("UserID")]
     public virtual User User { get; set; }
+
+    [ForeignKey("SubscriptionID")]
+    public virtual Subscription Subscription { get; set; }
 }
 
 [Table("graphic")]
@@ -137,7 +128,7 @@ public class Graphic
     public DateTime GPCDateUpload { get; set; }
 
     [Required]
-    [Column("File_Path", TypeName = "varchar(45)")]
+    [Column("File_Path", TypeName = "varchar(255)")]
     [StringLength(45)]
     public string FilePath { get; set; }
 
@@ -145,8 +136,9 @@ public class Graphic
     [Column("Animal_ID", TypeName = "binary(16)")]
     public Guid AnimalID { get; set; }
 
+    [Required]
     [Column("GPC_Size", TypeName = "int")]
-    public int? GPCSize { get; set; }
+    public int GPCSize { get; set; }
 
     [Required]
     [Column("Billing_ID", TypeName = "binary(16)")]
@@ -157,6 +149,34 @@ public class Graphic
 
     [ForeignKey("BillingID")]
     public virtual Billing Billing { get; set; }
+}
+
+[Table("jobdetails")]
+public class JobDetails
+{
+    [Key]
+    [Column("JD_ID", TypeName = "binary(16)")]
+    public Guid JDID { get; set; }
+
+    [Required]
+    [Column("GPC_ID", TypeName = "binary(16)")]
+    public Guid GPCID { get; set; }
+
+    [Required]
+    [Column("Model_ID", TypeName = "binary(16)")]
+    public Guid ModelID { get; set; }
+
+    [Required]
+    [Column("Model_Gen_Type", TypeName = "varchar(45)")]
+    [StringLength(45)]
+    public string ModelGenType { get; set; }
+
+    [ForeignKey("GPCID")]
+    public virtual Graphic Graphic { get; set; }
+
+    [ForeignKey("ModelID")]
+    public virtual Model3D Model3D { get; set; }
+    
 }
 
 [Table("jobscompleted")]
@@ -186,29 +206,15 @@ public class JobsCompleted
     public int JobSize { get; set; }
 
     [Required]
-    [Column("Model_ID", TypeName = "binary(16)")]
-    public Guid ModelID { get; set; }
-
-    [ForeignKey("ModelID")]
-    public virtual Model3D Model { get; set; }
-}
-
-
-[Table("jobdetails")]
-public class JobDetails
-{
-    [Key]
     [Column("JD_ID", TypeName = "binary(16)")]
     public Guid JDID { get; set; }
 
-    [Required]
-    [Column("Job_ID", TypeName = "binary(16)")]
-    public Guid JobID { get; set; }
-
-    [ForeignKey("JobID")]
-    public virtual JobsCompleted Job { get; set; }
-    
+    [ForeignKey("JDID")]
+    public virtual JobDetails JobDetails { get; set; }
 }
+
+
+
 
 [Table("jobspending")]
 public class JobsPending
@@ -228,11 +234,41 @@ public class JobsPending
     public string Status { get; set; }
 
     [Required]
+    [Column("JD_ID", TypeName = "binary(16)")]
+    public Guid JDID { get; set; }
+
+    [ForeignKey("JDID")]
+    public virtual JobDetails JobDetails { get; set; }
+}
+
+[Table("model3d")]
+public class Model3D
+{
+    [Key]
     [Column("Model_ID", TypeName = "binary(16)")]
     public Guid ModelID { get; set; }
 
-    [ForeignKey("ModelID")]
-    public virtual Model3D Model { get; set; }
+    [Required]
+    [Column("Model_Title", TypeName = "varchar(45)")]
+    [StringLength(45)]
+    public string ModelTitle { get; set; }
+
+    [Required]
+    [Column("Model_Date_Gen", TypeName = "date")]
+    [DataType(DataType.Date)]
+    public DateTime ModelDateGen { get; set; }
+
+    [Required]
+    [Column("File_Path", TypeName = "varchar(255)")]
+    [StringLength(255)]
+    public string FilePath { get; set; }
+
+    [Required]
+    [Column("GPC_ID", TypeName = "binary(16)")]
+    public Guid GPCID { get; set; }
+
+    [ForeignKey("GPCID")]
+    public virtual Graphic Graphic { get; set; }
 }
 
 
@@ -283,9 +319,9 @@ public class Organisation
     [StringLength(45)]
     public string OrgName { get; set; }
 
-    [Column("Org_Email", TypeName = "varchar(45)")]
-    [StringLength(45)]
-    public string OrgEmail { get; set; }
+    [Column("Org_Email", TypeName = "varchar(255)")]
+    [StringLength(255)]
+    public string? OrgEmail { get; set; }
 }
 
 [Table("organisationaccess")]
@@ -379,8 +415,8 @@ public class TransactionType
     public Guid TransTypeID { get; set; }
 
     [Required]
-    [Column("Trans_Details", TypeName = "varchar(45)")]
-    [StringLength(45)]
+    [Column("Trans_Details", TypeName = "varchar(255)")]
+    [StringLength(255)]
     public string TransDetails { get; set; }
 }
 
@@ -397,13 +433,13 @@ public class User
     public string PermissionLevel { get; set; }
 
     [Required]
-    [Column("User_Name", TypeName = "varchar(20)")]
-    [StringLength(20)]
+    [Column("User_Name", TypeName = "varchar(255)")]
+    [StringLength(255)]
     public string UserName { get; set; }
 
     [Required]
-    [Column("User_Email", TypeName = "varchar(20)")]
-    [StringLength(20)]
+    [Column("User_Email", TypeName = "varchar(255)")]
+    [StringLength(255)]
     public string UserEmail { get; set; }
 
     [Required]

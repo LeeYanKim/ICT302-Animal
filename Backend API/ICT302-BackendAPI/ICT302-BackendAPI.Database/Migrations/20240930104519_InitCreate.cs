@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class InitCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,7 +48,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                 {
                     Org_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     Org_Name = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
-                    Org_Email = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false)
+                    Org_Email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,7 +76,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                 columns: table => new
                 {
                     TransType_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
-                    Trans_Details = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false)
+                    Trans_Details = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,8 +90,8 @@ namespace ICT302_BackendAPI.Database.Migrations
                 {
                     User_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     Permission_Level = table.Column<string>(type: "char(10)", maxLength: 10, nullable: false),
-                    User_Name = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
-                    User_Email = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    User_Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    User_Email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     User_Password = table.Column<string>(type: "varchar(12)", maxLength: 12, nullable: false),
                     User_Date_Join = table.Column<DateTime>(type: "date", nullable: false),
                     subscription_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
@@ -113,7 +113,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                 columns: table => new
                 {
                     Access_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
-                    Access_Type = table.Column<string>(type: "char(25)", maxLength: 25, nullable: false),
+                    Access_Type = table.Column<string>(type: "varchar(25)", maxLength: 25, nullable: false),
                     Assigned_Date = table.Column<DateTime>(type: "date", nullable: false),
                     Animal_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     User_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
@@ -129,25 +129,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_animalaccess_user_User_ID",
-                        column: x => x.User_ID,
-                        principalTable: "user",
-                        principalColumn: "User_ID",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "billing",
-                columns: table => new
-                {
-                    Billing_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
-                    User_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_billing", x => x.Billing_ID);
-                    table.ForeignKey(
-                        name: "FK_billing_user_User_ID",
                         column: x => x.User_ID,
                         principalTable: "user",
                         principalColumn: "User_ID",
@@ -246,15 +227,43 @@ namespace ICT302_BackendAPI.Database.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "billing",
+                columns: table => new
+                {
+                    Billing_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    GPC_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    Job_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    User_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    Subscription_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_billing", x => x.Billing_ID);
+                    table.ForeignKey(
+                        name: "FK_billing_subscription_Subscription_ID",
+                        column: x => x.Subscription_ID,
+                        principalTable: "subscription",
+                        principalColumn: "Subscription_ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_billing_user_User_ID",
+                        column: x => x.User_ID,
+                        principalTable: "user",
+                        principalColumn: "User_ID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "graphic",
                 columns: table => new
                 {
                     GPC_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     GPC_Name = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
                     GPC_Date_Upload = table.Column<DateTime>(type: "date", nullable: false),
-                    File_Path = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
+                    File_Path = table.Column<string>(type: "varchar(255)", maxLength: 45, nullable: false),
                     Animal_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
-                    GPC_Size = table.Column<int>(type: "int", nullable: true),
+                    GPC_Size = table.Column<int>(type: "int", nullable: false),
                     Billing_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
                 },
                 constraints: table =>
@@ -282,7 +291,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                     Model_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     Model_Title = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
                     Model_Date_Gen = table.Column<DateTime>(type: "date", nullable: false),
-                    File_Path = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
+                    File_Path = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     GPC_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
                 },
                 constraints: table =>
@@ -298,6 +307,33 @@ namespace ICT302_BackendAPI.Database.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "jobdetails",
+                columns: table => new
+                {
+                    JD_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    GPC_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    Model_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    Model_Gen_Type = table.Column<string>(type: "varchar(45)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_jobdetails", x => x.JD_ID);
+                    table.ForeignKey(
+                        name: "FK_jobdetails_graphic_GPC_ID",
+                        column: x => x.GPC_ID,
+                        principalTable: "graphic",
+                        principalColumn: "GPC_ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_jobdetails_model3d_Model_ID",
+                        column: x => x.Model_ID,
+                        principalTable: "model3d",
+                        principalColumn: "Model_ID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "jobscompleted",
                 columns: table => new
                 {
@@ -306,16 +342,16 @@ namespace ICT302_BackendAPI.Database.Migrations
                     Jobs_Start = table.Column<DateTime>(type: "date", nullable: false),
                     Jobs_End = table.Column<DateTime>(type: "date", nullable: false),
                     Job_Size = table.Column<int>(type: "int", nullable: false),
-                    Model_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
+                    JD_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_jobscompleted", x => x.Job_ID);
                     table.ForeignKey(
-                        name: "FK_jobscompleted_model3d_Model_ID",
-                        column: x => x.Model_ID,
-                        principalTable: "model3d",
-                        principalColumn: "Model_ID",
+                        name: "FK_jobscompleted_jobdetails_JD_ID",
+                        column: x => x.JD_ID,
+                        principalTable: "jobdetails",
+                        principalColumn: "JD_ID",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
@@ -327,35 +363,16 @@ namespace ICT302_BackendAPI.Database.Migrations
                     Queue_Number = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     Job_Added = table.Column<DateTime>(type: "date", nullable: false),
                     Status = table.Column<string>(type: "char(35)", maxLength: 35, nullable: false),
-                    Model_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
+                    JD_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_jobspending", x => x.Queue_Number);
                     table.ForeignKey(
-                        name: "FK_jobspending_model3d_Model_ID",
-                        column: x => x.Model_ID,
-                        principalTable: "model3d",
-                        principalColumn: "Model_ID",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySQL:Charset", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "jobdetails",
-                columns: table => new
-                {
-                    JD_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
-                    Job_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_jobdetails", x => x.JD_ID);
-                    table.ForeignKey(
-                        name: "FK_jobdetails_jobscompleted_Job_ID",
-                        column: x => x.Job_ID,
-                        principalTable: "jobscompleted",
-                        principalColumn: "Job_ID",
+                        name: "FK_jobspending_jobdetails_JD_ID",
+                        column: x => x.JD_ID,
+                        principalTable: "jobdetails",
+                        principalColumn: "JD_ID",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
@@ -369,6 +386,22 @@ namespace ICT302_BackendAPI.Database.Migrations
                 name: "IX_animalaccess_User_ID",
                 table: "animalaccess",
                 column: "User_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_billing_GPC_ID",
+                table: "billing",
+                column: "GPC_ID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_billing_Job_ID",
+                table: "billing",
+                column: "Job_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_billing_Subscription_ID",
+                table: "billing",
+                column: "Subscription_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_billing_User_ID",
@@ -386,19 +419,24 @@ namespace ICT302_BackendAPI.Database.Migrations
                 column: "Billing_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_jobdetails_Job_ID",
+                name: "IX_jobdetails_GPC_ID",
                 table: "jobdetails",
-                column: "Job_ID");
+                column: "GPC_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_jobscompleted_Model_ID",
+                name: "IX_jobdetails_Model_ID",
+                table: "jobdetails",
+                column: "Model_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_jobscompleted_JD_ID",
                 table: "jobscompleted",
-                column: "Model_ID");
+                column: "JD_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_jobspending_Model_ID",
+                name: "IX_jobspending_JD_ID",
                 table: "jobspending",
-                column: "Model_ID");
+                column: "JD_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_model3d_GPC_ID",
@@ -444,16 +482,49 @@ namespace ICT302_BackendAPI.Database.Migrations
                 name: "IX_user_subscription_ID",
                 table: "user",
                 column: "subscription_ID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_billing_graphic_GPC_ID",
+                table: "billing",
+                column: "GPC_ID",
+                principalTable: "graphic",
+                principalColumn: "GPC_ID",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_billing_jobscompleted_Job_ID",
+                table: "billing",
+                column: "Job_ID",
+                principalTable: "jobscompleted",
+                principalColumn: "Job_ID",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "accesstype");
+            migrationBuilder.DropForeignKey(
+                name: "FK_graphic_animal_Animal_ID",
+                table: "graphic");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_billing_user_User_ID",
+                table: "billing");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_billing_graphic_GPC_ID",
+                table: "billing");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_jobdetails_graphic_GPC_ID",
+                table: "jobdetails");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_model3d_graphic_GPC_ID",
+                table: "model3d");
 
             migrationBuilder.DropTable(
-                name: "jobdetails");
+                name: "accesstype");
 
             migrationBuilder.DropTable(
                 name: "jobspending");
@@ -468,9 +539,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                 name: "transaction");
 
             migrationBuilder.DropTable(
-                name: "jobscompleted");
-
-            migrationBuilder.DropTable(
                 name: "animalaccess");
 
             migrationBuilder.DropTable(
@@ -480,22 +548,28 @@ namespace ICT302_BackendAPI.Database.Migrations
                 name: "transactiontype");
 
             migrationBuilder.DropTable(
-                name: "model3d");
-
-            migrationBuilder.DropTable(
-                name: "graphic");
-
-            migrationBuilder.DropTable(
                 name: "animal");
-
-            migrationBuilder.DropTable(
-                name: "billing");
 
             migrationBuilder.DropTable(
                 name: "user");
 
             migrationBuilder.DropTable(
+                name: "graphic");
+
+            migrationBuilder.DropTable(
+                name: "billing");
+
+            migrationBuilder.DropTable(
+                name: "jobscompleted");
+
+            migrationBuilder.DropTable(
                 name: "subscription");
+
+            migrationBuilder.DropTable(
+                name: "jobdetails");
+
+            migrationBuilder.DropTable(
+                name: "model3d");
         }
     }
 }

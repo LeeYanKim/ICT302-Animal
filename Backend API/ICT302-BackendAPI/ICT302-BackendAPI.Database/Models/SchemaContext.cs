@@ -8,7 +8,7 @@ public class SchemaContext : DbContext
     //private readonly IConfiguration _configuration;
 
     // TODO: Update this back to reading appsettings file rather than hard code a connection string
-    private readonly string _connectionString = "server=VGPU-IT01.ad.murdoch.edu.au;port=3306;user=api;password=APIPass!;database=it01-animals"; // Main MySQL VM server
+    private readonly string _connectionString = "server=ICT302-IT01-NoGPU.ad.murdoch.edu.au;port=3306;user=api;password=APIPass!;database=it01-animals"; // Main MySQL VM server
 
     public SchemaContext()
     {
@@ -42,4 +42,5 @@ public class SchemaContext : DbContext
     public DbSet<Transaction> Transaction { get; set; }
     public DbSet<TransactionType> TransactionType { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<UserAccess> UserAccess { get; set; }
 }

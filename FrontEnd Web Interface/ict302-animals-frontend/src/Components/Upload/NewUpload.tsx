@@ -120,6 +120,7 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
                         type='file'
                         onChange={handleFileUpload}
                         multiple
+                        accept=".png, .jpg, .jpeg, .mp4, .mkv, .mov"
                     />
                 </Button>
             </DialogContent>
