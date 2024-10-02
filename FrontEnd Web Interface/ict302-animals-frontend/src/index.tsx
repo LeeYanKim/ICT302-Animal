@@ -22,9 +22,9 @@ root.render(
   
   <React.StrictMode>
     <BrowserRouter>
-      <ContextStore>
-        <App />
-      </ContextStore>
+        <ContextStore>
+          <App />
+        </ContextStore>
     </BrowserRouter>
     
   </React.StrictMode>

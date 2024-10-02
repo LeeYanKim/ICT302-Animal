@@ -1,14 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import { useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
-import { areaElementClasses } from '@mui/x-charts/LineChart';
 
+import { Box, Card, CardContent, Chip, Stack, Typography, useTheme } from '@mui/material';
+import { SparkLineChart, areaElementClasses } from '@mui/x-charts';
+
+import API from '../../Internals/API';
 
 export type AnimalCardProps = {
     animalName: string;
@@ -22,15 +17,27 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalName, animalDOB, animalTy
     const [animalImage, setAnimalImage] = useState<string>('');
 
     const handleGetAnimalImage = async () => {
+        let filePath = API.Download() + '/' + animalType.toLowerCase() + '.png';
+        let response;
+        
         try {
-            let filePath = 'http://localhost:5173/api/user/files/' + animalType.toLowerCase() + '.png';
-            const response = await fetch(filePath);
+            response = await fetch(filePath);
+        } catch (error) {
+            console.error(error);
+        }
+
+
+        if(response?.ok)
+        {
             const data = await response.blob();
             let d = URL.createObjectURL(data);
             setAnimalImage(d);
-            console.log(data);
-        } catch (error) {
-            console.error(error);
+        }
+        else
+        {
+            console.log('Falling back to internal animal images');
+            const img = '/assets/images/fallback/' + animalType.toLowerCase() + '.png';
+            setAnimalImage(img);
         }
 
     }
