@@ -82,6 +82,7 @@ export default function NewUpload({ open, handleClose }: NewUploadProps) {
             Upload Media
             <VisuallyHiddenInput
                 type='file'
+                accept=".png, .jpg, .jpeg, .mp4, .mkv, .mov"
                 onChange={handleFileUpload}
                 multiple
             />

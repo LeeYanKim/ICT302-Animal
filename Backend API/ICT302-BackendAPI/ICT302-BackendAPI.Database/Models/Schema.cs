@@ -168,6 +168,7 @@ public class JobDetails
 
     [Required]
     [Column("Model_Gen_Type", TypeName = "varchar(45)")]
+    [StringLength(45)]
     public string ModelGenType { get; set; }
 
     [ForeignKey("GPCID")]

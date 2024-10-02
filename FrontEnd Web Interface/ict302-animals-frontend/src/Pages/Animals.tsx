@@ -1,6 +1,8 @@
 import React, {useContext, useEffect, useState} from 'react';
 
 import { UserProfileContext } from "../Internals/ContextStore";
+import API from "../Internals/API";
+
 import AnimalCard from "../Components/Animal/AnimalCard";
 import CompletedCard from "../Components/Completed/CompletedCard";
 import {Grid2 as Grid, Box} from "@mui/material";
@@ -12,7 +14,7 @@ const Animals: React.FC = () => {
 
     const handelDBConnectionTest = async () => {
         try {
-            const response = await fetch('http://10.51.33.25:5000/api/db/animals');
+            const response = await fetch(API.Animals());
             const data = await response.json();
             setAnimals([]);
             setAnimals(data);
