@@ -113,7 +113,7 @@ const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
                 variant='contained'
                 tabIndex={-1}
                 startIcon={<CloudUploadIcon />}>
-                    Upload Media
+                    Upload
                 <VisuallyHiddenInput
                     type='file'
                     accept=".png, .jpg, .jpeg, .mp4, .mkv, .mov"

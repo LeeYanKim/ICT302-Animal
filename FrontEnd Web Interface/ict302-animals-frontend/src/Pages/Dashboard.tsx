@@ -18,12 +18,14 @@ interface DashboardProps {
 
 
 const Dashboard: React.FC<DashboardProps> = ({ renderedPage }) => {
+
+
+
   const userContext = useContext(UserProfileContext);
   let alerts: React.ReactNode[] = [];
 
   const [currentDashboardPage, setCurrentDashboardPage] = React.useState<DashboardPages>(renderedPage ? getDashboardPageFromPath(renderedPage) : DashboardPages.Home);
   const [alertQueue, setAlertQueue] = React.useState<React.ReactNode[]>(alerts);
-
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false); // State to handle drawer open/close
   const isLargeScreen = useMediaQuery((theme: Theme) => theme.breakpoints.up('md')); // Check if screen size is medium or larger
 
@@ -40,6 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({ renderedPage }) => {
   const toggleDrawer = (newState: boolean) => () => {
     setIsDrawerOpen(newState);
   };
+
 
   //This removes items from the queue after 15 seconds for testing purposes
   useEffect(() => {
@@ -80,7 +83,8 @@ const Dashboard: React.FC<DashboardProps> = ({ renderedPage }) => {
           {/* Main content */}
           <Box
               component="main"
-              sx={(theme) => ({
+              
+              sx={(theme: { palette: { background: { default: string; }; }; }) => ({
                 flexGrow: 1,
                 backgroundColor: alpha(theme.palette.background.default, 1),
                 overflow: 'auto',
