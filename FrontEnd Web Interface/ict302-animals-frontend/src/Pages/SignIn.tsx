@@ -15,7 +15,7 @@ import { FrontendContext } from "../Internals/ContextStore";
 
 import { getAnalytics } from "firebase/analytics";
 
-import { signInWithEmailAndPassword, onAuthStateChanged  } from 'firebase/auth';
+import { signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -58,6 +58,7 @@ const SignIn: React.FC = () => {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
+  const googleProvider = new GoogleAuthProvider();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -81,7 +82,7 @@ const SignIn: React.FC = () => {
 
     //Example of how to sign in with Firebase Auth
     // Note this would replace the user state handeling within the frontendContext
-    signInWithEmailAndPassword(frontendContext.firebaseAuth.current, data.get('email') as string, data.get('password') as string)
+    await signInWithEmailAndPassword(frontendContext.firebaseAuth.current, data.get('email') as string, data.get('password') as string)
     .then((userCredential) => {
       // Signed in
       const user = userCredential.user;
@@ -133,9 +134,22 @@ const SignIn: React.FC = () => {
     return isValid;
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     // TODO: Implement Google OAuth sign-in logic
-    alert('Sign in with Google');
+    //alert('Sign in with Google');
+    await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider)
+    .then((result) => {
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      //@ts-ignore
+      const token = credential.accessToken;
+      const user = result.user;
+      console.log(user);
+    }).catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      const email = error.customData.email;
+      const credential = GoogleAuthProvider.credentialFromError(error);
+    });
   };
   
   const handleFacebookSignIn = () => {
