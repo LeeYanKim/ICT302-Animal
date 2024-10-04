@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import { Typography, Button, Box, Grid } from '@mui/material';
-import { UserProfileContext } from '../Internals/ContextStore';
+import { FrontendContext } from '../Internals/ContextStore';
 import UploadPrompt from '../Components/Upload/UploadPrompt';
 import { UploadProps } from '../Components/Upload/UploadProps';
 
 const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 
   const animalImages = [
     'https://via.placeholder.com/250x150',

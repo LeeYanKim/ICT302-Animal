@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
 import API from "../Internals/API";
 
 import AnimalCard from "../Components/Animal/AnimalCard";
@@ -8,7 +8,7 @@ import CompletedCard from "../Components/Completed/CompletedCard";
 import {Grid2 as Grid, Box} from "@mui/material";
 
 const Animals: React.FC = () => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 
   const [animals, setAnimals] = useState<[]>([]);
 

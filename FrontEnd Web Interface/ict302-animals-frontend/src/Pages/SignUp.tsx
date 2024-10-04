@@ -3,7 +3,7 @@ import {Box, Button, Checkbox, Divider, FormControl, FormControlLabel, FormLabel
 import getSignUpTheme from '../Components/SignUp/theme/getSignUpTheme';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../Components/SignUp/CustomIcons';
 
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -37,7 +37,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const SignUp: React.FC = () => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
   const [mode, setMode] = React.useState<PaletteMode>('light');
   const [showCustomTheme, setShowCustomTheme] = React.useState(true);
   const defaultTheme = createTheme({ palette: { mode } });

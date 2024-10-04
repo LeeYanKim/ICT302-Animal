@@ -11,7 +11,11 @@ import GoogleIcon from '@mui/icons-material/Google';
 
 import { ProjectLogoMin } from '../Components/UI/ProjectLogo';
 import UserProfile from '../Internals/UserProfile';
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
+
+import { getAnalytics } from "firebase/analytics";
+
+import { signInWithEmailAndPassword, onAuthStateChanged  } from 'firebase/auth';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -45,7 +49,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const SignIn: React.FC = () => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
   const nav = useNavigate();
 
   const [emailError, setEmailError] = React.useState(false);
@@ -53,6 +57,7 @@ const SignIn: React.FC = () => {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -62,7 +67,7 @@ const SignIn: React.FC = () => {
     setOpen(false);
   };
 
-  const HandleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const HandleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
@@ -71,20 +76,34 @@ const SignIn: React.FC = () => {
     });
 
     // TODO: Fetch the user from the database and validate the password
-    userContext.valid = true;
-    CreateUserContext();
+    frontendContext.user.valid = true;
+    CreatefrontendContext();
+
+    //Example of how to sign in with Firebase Auth
+    // Note this would replace the user state handeling within the frontendContext
+    signInWithEmailAndPassword(frontendContext.firebaseAuth.current, data.get('email') as string, data.get('password') as string)
+    .then((userCredential) => {
+      // Signed in
+      const user = userCredential.user;
+      console.log(user);
+      nav('/dashboard');
+      // ...
+    }).catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+    });
 
   };
 
-  const CreateUserContext = () => {
+  const CreatefrontendContext = () => {
     // TODO: Add authentication logic here, This just uses a dummy user object for now to show logging in and user state change
-    userContext.contextRef.current.username = 'Bryce Standley';
-    userContext.contextRef.current.email = 'bryce@vectorpixel.net';
-    userContext.contextRef.current.initials = 'BS';
-    userContext.contextRef.current.loggedInState = true;
+    frontendContext.user.contextRef.current.username = 'Bryce Standley';
+    frontendContext.user.contextRef.current.email = 'bryce@vectorpixel.net';
+    frontendContext.user.contextRef.current.initials = 'BS';
+    frontendContext.user.contextRef.current.loggedInState = true;
     
     
-    nav('/dashboard');
+    
   }
 
   const validateInputs = () => {
@@ -123,7 +142,9 @@ const SignIn: React.FC = () => {
     // TODO: Implement Facebook OAuth sign-in logic
     alert('Sign in with Facebook');
   };
-  
+  console.log(process.env);
+  const analytics = getAnalytics(frontendContext.firebaseRef.current);
+  console.log(analytics);
 
   return (
         <SignInContainer direction="column" justifyContent="space-between">
