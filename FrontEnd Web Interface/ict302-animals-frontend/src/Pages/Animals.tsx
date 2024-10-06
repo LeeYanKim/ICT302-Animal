@@ -32,7 +32,7 @@ const Animals: React.FC = () => {
 
     //func to handle opening new page of animal
   const handleCardClick = (animalId: string) => {
-    navigate(`/animals/${animalId}`);  // Navigate to the animal details page using the animalId
+    navigate(`/dashboard/animals/${animalId}`);  // Navigate to the animal details page using the animalId
   };
 
   return (
