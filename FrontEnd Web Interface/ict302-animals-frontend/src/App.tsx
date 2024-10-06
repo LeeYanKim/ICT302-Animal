@@ -16,6 +16,7 @@ import SignIn from './Pages/SignIn';
 import SignUp from './Pages/SignUp';
 import SignOut from './Pages/SignOut';
 import Dashboard from './Pages/Dashboard';
+import AnimalDetails from './Components/Animal/AnimalDetails';  // Import the AnimalDetails component for animal page
 
 // Imports of testing pages
 import View from './Pages/View';
@@ -106,7 +107,7 @@ const App: React.FC = () => {
                 <div className="d-flex flex-row">
                     {!currentPath.includes("dashboard") && isTabletOrMobile && <LandingNav />} {/* TODO Add a mobile/tabled variation of the nav bar*/}
                     {!currentPath.includes("dashboard") && isDesktopOrLaptop && <LandingNav />}
-                    {/*<Button onClick={toggleColorMode}>Toggle Color Mode</Button>*/}
+                    <Button onClick={toggleColorMode}>Toggle Color Mode</Button>
                     <div className="d-flex flex-column content" id="page-wrap">
                         <Routes> {/* This is where the routes are defined */}
 
@@ -120,7 +121,7 @@ const App: React.FC = () => {
                                 <Route key={index} path={dashboardPath} element={userContext.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
 
-                            
+                            <Route path="/animals/:animalId" element={<AnimalDetails />} /> {/* Animal details page */}
 
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
 
