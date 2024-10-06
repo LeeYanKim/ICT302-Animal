@@ -1,0 +1,33 @@
+# This file is used to ignore files which should not be pushed to the repository.
+
+# Backend API Ignore files
+
+# Jetbrains idea files
+.idea
+# Compiled files
+Backend API/ICT302-BackendAPI/obj/
+
+
+
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI/obj/
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/
+
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.Database/bin/
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.Database/obj/
+
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.API/bin/
+Backend API/ICT302-BackendAPI/ICT302-BackendAPI.API/obj/
+
+# Visual Studio Ignore Files
+.vs
+
+# Frontend API Ignore files
+
+# Node modules
+/node_modules
+/dist
+
+
+
+
+Backend API/ICT302-BackendAPI/obj/

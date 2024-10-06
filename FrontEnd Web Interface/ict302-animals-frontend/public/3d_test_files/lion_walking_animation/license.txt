@@ -1,0 +1,11 @@
+Model Information:
+* title:	Lion walking Animation
+* source:	https://sketchfab.com/3d-models/lion-walking-animation-af177d6f76e6446aa01556a1ee0a0f9d
+* author:	Hermetic Bucky (https://sketchfab.com/Ianbucky_)
+
+Model License:
+* license type:	CC-BY-NC-ND-4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions can not be distributed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Lion walking Animation" (https://sketchfab.com/3d-models/lion-walking-animation-af177d6f76e6446aa01556a1ee0a0f9d) by Hermetic Bucky (https://sketchfab.com/Ianbucky_) licensed under CC-BY-NC-ND-4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)
