@@ -107,7 +107,7 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
           </Box>
         </DialogContent>
 
-        {/* Video Preview */}
+        {/* Video Preview *
         {videoUrl && (
           <Box mt={2} sx={{ display: 'flex', justifyContent: 'center' }}>
             <video width="100%" controls>
@@ -116,8 +116,7 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
             </video>
           </Box>
         )}
-
-
+        */}
         <DialogActions>
           <Button onClick={handleGenerate} color="primary" variant="contained">
             Generate

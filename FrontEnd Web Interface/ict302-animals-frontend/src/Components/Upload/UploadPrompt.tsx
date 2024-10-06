@@ -57,8 +57,10 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
   // Fetch uploaded animals data
   const fetchUploadedAnimals = async () => {
     try {
-      const response = await fetch('http://localhost:5173/api/upload/animals/list');
+      const response = await fetch('http://localhost:5173/api/files/animals/list');
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error fetching uploaded animals: ${response.status} ${response.statusText} - ${errorText}`);
         throw new Error('Failed to fetch uploaded animals');
       }
       const data = await response.json();
@@ -174,7 +176,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         </DialogActions>
       </Dialog>
 
-      {/* Grid of uploaded animal images */}
+      {/* Grid of uploaded animal images 
       <Box sx={{ marginTop: '20px' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold', marginBottom: '10px' }}>
           Recently uploaded:
@@ -193,6 +195,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
           ))}
         </Grid>
       </Box>
+      
 
       {/* Animal form dialog */}
       <NewAnimal

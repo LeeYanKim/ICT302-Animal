@@ -22,7 +22,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     try {
       const response = await fetch('http://localhost:5173/api/files/animals/list');
       if (!response.ok) {
-        throw new Error('Failed to fetch uploaded animals');
+        throw new Error('Failed to fetch uploaded animals at Recently uploaded');
       }
       const data = await response.json();
       setAnimals(data);
@@ -97,7 +97,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
       {/* Grid of uploaded animal data */}
       <Grid container spacing={3}>
         {itemsToDisplay.map((animal, index) => (
-          <Grid item xs={12} sm={6} md={4} key={animal.animalId}>
+          <Grid item xs={12} sm={6} md={4} key={animal.animalId || `placeholder-${index}`}>
             <Box
               sx={{
                 padding: '10px',
