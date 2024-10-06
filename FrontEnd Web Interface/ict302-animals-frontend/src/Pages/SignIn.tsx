@@ -1,13 +1,11 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useState, Suspense } from 'react';
 import {Box, Button, Checkbox, FormControlLabel, Divider, FormLabel, FormControl, TextField, Typography, Stack, Card as MuiCard, ThemeProvider, createTheme, styled, PaletteMode} from '@mui/material';
 import {Link, useNavigate} from 'react-router-dom';
 
 import ForgotPassword from '../Components/SignIn/ForgotPassword';
 import getSignInTheme from '../Components/SignIn/theme/getSignInTheme';
 
-import FacebookIcon from '@mui/icons-material/Facebook';
-import GoogleIcon from '@mui/icons-material/Google';
-
+import { GoogleIcon, FacebookIcon } from '../Components/SignUp/CustomIcons';
 
 import { ProjectLogoMin } from '../Components/UI/ProjectLogo';
 import UserProfile from '../Internals/UserProfile';
@@ -15,7 +13,10 @@ import { FrontendContext } from "../Internals/ContextStore";
 
 import { getAnalytics } from "firebase/analytics";
 
-import { signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
+
+// Dynamically import the SignUp component
+const SignUp = React.lazy(() => import('../Pages/SignUp'));
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -58,6 +59,8 @@ const SignIn: React.FC = () => {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
+  // State to toggle between sign-in and sign-up
+  const [isSignUp, setIsSignUp] = useState(false);
   const googleProvider = new GoogleAuthProvider();
 
   const handleClickOpen = () => {
@@ -102,9 +105,6 @@ const SignIn: React.FC = () => {
     frontendContext.user.contextRef.current.email = 'bryce@vectorpixel.net';
     frontendContext.user.contextRef.current.initials = 'BS';
     frontendContext.user.contextRef.current.loggedInState = true;
-    
-    
-    
   }
 
   const validateInputs = () => {
@@ -135,27 +135,72 @@ const SignIn: React.FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    // TODO: Implement Google OAuth sign-in logic
-    //alert('Sign in with Google');
-    await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider)
-    .then((result) => {
+    const googleProvider = new GoogleAuthProvider();
+  
+    try {
+      const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
+      
+      // This gives you a Google Access Token. You can use it to access Google APIs.
       const credential = GoogleAuthProvider.credentialFromResult(result);
-      //@ts-ignore
-      const token = credential.accessToken;
+      const token = credential?.accessToken;
+  
+      // The signed-in user info.
       const user = result.user;
-      console.log(user);
-    }).catch((error) => {
+      console.log('User signed in:', user);
+  
+      // Update the frontendContext with the logged-in user details
+      frontendContext.user.contextRef.current.username = user.displayName || '';
+      frontendContext.user.contextRef.current.email = user.email || '';
+      frontendContext.user.contextRef.current.initials = user.displayName ? user.displayName.split(' ').map(name => name[0]).join('') : '';
+      frontendContext.user.contextRef.current.loggedInState = true;
+  
+      // Navigate to the dashboard after successful sign-in
+      nav('/dashboard');
+  
+    } catch (error) {
+      // Handle Errors here.
       const errorCode = error.code;
       const errorMessage = error.message;
-      const email = error.customData.email;
+      const email = error.customData?.email;
       const credential = GoogleAuthProvider.credentialFromError(error);
-    });
+      console.error("Error signing in with Google:", errorCode, errorMessage, email, credential);
+    }
   };
   
-  const handleFacebookSignIn = () => {
-    // TODO: Implement Facebook OAuth sign-in logic
-    alert('Sign in with Facebook');
+  
+  const handleFacebookSignIn = async () => {
+    const facebookProvider = new FacebookAuthProvider();
+  
+    try {
+      const result = await signInWithPopup(frontendContext.firebaseAuth.current, facebookProvider);
+  
+      // This gives you a Facebook Access Token. You can use it to access Facebook APIs.
+      const credential = FacebookAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+  
+      // The signed-in user info.
+      const user = result.user;
+      console.log('User signed in with Facebook:', user);
+  
+      // Update the frontendContext with the logged-in user details
+      frontendContext.user.contextRef.current.username = user.displayName || '';
+      frontendContext.user.contextRef.current.email = user.email || '';
+      frontendContext.user.contextRef.current.initials = user.displayName ? user.displayName.split(' ').map(name => name[0]).join('') : '';
+      frontendContext.user.contextRef.current.loggedInState = true;
+  
+      // Navigate to the dashboard after successful sign-in
+      nav('/dashboard');
+  
+    } catch (error) {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      const email = error.customData?.email;
+      const credential = FacebookAuthProvider.credentialFromError(error);
+      console.error("Error signing in with Facebook:", errorCode, errorMessage, email, credential);
+    }
   };
+
   console.log(process.env);
   const analytics = getAnalytics(frontendContext.firebaseRef.current);
   console.log(analytics);
@@ -164,115 +209,74 @@ const SignIn: React.FC = () => {
         <SignInContainer direction="column" justifyContent="space-between">
           <Card variant="outlined">
             <ProjectLogoMin />
-            <Typography
-              component="h1"
-              variant="h4"
-              sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-            >
-              Sign in
+            <Typography component="h1" variant="h4">
+              {isSignUp ? 'Sign up' : 'Sign in'}
             </Typography>
-            <Box
-              component="form"
-              onSubmit={HandleSubmit}
-              noValidate
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                gap: 2,
-              }}
-            >
-              <FormControl>
-                <FormLabel htmlFor="email">Email</FormLabel>
-                <TextField
-                  error={emailError}
-                  helperText={emailErrorMessage}
-                  id="email"
-                  type="email"
-                  name="email"
-                  placeholder="your@email.com"
-                  autoComplete="email"
-                  autoFocus
-                  required
-                  fullWidth
-                  variant="outlined"
-                  color={emailError ? 'error' : 'primary'}
-                  sx={{ ariaLabel: 'email' }}
-                />
-              </FormControl>
-              <FormControl>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+
+            {isSignUp ? (
+              // Render SignUp Form (loaded lazily)
+              <Suspense fallback={<div>Loading...</div>}>
+                <SignUp />
+              </Suspense>
+            ) : (
+              // Render SignIn Form
+              <Box component="form" onSubmit={HandleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
+                <FormControl>
+                  <FormLabel htmlFor="email">Email</FormLabel>
+                  <TextField id="email" type="email" name="email" placeholder="your@email.com" required fullWidth />
+                </FormControl>
+                <FormControl>
                   <FormLabel htmlFor="password">Password</FormLabel>
-                  <Button
-                    onClick={handleClickOpen}
-                    sx={{ alignSelf: 'baseline' }}
-                  >
-                    Forgot your password?
-                  </Button>
-                </Box>
-                <TextField
-                  error={passwordError}
-                  helperText={passwordErrorMessage}
-                  name="password"
-                  placeholder="••••••"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  autoFocus
-                  required
-                  fullWidth
-                  variant="outlined"
-                  color={passwordError ? 'error' : 'primary'}
-                />
-              </FormControl>
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <ForgotPassword open={open} handleClose={handleClose} />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                onClick={validateInputs}
-              >
-                Sign in
-              </Button>
+                  <TextField id="password" type="password" name="password" placeholder="••••••" required fullWidth />
+                </FormControl>
+                <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
+                <Button type="submit" fullWidth variant="contained">Sign in</Button>
+              </Box>
+            )}            
+
               <Divider sx={{ my: 2 }}>
                   <Typography sx={{ color: 'text.secondary' }}>or</Typography>
               </Divider>
+
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Button
+                  type="submit"
                   fullWidth
                   variant="outlined"
                   onClick={handleGoogleSignIn}
                   startIcon={<GoogleIcon />}
                 >
-                  Sign in with Google
+                  Sign up with Google
                 </Button>
-
                 <Button
+                  type="submit"
                   fullWidth
                   variant="outlined"
                   onClick={handleFacebookSignIn}
                   startIcon={<FacebookIcon />}
                 >
-                Sign in with Facebook
+                  Sign up with Facebook
                 </Button>
               </Box>
-              <Typography sx={{ textAlign: 'center' }}>
-                Don&apos;t have an account?{' '}
-                <span>
-                  <Button
-                    component={Link}
-                    sx={{ alignSelf: 'center', color: 'white'}}
-                    to={'/signup'}
-                    >
-                        Sign-up
+
+              <Typography sx={{ textAlign: 'center', mt: 2 }}>
+                {isSignUp ? (
+                  <>
+                    Already have an account?{' '}
+                    <Button onClick={() => setIsSignUp(false)} sx={{ color: 'black' }}>
+                      Sign in
                     </Button>
-                </span>
+                  </>
+                ) : (
+                  <>
+                    Don&apos;t have an account?{' '}
+                    <Button onClick={() => setIsSignUp(true)} sx={{ color: 'black' }}>
+                      Sign-up
+                    </Button>
+                  </>
+                )}
               </Typography>
-            </Box>
+
           </Card>
         </SignInContainer>
   );

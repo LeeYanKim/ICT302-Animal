@@ -1,222 +1,109 @@
-import React, { useContext } from 'react';
-import {Box, Button, Checkbox, Divider, FormControl, FormControlLabel, FormLabel, Link, TextField, Typography, Stack, Card as MuiCard, createTheme,ThemeProvider, styled, PaletteMode} from '@mui/material';
-import getSignUpTheme from '../Components/SignUp/theme/getSignUpTheme';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../Components/SignUp/CustomIcons';
+import React, { useState, useContext } from 'react';
+import { Box, Button, FormControl, FormLabel, TextField, Typography } from '@mui/material';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha'; // Import the reCAPTCHA component
+import { FrontendContext } from "../Internals/ContextStore"; // Import frontend context
 
-import { FrontendContext } from "../Internals/ContextStore";
+interface SignUpProps {
+  onSignUpSuccess?: () => void;
+}
 
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  width: '100%',
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
-  margin: 'auto',
-  boxShadow:
-    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
-  [theme.breakpoints.up('sm')]: {
-    width: '450px',
-  },
-  ...theme.applyStyles('dark', {
-    boxShadow:
-      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
-  }),
-}));
+const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const frontendContext = useContext(FrontendContext); // Get the frontend context
+  const nav = useNavigate();
 
-const SignUpContainer = styled(Stack)(({ theme }) => ({
-  height: '100%',
-  padding: 4,
-  backgroundImage:
-    'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-  backgroundRepeat: 'no-repeat',
-  ...theme.applyStyles('dark', {
-    backgroundImage:
-      'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
-  }),
-}));
+  const handleSignUpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-const SignUp: React.FC = () => {
-  const frontendContext = useContext(FrontendContext);
-  const [mode, setMode] = React.useState<PaletteMode>('light');
-  const [showCustomTheme, setShowCustomTheme] = React.useState(true);
-  const defaultTheme = createTheme({ palette: { mode } });
-  const SignUpTheme = createTheme(getSignUpTheme(mode));
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [nameError, setNameError] = React.useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = React.useState('');
-
-  const validateInputs = () => {
-    const email = document.getElementById('email') as HTMLInputElement;
-    const password = document.getElementById('password') as HTMLInputElement;
-    const name = document.getElementById('name') as HTMLInputElement;
-
-    let isValid = true;
-
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
     }
 
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage('');
+    if (!recaptchaToken) {
+      setError('Please complete the reCAPTCHA');
+      return;
     }
 
-    if (!name.value || name.value.length < 1) {
-      setNameError(true);
-      setNameErrorMessage('Name is required.');
-      isValid = false;
-    } else {
-      setNameError(false);
-      setNameErrorMessage('');
+    try {
+      // Create user with Firebase authentication
+      await createUserWithEmailAndPassword(frontendContext.firebaseAuth.current, email, password);
+      // On successful sign up
+      if (onSignUpSuccess) onSignUpSuccess();
+      nav('/dashboard'); // Navigate to the dashboard or desired page
+    } catch (error) {
+      setError('Error creating account: ' + error.message);
     }
-
-    return isValid;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('name'),
-      lastName: data.get('lastName'),
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token); // Store reCAPTCHA token on change
   };
 
   return (
-        <SignUpContainer direction="column" justifyContent="space-between">
-          <Stack
-            sx={{
-              justifyContent: 'center',
-              height: '100dvh',
-              p: 2,
-            }}
-          >
-            <Card variant="outlined">
-              <SitemarkIcon />
-              <Typography
-                component="h1"
-                variant="h4"
-                sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-              >
-                Sign up
-              </Typography>
-              <Box
-                component="form"
-                onSubmit={handleSubmit}
-                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-              >
-                <FormControl>
-                  <FormLabel htmlFor="name">Full name</FormLabel>
-                  <TextField
-                    autoComplete="name"
-                    name="name"
-                    required
-                    fullWidth
-                    id="name"
-                    placeholder="Jon Snow"
-                    error={nameError}
-                    helperText={nameErrorMessage}
-                    color={nameError ? 'error' : 'primary'}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="email">Email</FormLabel>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    placeholder="your@email.com"
-                    name="email"
-                    autoComplete="email"
-                    variant="outlined"
-                    error={emailError}
-                    helperText={emailErrorMessage}
-                    color={passwordError ? 'error' : 'primary'}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <TextField
-                    required
-                    fullWidth
-                    name="password"
-                    placeholder="••••••"
-                    type="password"
-                    id="password"
-                    autoComplete="new-password"
-                    variant="outlined"
-                    error={passwordError}
-                    helperText={passwordErrorMessage}
-                    color={passwordError ? 'error' : 'primary'}
-                  />
-                </FormControl>
-                <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
-                  label="I want to receive updates via email."
-                />
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  onClick={validateInputs}
-                >
-                  Sign up
-                </Button>
-                <Typography sx={{ textAlign: 'center' }}>
-                  Already have an account?{' '}
-                  <span>
-                    <Link
-                      href="/material-ui/getting-started/templates/sign-in/"
-                      variant="body2"
-                      sx={{ alignSelf: 'center' }}
-                    >
-                      Sign in
-                    </Link>
-                  </span>
-                </Typography>
-              </Box>
-              <Divider>
-                <Typography sx={{ color: 'text.secondary' }}>or</Typography>
-              </Divider>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => alert('Sign up with Google')}
-                  startIcon={<GoogleIcon />}
-                >
-                  Sign up with Google
-                </Button>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => alert('Sign up with Facebook')}
-                  startIcon={<FacebookIcon />}
-                >
-                  Sign up with Facebook
-                </Button>
-              </Box>
-            </Card>
-          </Stack>
-        </SignUpContainer>
+    <Box component="form" onSubmit={handleSignUpSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
+      <FormControl>
+        <FormLabel htmlFor="email">Email</FormLabel>
+        <TextField
+          id="email"
+          type="email"
+          name="email"
+          placeholder="your@email.com"
+          required
+          fullWidth
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </FormControl>
+
+      <FormControl>
+        <FormLabel htmlFor="password">Create Password</FormLabel>
+        <TextField
+          id="password"
+          type="password"
+          name="password"
+          placeholder="••••••"
+          required
+          fullWidth
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      </FormControl>
+
+      <FormControl>
+        <FormLabel htmlFor="confirmPassword">Re-enter Password</FormLabel>
+        <TextField
+          id="confirmPassword"
+          type="password"
+          name="confirmPassword"
+          placeholder="••••••"
+          required
+          fullWidth
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+      </FormControl>
+
+      {error && <Typography color="error">{error}</Typography>}
+
+      <FormControl>
+        <ReCAPTCHA
+          sitekey="6LdD8VgqAAAAAFZ2fzniAJ9rmDc_es3C0fp9P9Ma"  
+          onChange={handleRecaptchaChange}
+        />
+      </FormControl>
+
+      <Button type="submit" fullWidth variant="contained">
+        Sign up
+      </Button>
+    </Box>
   );
-}
+};
 
 export default SignUp;
