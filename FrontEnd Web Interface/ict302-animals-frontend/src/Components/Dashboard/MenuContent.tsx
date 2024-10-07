@@ -5,16 +5,10 @@ import DashboardPages, {getDashboardPageFromName, getNameFromDashboardPage, Dash
 
 import { Link, useNavigate } from 'react-router-dom';
 
-
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import QueueIcon from '@mui/icons-material/Queue';
-import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
-import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import PetsIcon from '@mui/icons-material/Pets';
-
 
 import { FrontendContext } from "../../Internals/ContextStore";
 
@@ -25,15 +19,11 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
   const mainListItems = [
     { text: 'Home', icon: <HomeRoundedIcon /> },
     { text: 'Upload', icon: <CloudUploadIcon /> },
-    { text: 'Queue', icon: <QueueIcon />},
-    { text: 'Completed', icon: <LibraryAddCheckIcon /> },
     { text: 'Animals', icon: <PetsIcon /> },
   ];
   
   const secondaryListItems = [
-    { text: 'Settings', icon: <SettingsRoundedIcon /> },
     { text: 'About', icon: <InfoRoundedIcon /> },
-    { text: 'Feedback', icon: <HelpRoundedIcon /> },
   ];
 
   const nav = useNavigate();
