@@ -25,6 +25,8 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
   const mainListItems = [
     { text: 'Home', icon: <HomeRoundedIcon /> },
     { text: 'Upload', icon: <CloudUploadIcon /> },
+    { text: 'Queue', icon: <QueueIcon />},
+    { text: 'Completed', icon: <LibraryAddCheckIcon /> },
     { text: 'Animals', icon: <PetsIcon /> },
   ];
   
