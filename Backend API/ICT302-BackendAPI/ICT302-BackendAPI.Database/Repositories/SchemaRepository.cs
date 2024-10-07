@@ -1,4 +1,4 @@
-﻿using ICT302_BackendAPI.Database.Models;
+using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ICT302_BackendAPI.Database.Repositories;
@@ -43,5 +43,23 @@ public class SchemaRepository : ISchemaRepository
     {
         _ctx.Animals.Remove(animal);
         return await _ctx.SaveChangesAsync();
+    }
+  
+    public async Task<Animal> UpdateAnimalVideoDataAsync(Guid animalId, byte[] videoData, byte[] thumbnailData, DateTime uploadDate)
+    {
+        var animal = await _ctx.Animals.FindAsync(animalId);
+        if (animal == null)
+        {
+            return null; // Animal not found
+        }
+
+        animal.VideoData = videoData;
+        animal.ThumbnailData = thumbnailData;
+        animal.VideoUploadDate = uploadDate;
+
+        _ctx.Animals.Update(animal);
+        await _ctx.SaveChangesAsync();
+
+        return animal;
     }
 }

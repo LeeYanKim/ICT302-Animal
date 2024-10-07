@@ -41,10 +41,13 @@ const LandingNav: React.FC= () => {
     };
 
     return (
-            <AppBar position="static">
+            <AppBar position="static" 
+            sx = {{
+                background: 'linear-gradient(90deg, rgba(255,105,105,0.7), rgba(173,216,230,0.6))',
+            }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
-                        <PetsIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} /> {/* TODO Replace with team logo */}
+                        <PetsIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 , color : '#FFFFFF'}} /> {/* TODO Replace with team logo */}
                         <Typography
                             variant="h6"
                             noWrap
@@ -55,7 +58,7 @@ const LandingNav: React.FC= () => {
                                 display: { xs: 'none', md: 'flex' },
                                 fontFamily: 'monospace',
                                 fontWeight: 700,
-                                color: 'inherit',
+                                color: '#FFFFFF',
                                 textDecoration: 'none',
                             }}
                         >
@@ -110,7 +113,7 @@ const LandingNav: React.FC= () => {
                                 fontFamily: 'monospace',
                                 fontWeight: 700,
                                 letterSpacing: '.3rem',
-                                color: 'inherit',
+                                color: 'black',
                                 textDecoration: 'none',
                             }}
                         >

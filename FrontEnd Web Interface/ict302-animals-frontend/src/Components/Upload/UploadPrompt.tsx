@@ -1,132 +1,140 @@
-import React, {ChangeEvent, useContext} from 'react';
-
+// UploadPrompt.tsx
+import React, { ChangeEvent, useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Button,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+} from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import NewAnimal from './NewAnimal';
+import NewUpload from './NewUpload';
+import { UploadProps } from './UploadProps';
+        
 import { FrontendContext } from "../../Internals/ContextStore";
 import API from '../../Internals/API';
 
 
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Box, FormLabel, styled, Typography, Chip} from '@mui/material';
+const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUploadSuccess }) => {
+  const [isAnimalFormOpen, setIsAnimalFormOpen] = useState(false);
+  const [isUploadFormOpen, setIsUploadFormOpen] = useState(false);
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
+  const [animalDetails, setAnimalDetails] = useState({
+    animalName: '',
+    animalType: '',
+    dateOfBirth: '',
+  });
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-import NewUpload from './NewUpload';
-
-import CheckIcon from '@mui/icons-material/Check';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
-import {UploadProps} from './UploadProps';
-import  UserAlert  from '../../Internals/components/Alerts/Alert';
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
-
-const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
-  const frontendContext = useContext(FrontendContext);
-
-  const [open, setOpen] = React.useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = (canceled: boolean) => {
-        setOpen(false);
-        if(canceled) return;
-
-        setAlertQueue([...alertQueue, <UserAlert icon={<CheckIcon/>} severity='success' message="Upload Successful" progress={null}/>]);
-        frontendContext.user.contextRef.current.currentItemsInQueue += 1;
-        frontendContext.user.contextRef.current.currentItemsInProcessQueue.push({id: '0', name: 'Test', size: 100, type: 'image', progress: 0, status: 'Uploading'});
-    };
-
-    const HandleSubmit = () => {
-        console.log('Submit');
-
+    const frontendContext = useContext(FrontendContext);
+    
+  // Handle file selection and open the animal form
+  const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFileToUpload(e.target.files[0]);
+      setIsAnimalFormOpen(true);
     }
+  };
+    
 
-    const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-      console.log('File Upload', e.target.files);
-      if(e.target.files === null) return;
+  // Handle submission of the animal form
+  const handleAnimalFormSubmit = (animalData: {
+    animalName: string;
+    animalType: string;
+    dateOfBirth: string;
+    file?: File;
+  }) => {
+    setAnimalDetails({
+      animalName: animalData.animalName,
+      animalType: animalData.animalType,
+      dateOfBirth: animalData.dateOfBirth,
+    });
+    if (animalData.file) {
+      setFileToUpload(animalData.file);
+    }
+    setIsAnimalFormOpen(false);
+    setIsUploadFormOpen(true);
+  };
 
-      const formData = new FormData();
-      if (e.target.files) {
-          for (let i = 0; i < e.target.files.length; i++) {
-              formData.append('files', e.target.files[i], e.target.files[i].name);
-          }
-      }
+  const handleUploadFormClose = (canceled: boolean) => {
+    if (!canceled) {
+      // Optionally refresh the list of uploaded animals
+    }
+    setIsUploadFormOpen(false);
+  };
 
-      try {
-          const response = await fetch(API.Upload(), {
-              method: 'POST',
-              body: formData,
-          });
-          const data = await response.json();
-          console.log(data);
-          handleClose(true)
-      } catch (error) {
-          console.error(error);
-      }
-  }
+  const handleSnackbarClose = () => {
+    setIsSnackbarOpen(false);
+  };
 
   return (
     <div>
       <Box
         component="form"
-        onSubmit={HandleSubmit}
         noValidate
         sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        gap: 2,
-        }}>
-        <Typography variant='h2' sx={{alignSelf: 'center'}}>
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          gap: 2,
+        }}
+      >
+        <Typography variant="h2" sx={{ alignSelf: 'center' }}>
           Get Started Uploading!
         </Typography>
-        <Typography variant='body1' sx={{alignSelf: 'center'}}>
+        <Typography variant="body1" sx={{ alignSelf: 'center' }}>
           This application is a work in progress.
         </Typography>
-        <Typography variant='body1' sx={{alignSelf: 'center'}}>
-          Please do not upload any sensitive or personal information.
-        </Typography>
-        <Typography variant='body1' sx={{alignSelf: 'center'}}>
+        <Typography variant="body1" sx={{ alignSelf: 'center' }}>
           Accepted file types
         </Typography>
-        <Box sx={{display: 'flex', justifyContent: 'center'}}>
-          <Chip label='png'/>
-          <Chip label='jpg' />
-          <Chip label='jpeg' />
-          <Chip label='mp4' />
-          <Chip label='mkv' />
-          <Chip label='mov' />
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+            Select File
+            <input
+              type="file"
+              accept=".mp4, .mkv, .mov, .webm"
+              hidden
+              onChange={handleFileSelection}
+            />
+          </Button>
         </Box>
-        <FormControl>
-          <FormControl>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignSelf: 'center'}}>
-              <Button component='label'
-                role={undefined}
-                variant='contained'
-                tabIndex={-1}
-                startIcon={<CloudUploadIcon />}>
-                    Upload
-                <VisuallyHiddenInput
-                    type='file'
-                    accept=".png, .jpg, .jpeg, .mp4, .mkv, .mov"
-                    onChange={handleFileUpload}
-                    multiple
-                />
-              </Button>
-            </Box>
-          </FormControl>
-        </FormControl>
       </Box>
+
+      {/* Animal form dialog */}
+      <NewAnimal
+        open={isAnimalFormOpen}
+        handleClose={() => setIsAnimalFormOpen(false)}
+        addNewAnimal={handleAnimalFormSubmit}
+        requireFile={false} // No need to require file here as it's already selected
+      />
+
+      {/* Upload form dialog */}
+      <NewUpload
+        open={isUploadFormOpen}
+        handleClose={handleUploadFormClose}
+        animalDetails={animalDetails}
+        fileToUpload={fileToUpload}
+      />
+
+      {/* Snackbar for error messages */}
+      <Snackbar
+        open={isSnackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
-}
+};
 
 export default UploadPrompt;

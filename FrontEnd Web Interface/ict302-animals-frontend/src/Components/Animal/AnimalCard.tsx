@@ -9,9 +9,10 @@ export type AnimalCardProps = {
     animalName: string;
     animalDOB: Date;
     animalType: string;
+    onClick: () => void;
 };
 
-const AnimalCard: React.FC<AnimalCardProps> = ({ animalName, animalDOB, animalType}) =>{
+const AnimalCard: React.FC<AnimalCardProps> = ({ animalName, animalDOB, animalType , onClick}) =>{
     const theme = useTheme();
 
     const [animalImage, setAnimalImage] = useState<string>('');
@@ -48,7 +49,7 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalName, animalDOB, animalTy
 
 
     return (
-        <Card variant="outlined" sx={{ height: '100%',minWidth: 450, flexGrow: 1}}>
+        <Card variant="outlined" sx={{ height: '100%',minWidth: 450, flexGrow: 1, cursor: 'pointer'}} onClick={onClick}>
             <CardContent>
                 <Typography component="h2" variant="subtitle2" gutterBottom>
                     Name: {animalName}

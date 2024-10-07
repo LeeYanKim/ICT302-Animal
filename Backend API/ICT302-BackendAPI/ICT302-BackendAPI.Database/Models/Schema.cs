@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
@@ -18,28 +18,38 @@ public class AccessType
     public string AccessTypeDetails { get; set; }
 }
 
-[Table("animal")]
-public class Animal
-{
-    [Key]
-    [Column("Animal_ID", TypeName = "binary(16)")]
-    public Guid AnimalID { get; set; }
+  [Table("animal")]
+    public class Animal
+    {
+        [Key]
+        [Column("Animal_ID", TypeName = "binary(16)")]
+        public Guid AnimalID { get; set; }
 
-    [Required]
-    [Column("Animal_Name", TypeName = "varchar(45)")]
-    [StringLength(45)]
-    public string AnimalName { get; set; }
+        [Required]
+        [Column("Animal_Name", TypeName = "varchar(45)")]
+        [StringLength(45)]
+        public string AnimalName { get; set; }
 
-    [Required]
-    [Column("Animal_DOB", TypeName = "date")]
-    [DataType(DataType.Date)]
-    public DateTime AnimalDOB { get; set; }
+        [Required]
+        [Column("Animal_DOB", TypeName = "date")]
+        [DataType(DataType.Date)]
+        public DateTime AnimalDOB { get; set; }
 
-    [Required]
-    [Column("Animal_Type", TypeName = "varchar(45)")]
-    [StringLength(45)]
-    public string AnimalType { get; set; }
-}
+        [Required]
+        [Column("Animal_Type", TypeName = "varchar(45)")]
+        [StringLength(45)]
+        public string AnimalType { get; set; }
+
+        // New fields for video file and thumbnail data
+        [Column("Video_Data")]
+        public byte[]? VideoData { get; set; }
+
+        [Column("Thumbnail_Data")]
+        public byte[]? ThumbnailData { get; set; }
+
+        [Column("Video_Upload_Date", TypeName = "datetime")]
+        public DateTime? VideoUploadDate { get; set; }
+    }
 
 [Table("animalaccess")]
 public class AnimalAccess

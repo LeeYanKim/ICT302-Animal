@@ -3,13 +3,10 @@ import React, {useContext} from 'react';
 import { FrontendContext } from "../Internals/ContextStore";
 
 import QueueCard from '../Components/Queue/QueueCard';
-
-import {Box, Stack, Grid2 as Grid, alpha} from '@mui/material';
+import { Box, Stack, Grid2 as Grid, alpha, Theme } from '@mui/material';
 
 const Queue: React.FC = () => {
   const frontendContext = useContext(FrontendContext);
-
-  //TODO Add queue update logic
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -42,6 +39,6 @@ const Queue: React.FC = () => {
           </Box>
         </Box>
   );
-}
+};
 
 export default Queue;
