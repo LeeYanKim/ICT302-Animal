@@ -1,4 +1,3 @@
-// NewUpload.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Button,
@@ -10,6 +9,8 @@ import {
   Alert,
   Typography,
 } from '@mui/material';
+
+import API from '../../Internals/API';
 
 interface NewUploadProps {
   open: boolean;
@@ -55,7 +56,7 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
     formData.append('dateOfBirth', formattedDOB); // Changed from 'animalDOB' to 'dateOfBirth'
 
     try {
-      const response = await fetch('http://localhost:5173/api/upload', { // Adjusted port to 5000
+      const response = await fetch(API.Upload(), { // Adjusted port to 5000
         method: 'POST',
         body: formData,
       });

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Button, Menu, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+import API from '../../Internals/API';
+
 interface RecentlyUploadedProps {
   triggerRefresh: boolean; // Prop to trigger the refresh of uploaded data
 }
@@ -22,7 +24,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
 
   const fetchUploadedAnimals = async () => {
     try {
-      const response = await fetch('http://localhost:5173/api/files/animals/list');
+      const response = await fetch(API.Download() + '/animals/list');
       if (!response.ok) {
         throw new Error('Failed to fetch uploaded animals');
       }
