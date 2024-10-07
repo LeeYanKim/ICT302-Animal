@@ -5,7 +5,7 @@ class APIEndpoints {
     baseUrl: string = '';
     dbEndpoint: string = '/db';
     fileUpload: string = '/upload';
-    download: string = '/download';
+    download: string = '/files';
     animals: string = '/animals';
     accessType: string = '/accessType';
     animalAccess: string = '/animalAccess';
