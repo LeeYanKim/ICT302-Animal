@@ -1,6 +1,6 @@
 import React, {ChangeEvent, useContext} from 'react';
 
-import { UserProfileContext } from "../../Internals/ContextStore";
+import { FrontendContext } from "../../Internals/ContextStore";
 import API from '../../Internals/API';
 
 
@@ -27,7 +27,7 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 
   const [open, setOpen] = React.useState(false);
 
@@ -40,8 +40,8 @@ const UploadPrompt: React.FC<UploadProps> = ({alertQueue, setAlertQueue}) => {
         if(canceled) return;
 
         setAlertQueue([...alertQueue, <UserAlert icon={<CheckIcon/>} severity='success' message="Upload Successful" progress={null}/>]);
-        userContext.contextRef.current.currentItemsInQueue += 1;
-        userContext.contextRef.current.currentItemsInProcessQueue.push({id: '0', name: 'Test', size: 100, type: 'image', progress: 0, status: 'Uploading'});
+        frontendContext.user.contextRef.current.currentItemsInQueue += 1;
+        frontendContext.user.contextRef.current.currentItemsInProcessQueue.push({id: '0', name: 'Test', size: 100, type: 'image', progress: 0, status: 'Uploading'});
     };
 
     const HandleSubmit = () => {

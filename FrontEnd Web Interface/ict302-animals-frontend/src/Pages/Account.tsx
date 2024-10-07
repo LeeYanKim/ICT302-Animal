@@ -1,9 +1,9 @@
 import React, {useContext} from 'react';
 
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
 
 const Account: React.FC = () => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 
   return (
     <div>

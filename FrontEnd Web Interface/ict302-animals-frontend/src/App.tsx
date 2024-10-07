@@ -22,7 +22,7 @@ import View from './Pages/View';
 import BackendTest from './Pages/Test/BackendTest';
 
 import UserProfile from './Internals/UserProfile';
-import {UserProfileContext} from './Internals/ContextStore';
+import {FrontendContext} from './Internals/ContextStore';
 
 
 // Imports of MUI and custom Theme components
@@ -80,9 +80,8 @@ const App: React.FC = () => {
         localStorage.setItem('themeMode', newMode); // Save the selected mode to localStorage
     };
 
-    const userContext = useContext(UserProfileContext);
+    const frontendContext = useContext(FrontendContext);
 
-    //console.log('App', userContext);
 
     const dashboardPaghPaths = [
         "/dashboard",
@@ -117,7 +116,7 @@ const App: React.FC = () => {
                             <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
                             <Route path="/signout" element={<SignOut />} /> {/* This is the sign in page */}
                             {dashboardPaghPaths.map((dashboardPath, index) => (
-                                <Route key={index} path={dashboardPath} element={userContext.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
+                                <Route key={index} path={dashboardPath} element={frontendContext.user.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
 
                             

@@ -5,7 +5,7 @@ import AppNavbar from '../Components/Dashboard/AppNavbar';
 import Header from '../Components/Dashboard/Header';
 import SideMenu from '../Components/Dashboard/SideMenu';
 
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
 import DashboardPages, {getDashboardPageFromName, getNameFromDashboardPage, getDashboardPageFromPath, getDashboardPageRenderFromDashboardPage}  from '../Components/Dashboard/DashboardHelpers';
 import UserAlert from '../Internals/components/Alerts/Alert';
 import CompletedItem from '../Internals/data/CompletedItem';
@@ -21,7 +21,7 @@ const Dashboard: React.FC<DashboardProps> = ({ renderedPage }) => {
 
 
 
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
   let alerts: React.ReactNode[] = [];
 
   const [currentDashboardPage, setCurrentDashboardPage] = React.useState<DashboardPages>(renderedPage ? getDashboardPageFromPath(renderedPage) : DashboardPages.Home);
@@ -47,17 +47,17 @@ const Dashboard: React.FC<DashboardProps> = ({ renderedPage }) => {
   //This removes items from the queue after 15 seconds for testing purposes
   useEffect(() => {
     let timer = setTimeout(() => {
-      if(userContext.contextRef.current.currentItemsInQueue > 0) {
-        userContext.contextRef.current.currentItemsInQueue -= 1;
-        userContext.contextRef.current.completedItems.push({id: "1", name: "Test Item", size: 1, type: "3d Model", status: "Complete", modelPath: "/3d_test_files/toon_cat_free.glb"});
-        userContext.contextRef.current.currentCompletedItems += 1;
-        userContext.contextRef.current.currentItemsInProcessQueue.shift();
+      if(frontendContext.user.contextRef.current.currentItemsInQueue > 0) {
+        frontendContext.user.contextRef.current.currentItemsInQueue -= 1;
+        frontendContext.user.contextRef.current.completedItems.push({id: "1", name: "Test Item", size: 1, type: "3d Model", status: "Complete", modelPath: "/3d_test_files/toon_cat_free.glb"});
+        frontendContext.user.contextRef.current.currentCompletedItems += 1;
+        frontendContext.user.contextRef.current.currentItemsInProcessQueue.shift();
       }
     }, 15000);
     return () => {
       clearTimeout(timer);
     };
-  },[userContext.contextRef.current.currentItemsInQueue]);
+  },[frontendContext.user.contextRef.current.currentItemsInQueue]);
 
   return (
         <Box sx={{ display: 'flex', position: 'relative' }}>
