@@ -1,4 +1,4 @@
-﻿using ICT302_BackendAPI.Database.Models;
+using ICT302_BackendAPI.Database.Models;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
@@ -9,5 +9,6 @@ namespace ICT302_BackendAPI.Database.Repositories
         Task<Animal> GetAnimalByIDAsync(Guid id);
         Task<IEnumerable<Animal>> GetAnimalsAsync();
         Task<Animal> UpdateAnimalAsync(Animal animal);
+         Task<Animal> UpdateAnimalVideoDataAsync(Guid animalId, byte[] videoData, byte[] thumbnailData, DateTime uploadDate);
     }
 }

@@ -1,51 +1,89 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, TextField, Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+// NewAnimal.tsx
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
+  TextField,
+  Box,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+} from "@mui/material";
 import React, { useState } from "react";
+import { SelectChangeEvent } from '@mui/material/Select';
+
+interface AnimalDetails {
+  animalName: string;
+  animalType?: string;
+  dateOfBirth?: string;
+  file?: File;
+}
 
 interface NewAnimalProps {
   open: boolean;
   handleClose: () => void;
-  addNewAnimal: (animalName: string) => void; // New prop to pass back the new animal
+  addNewAnimal: (animalDetails: AnimalDetails) => void;
+  requireFile?: boolean; // New prop to indicate if file selection is required
 }
 
-const animalTypesList = ["Mammal", "Bird", "Reptile", "Fish"]; // Initial animal types
+const animalTypesList = ["Mammal", "Bird", "Reptile", "Fish"];
 
-const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose, addNewAnimal }) => {
-  const [animalName, setAnimalName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [animalType, setAnimalType] = useState('');
-  const [animalTypes, setAnimalTypes] = useState(animalTypesList);
-  const [isAddNewTypeDialogOpen, setIsAddNewTypeDialogOpen] = useState(false);
-  const [newAnimalType, setNewAnimalType] = useState('');
+const NewAnimal: React.FC<NewAnimalProps> = ({
+  open,
+  handleClose,
+  addNewAnimal,
+  requireFile = false, // Default to false
+}) => {
+  const [animalName, setAnimalName] = useState<string>("");
+  const [dateOfBirth, setDateOfBirth] = useState<string>("");
+  const [animalType, setAnimalType] = useState<string>("");
+  const [animalTypes, setAnimalTypes] = useState<string[]>(animalTypesList);
+  const [isAddNewTypeDialogOpen, setIsAddNewTypeDialogOpen] = useState<boolean>(false);
+  const [newAnimalType, setNewAnimalType] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Handle selecting an existing animal type
   const handleAnimalTypeChange = (event: SelectChangeEvent<string>) => {
-    setAnimalType(event.target.value);
+    setAnimalType(event.target.value as string);
   };
 
-  // Open dialog to add a new animal type
   const handleAddNewTypeOpen = () => {
     setIsAddNewTypeDialogOpen(true);
   };
 
-  // Close dialog and reset the new animal type
   const handleAddNewTypeClose = () => {
     setIsAddNewTypeDialogOpen(false);
-    setNewAnimalType('');
+    setNewAnimalType("");
   };
 
-  // Add the new animal type to the list and close the dialog
   const handleAddNewType = () => {
     if (newAnimalType && !animalTypes.includes(newAnimalType)) {
-      setAnimalTypes([...animalTypes, newAnimalType]); // Add new type
-      setAnimalType(newAnimalType); // Set it as the selected type
+      setAnimalTypes([...animalTypes, newAnimalType]);
+      setAnimalType(newAnimalType);
     }
-    handleAddNewTypeClose(); // Close the dialog
+    handleAddNewTypeClose();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFile(event.target.files[0]);
+    }
   };
 
   const handleGenerate = () => {
-    if (animalName) {
-      addNewAnimal(animalName); // Pass the new animal name back to the parent (Tagging component)
+    if (animalName && (!requireFile || (requireFile && selectedFile))) {
+      addNewAnimal({
+        animalName,
+        animalType,
+        dateOfBirth,
+        file: selectedFile || undefined,
+      });
       handleClose();
+    } else {
+      alert("Please fill in all required fields.");
     }
   };
 
@@ -66,6 +104,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose, addNewAnimal }
               value={animalName}
               onChange={(e) => setAnimalName(e.target.value)}
               margin="normal"
+              required
             />
 
             <TextField
@@ -79,18 +118,18 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose, addNewAnimal }
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
               margin="normal"
+              required={requireFile} // Required only if file is required
             />
 
             <FormControl fullWidth margin="normal">
+              <InputLabel id="animal-type-label">Animal Type</InputLabel>
               <Select
                 labelId="animal-type-label"
                 value={animalType}
                 onChange={handleAnimalTypeChange}
-                displayEmpty
+                label="Animal Type"
+                required={requireFile} // Required only if file is required
               >
-                <MenuItem value="">
-                  <em>Select Animal Type</em>
-                </MenuItem>
                 {animalTypes.map((type) => (
                   <MenuItem key={type} value={type}>
                     {type}
@@ -103,10 +142,29 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose, addNewAnimal }
               onClick={handleAddNewTypeOpen}
               color="primary"
               variant="outlined"
-              sx={{ marginTop: '10px' }}
+              sx={{ marginTop: "10px" }}
             >
               Add New Animal Type
             </Button>
+
+            {/* File Input */}
+            {requireFile && (
+              <Box mt={2}>
+                <Typography variant="body1" gutterBottom>
+                  Select a video file for the animal:
+                </Typography>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileChange}
+                />
+                {selectedFile && (
+                  <Typography variant="body2">
+                    Selected file: {selectedFile.name}
+                  </Typography>
+                )}
+              </Box>
+            )}
           </Box>
         </DialogContent>
 
@@ -120,7 +178,6 @@ const NewAnimal: React.FC<NewAnimalProps> = ({ open, handleClose, addNewAnimal }
         </DialogActions>
       </Dialog>
 
-      {/* Dialog for adding a new animal type */}
       <Dialog open={isAddNewTypeDialogOpen} onClose={handleAddNewTypeClose}>
         <DialogTitle>Add New Animal Type</DialogTitle>
         <DialogContent>

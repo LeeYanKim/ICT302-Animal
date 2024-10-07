@@ -12,9 +12,10 @@ interface TaggingProps {
   handleClose: () => void;
   closeUploadDialog: () => void;
   videoUrl: string; // To pass the video URL for preview
+  onGenerate: () => void;  // Add this prop to notify when generate is called to refresh the thumbnails
 }
 
-export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl }: TaggingProps) {
+export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl ,onGenerate }: TaggingProps) {
   const [selectedAnimal, setSelectedAnimal] = React.useState(''); // Selected animal state
   const [animals, setAnimals] = React.useState(['Jax', 'Max', 'Fernet', 'Aqua']); // Existing animals
   const [generator, setGenerator] = React.useState('GART'); // Selected generator state
@@ -33,13 +34,19 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
     setIsNewAnimalOpen(false);
   };
 
-  const handleAddNewAnimal = (newAnimal: string) => {
+  const handleAddNewAnimal = (animalDetails: {
+    animalName: string;
+    animalType: string;
+    dateOfBirth: string;
+    file?: File; // Make file optional if not used in this context
+  }) => {
+    const { animalName } = animalDetails;
     // Add the new animal to the list and set it as the selected animal
-    setAnimals([...animals, newAnimal]);
-    setSelectedAnimal(newAnimal);
+    setAnimals([...animals, animalName]);
+    setSelectedAnimal(animalName);
     setIsNewAnimalOpen(false); // Close the new animal dialog
   };
-
+  
   const handleGenerate = () => {
     setIsSnackbarOpen(true);
     handleClose(); // Close tagging dialog
@@ -106,7 +113,7 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
           </Box>
         </DialogContent>
 
-        {/* Video Preview */}
+        {/* Video Preview *
         {videoUrl && (
           <Box mt={2} sx={{ display: 'flex', justifyContent: 'center' }}>
             <video width="100%" controls>
@@ -115,8 +122,7 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
             </video>
           </Box>
         )}
-
-
+        */}
         <DialogActions>
           <Button onClick={handleGenerate} color="primary" variant="contained">
             Generate

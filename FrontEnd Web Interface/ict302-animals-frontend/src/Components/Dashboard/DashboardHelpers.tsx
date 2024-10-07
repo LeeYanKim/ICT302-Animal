@@ -18,7 +18,7 @@ import Animals from '../../Pages/Animals';
 
 
 enum DashboardPages {
-    Home, Upload, Queue, Completed, Settings, About, Feedback, Help, Account, Animals
+    Home, Upload,  Settings, About, Feedback, Help, Account, Animals
 }
 
 export function getDashboardPageFromName(page: string): DashboardPages {
@@ -27,10 +27,6 @@ export function getDashboardPageFromName(page: string): DashboardPages {
             return DashboardPages.Home;
         case 'upload':
             return DashboardPages.Upload;
-        case 'queue':
-            return DashboardPages.Queue;
-        case 'completed':
-            return DashboardPages.Completed;
         case 'settings':
             return DashboardPages.Settings;
         case 'about':
@@ -54,10 +50,6 @@ export function getNameFromDashboardPage(page: DashboardPages) {
             return 'home';
         case DashboardPages.Upload:
             return 'upload';
-        case DashboardPages.Queue:
-            return 'queue';
-        case DashboardPages.Completed:
-            return 'completed';
         case DashboardPages.Settings:
             return 'settings';
         case DashboardPages.About:
@@ -79,10 +71,6 @@ export function getPrettyNameFromDashboardPage(page: DashboardPages) {
             return 'Home';
         case DashboardPages.Upload:
             return 'Upload';
-        case DashboardPages.Queue:
-            return 'Queue';
-        case DashboardPages.Completed:
-            return 'Completed';
         case DashboardPages.Settings:
             return 'Settings';
         case DashboardPages.About:
@@ -106,16 +94,13 @@ export function getDashboardPageFromPath(path: string): DashboardPages {
     return DashboardPages.Home;
 }
 
-export function getDashboardPageRenderFromDashboardPage(page: DashboardPages, alertQueue: React.ReactNode[], setAlertsQueue: any) {
+export function getDashboardPageRenderFromDashboardPage(page: DashboardPages, alertQueue: React.ReactNode[], setAlertsQueue: any, onUploadSuccess?: () => void) {
+    const handleUploadSuccess = onUploadSuccess ?? (() => {});
     switch (page) {
         case DashboardPages.Home:
             return <MainGrid />;
         case DashboardPages.Upload:
-            return <Upload alertQueue={alertQueue} setAlertQueue={setAlertsQueue}/>;
-        case DashboardPages.Queue:
-            return <Queue />;
-        case DashboardPages.Completed:
-            return <Completed />;
+            return <Upload alertQueue={alertQueue} setAlertQueue={setAlertsQueue} onUploadSuccess={handleUploadSuccess}/>;
         case DashboardPages.Settings:
             return <Settings />;
         case DashboardPages.About:

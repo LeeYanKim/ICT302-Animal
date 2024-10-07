@@ -16,6 +16,7 @@ import SignIn from './Pages/SignIn';
 import SignUp from './Pages/SignUp';
 import SignOut from './Pages/SignOut';
 import Dashboard from './Pages/Dashboard';
+import AnimalDetails from './Components/Animal/AnimalDetails';  // Import the AnimalDetails component for animal page
 
 // Imports of testing pages
 import View from './Pages/View';
@@ -96,6 +97,7 @@ const App: React.FC = () => {
         "/dashboard/help",
         "/dashboard/account",
         "/dashboard/animals",
+        "/dashboard/animals/:animalId"
     ];
 
 // Returns the main component of the app with the navigation bar and the routes
@@ -120,7 +122,7 @@ const App: React.FC = () => {
                                 <Route key={index} path={dashboardPath} element={userContext.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
 
-                            
+                            <Route path="/dashboard/animals/:animalId" element={<AnimalDetails />} /> {/* Animal details page */}
 
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
 
