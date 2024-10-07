@@ -91,7 +91,7 @@ const SignIn: React.FC = () => {
       const user = userCredential.user;
       console.log(user);
       nav('/dashboard');
-      // ...
+      //..
     }).catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -106,6 +106,20 @@ const SignIn: React.FC = () => {
     frontendContext.user.contextRef.current.initials = 'BS';
     frontendContext.user.contextRef.current.loggedInState = true;
   }
+
+  // Helper function to update frontend context
+  const updateContextAndNavigate = (user: { displayName?: string | null, email?: string | null }) => {
+    frontendContext.user.valid = true;
+    frontendContext.user.contextRef.current.username = user.displayName || '';
+    frontendContext.user.contextRef.current.email = user.email || '';
+    frontendContext.user.contextRef.current.initials = user.displayName
+      ? user.displayName.split(' ').map(name => name[0]).join('')
+      : '';
+    frontendContext.user.contextRef.current.loggedInState = true;
+  
+    nav('/dashboard');
+  };
+  
 
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
@@ -139,33 +153,25 @@ const SignIn: React.FC = () => {
   
     try {
       const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
-      
-      // This gives you a Google Access Token. You can use it to access Google APIs.
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
-  
-      // The signed-in user info.
       const user = result.user;
-      console.log('User signed in:', user);
+  
+      console.log('Google sign-in successful:', user);
   
       // Update the frontendContext with the logged-in user details
-      frontendContext.user.contextRef.current.username = user.displayName || '';
-      frontendContext.user.contextRef.current.email = user.email || '';
-      frontendContext.user.contextRef.current.initials = user.displayName ? user.displayName.split(' ').map(name => name[0]).join('') : '';
-      frontendContext.user.contextRef.current.loggedInState = true;
+      updateContextAndNavigate(user);
   
-      // Navigate to the dashboard after successful sign-in
-      nav('/dashboard');
-  
+      // Log before navigating
+      if (user) {
+        console.log('User exists, navigating to dashboard...');
+        nav('/dashboard');
+      } else {
+        console.log('User is null, navigation skipped');
+      }
     } catch (error) {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      const email = error.customData?.email;
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      console.error("Error signing in with Google:", errorCode, errorMessage, email, credential);
+      console.error("Error signing in with Google:", error);
     }
   };
+  
   
   
   const handleFacebookSignIn = async () => {
@@ -183,11 +189,8 @@ const SignIn: React.FC = () => {
       console.log('User signed in with Facebook:', user);
   
       // Update the frontendContext with the logged-in user details
-      frontendContext.user.contextRef.current.username = user.displayName || '';
-      frontendContext.user.contextRef.current.email = user.email || '';
-      frontendContext.user.contextRef.current.initials = user.displayName ? user.displayName.split(' ').map(name => name[0]).join('') : '';
-      frontendContext.user.contextRef.current.loggedInState = true;
-  
+      updateContextAndNavigate(user);
+
       // Navigate to the dashboard after successful sign-in
       nav('/dashboard');
   
