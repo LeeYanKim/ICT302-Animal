@@ -33,7 +33,7 @@ class APIEndpoints {
 class API {
     private static endpoint: APIEndpoints | undefined;
     private static devEndpointAddress = 'http://localhost:5173/api';
-    private static prodEndpointAddress = 'https://wildvision.co/api';
+    private static prodEndpointAddress = 'https://api.wildvision.co/api'
 
     public static init() {
         if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development')

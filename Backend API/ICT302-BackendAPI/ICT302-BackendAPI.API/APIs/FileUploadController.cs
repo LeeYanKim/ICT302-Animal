@@ -151,7 +151,7 @@ public class FileUploadController : ControllerBase
                                 AnimalType = animalType,
                                 AnimalDOB = animalDOB,
                                 VideoUploadDate = DateTime.Now,
-                                ThumbnailData = thumbnailData
+                                //ThumbnailData = thumbnailData
                             };
 
                             _logger.LogInformation("Creating animal entry in the database: AnimalName = {AnimalName}", animal.AnimalName);
