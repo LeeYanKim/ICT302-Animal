@@ -34,13 +34,19 @@ export default function Tagging({ open, handleClose, closeUploadDialog, videoUrl
     setIsNewAnimalOpen(false);
   };
 
-  const handleAddNewAnimal = (newAnimal: string) => {
+  const handleAddNewAnimal = (animalDetails: {
+    animalName: string;
+    animalType: string;
+    dateOfBirth: string;
+    file?: File; // Make file optional if not used in this context
+  }) => {
+    const { animalName } = animalDetails;
     // Add the new animal to the list and set it as the selected animal
-    setAnimals([...animals, newAnimal]);
-    setSelectedAnimal(newAnimal);
+    setAnimals([...animals, animalName]);
+    setSelectedAnimal(animalName);
     setIsNewAnimalOpen(false); // Close the new animal dialog
   };
-
+  
   const handleGenerate = () => {
     setIsSnackbarOpen(true);
     handleClose(); // Close tagging dialog

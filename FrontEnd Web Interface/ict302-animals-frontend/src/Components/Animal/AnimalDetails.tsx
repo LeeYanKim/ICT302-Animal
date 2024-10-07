@@ -11,7 +11,7 @@ const AnimalDetails: React.FC = () => {
   useEffect(() => {
     const fetchAnimalData = async () => {
       try {
-        const response = await fetch(`http://localhost:5173/api/files/animals/${animalId}`);
+        const response = await fetch(`http://localhost:5173/api/files/animals/details/${animalId}`);
         if (!response.ok) throw new Error('Failed to fetch animal data');
         const data = await response.json();
         setAnimalData(data);
@@ -27,13 +27,13 @@ const AnimalDetails: React.FC = () => {
   if (!animalData) return <div>Loading...</div>;
 
   return (
-    <Box>
+    <Box textAlign="center" sx={{ mt: 5 }}>
       <Typography variant="h4">{animalData.animalName}</Typography>
       <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
       <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
       
       {/* Display video */}
-      <Box mt={3}>
+      <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <video controls width="600">
           <source src={videoUrl} type="video/mp4" />
           Your browser does not support the video tag.

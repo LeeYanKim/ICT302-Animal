@@ -1,3 +1,4 @@
+// NewUpload.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Button,
@@ -9,7 +10,6 @@ import {
   Alert,
   Typography,
 } from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 interface NewUploadProps {
   open: boolean;
@@ -46,16 +46,16 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
 
     // Prepare form data for the upload
     const formData = new FormData();
-    formData.append('files', fileToUpload); // Ensure the key is 'files' to match the backend
+    formData.append('file', fileToUpload); // Ensure the key is 'file' to match the backend
     formData.append('animalName', animalDetails.animalName);
     formData.append('animalType', animalDetails.animalType);
 
-    // Format the date as 'YYYY-MM-DD' (standard format) for proper backend parsing
-    const formattedDOB = new Date(animalDetails.dateOfBirth).toISOString().split('T')[0];
-    formData.append('animalDOB', formattedDOB);
+    // Ensure the date is formatted as 'yyyy-MM-dd'
+    const formattedDOB = animalDetails.dateOfBirth; // Assuming dateOfBirth is already in 'yyyy-MM-dd' format
+    formData.append('dateOfBirth', formattedDOB); // Changed from 'animalDOB' to 'dateOfBirth'
 
     try {
-      const response = await fetch('http://localhost:5173/api/upload', {
+      const response = await fetch('http://localhost:5173/api/upload', { // Adjusted port to 5000
         method: 'POST',
         body: formData,
       });
@@ -83,6 +83,7 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
     if (open && fileToUpload) {
       handleFileUpload();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, fileToUpload]);
 
   const handleSnackbarClose = () => {
@@ -95,7 +96,9 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
         <DialogTitle>{isUploading ? 'Uploading...' : 'Upload Video'}</DialogTitle>
         <DialogContent>
           {isUploading ? (
-            <Typography variant="body1">Uploading your video for the animal: {animalDetails.animalName}</Typography>
+            <Typography variant="body1">
+              Uploading your video for the animal: {animalDetails.animalName}
+            </Typography>
           ) : (
             <Typography variant="body1">Preparing to upload your video...</Typography>
           )}
