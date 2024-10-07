@@ -12,6 +12,7 @@ import LandingNav from './Components/LandingNav';
 import LandingPage from './Pages/LandingPage';
 import About from './Pages/About';
 import Contact from './Pages/Contact';
+import Enterprise from './Pages/Enterprise';
 import SignIn from './Pages/SignIn';
 import SignUp from './Pages/SignUp';
 import SignOut from './Pages/SignOut';
@@ -114,6 +115,7 @@ const App: React.FC = () => {
                             <Route path="/" element={<LandingPage />} /> {/* This is the default route */}
                             <Route path="/about" element={<About />} /> {/* This is the about page */}
                             <Route path="/contact" element={<Contact />} /> {/* This is the contact page */}
+                            <Route path="/enterprise" element={<Enterprise/>} /> {/* This is the enterprise page */}
                             <Route path="/signin" element={<SignIn />} /> {/* This is the sign in page */}
                             <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
                             <Route path="/signout" element={<SignOut />} /> {/* This is the sign in page */}
