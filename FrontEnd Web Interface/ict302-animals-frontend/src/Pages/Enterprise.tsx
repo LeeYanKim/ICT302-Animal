@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
 
 import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
@@ -48,7 +48,7 @@ function a11yProps(index: any) {
 
 //const Enterprise: React.FC<TabPanelProps>= () => {
 const Enterprise = () => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 //export default function FloatingActionButtonZoom() {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);

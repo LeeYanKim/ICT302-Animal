@@ -7,7 +7,6 @@ import RecentlyUploaded from '../Components/Upload/RecentlyUploaded';
 
 const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
 
-  const userContext = useContext(UserProfileContext);
   const [refreshThumbnails, setRefreshThumbnails] = React.useState(false);
   const frontendContext = useContext(FrontendContext);
 
