@@ -34,7 +34,9 @@ namespace ICT302_BackendAPI.Database.Migrations
                     Animal_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     Animal_Name = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
                     Animal_DOB = table.Column<DateTime>(type: "date", nullable: false),
-                    Animal_Type = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false)
+                    Animal_Type = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
+                    Video_File_Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true),
+                    Video_Upload_Date = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {

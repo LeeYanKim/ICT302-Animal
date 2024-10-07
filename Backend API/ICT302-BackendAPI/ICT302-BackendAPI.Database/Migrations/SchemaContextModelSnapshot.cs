@@ -539,8 +539,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.HasKey("UserID");
 
                     b.HasIndex("SubscriptionID");
-
-                    b.ToTable("user");
+                    b.ToTable("user", (string)null);
                 });
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.AnimalAccess", b =>
