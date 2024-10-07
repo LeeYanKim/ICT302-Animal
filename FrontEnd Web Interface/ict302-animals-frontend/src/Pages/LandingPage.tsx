@@ -6,14 +6,14 @@ import { Link } from 'react-router-dom';
 import './LandingPage.css';
 
 import Item from '../Components/UI/Item';
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
 
 // This is the Landing Page for the application
 
 
 
 const LandingPage: React.FC = () => {
-    const userContext = useContext(UserProfileContext);
+    const frontendContext = useContext(FrontendContext);
     return (
         <Container sx={{ my: 5 }}>
             <Box
