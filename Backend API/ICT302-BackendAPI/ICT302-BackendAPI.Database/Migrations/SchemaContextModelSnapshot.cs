@@ -60,18 +60,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("varchar(45)")
                         .HasColumnName("Animal_Type");
 
-                    b.Property<byte[]>("ThumbnailData")
-                        .HasColumnType("longblob")
-                        .HasColumnName("Thumbnail_Data");
-
-                    b.Property<byte[]>("VideoData")
-                        .HasColumnType("longblob")
-                        .HasColumnName("Video_Data");
-
-                    b.Property<DateTime?>("VideoUploadDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Video_Upload_Date");
-
                     b.HasKey("AnimalID");
 
                     b.ToTable("animal", (string)null);
@@ -214,7 +202,6 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("ModelGenType")
                         .IsRequired()
-                        .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
                         .HasColumnName("Model_Gen_Type");
 
@@ -556,32 +543,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.ToTable("user", (string)null);
                 });
 
-            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.UserAccess", b =>
-                {
-                    b.Property<byte[]>("OrgID")
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("Org_ID")
-                        .HasColumnOrder(0);
-
-                    b.Property<byte[]>("UserID")
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("User_ID")
-                        .HasColumnOrder(1);
-
-                    b.Property<byte[]>("AccessTypeID")
-                        .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("AccessType_ID");
-
-                    b.HasKey("OrgID", "UserID");
-
-                    b.HasIndex("AccessTypeID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("useraccess", (string)null);
-                });
-
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.AnimalAccess", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Animal", "Animal")
@@ -781,33 +742,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Subscription");
-                });
-
-            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.UserAccess", b =>
-                {
-                    b.HasOne("ICT302_BackendAPI.Database.Models.AccessType", "AccessType")
-                        .WithMany()
-                        .HasForeignKey("AccessTypeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ICT302_BackendAPI.Database.Models.Organisation", "Organisation")
-                        .WithMany()
-                        .HasForeignKey("OrgID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ICT302_BackendAPI.Database.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AccessType");
-
-                    b.Navigation("Organisation");
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

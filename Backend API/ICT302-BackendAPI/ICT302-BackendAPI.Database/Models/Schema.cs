@@ -18,7 +18,7 @@ public class AccessType
     public string AccessTypeDetails { get; set; }
 }
 
-  [Table("animal")]
+ [Table("animal")]
     public class Animal
     {
         [Key]
@@ -40,17 +40,13 @@ public class AccessType
         [StringLength(45)]
         public string AnimalType { get; set; }
 
-        // New fields for video file and thumbnail data
-        [Column("Video_Data")]
-        public byte[]? VideoData { get; set; }
-
-        [Column("Thumbnail_Data")]
-        public byte[]? ThumbnailData { get; set; }
+        [Column("Video_File_Name", TypeName = "varchar(255)")]
+        [StringLength(255)]
+        public string VideoFileName { get; set; }
 
         [Column("Video_Upload_Date", TypeName = "datetime")]
         public DateTime? VideoUploadDate { get; set; }
     }
-
 [Table("animalaccess")]
 public class AnimalAccess
 {
