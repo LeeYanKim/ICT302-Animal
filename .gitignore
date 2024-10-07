@@ -7,7 +7,7 @@
 # Compiled files
 Backend API/ICT302-BackendAPI/obj/
 
-
+*.pth
 
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI/obj/
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/

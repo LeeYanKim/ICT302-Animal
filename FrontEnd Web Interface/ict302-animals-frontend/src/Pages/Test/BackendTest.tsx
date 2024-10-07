@@ -1,12 +1,12 @@
 import React, {useContext, useState} from 'react';
 
-import { UserProfileContext } from "../../Internals/ContextStore";
+import { FrontendContext } from "../../Internals/ContextStore";
 import { SVGProps } from 'react';
 
 import { Box, Button, Container, Grid, Typography} from '@mui/material';
 
 const BackendTest: React.FC = () => {
-    const userContext = useContext(UserProfileContext);
+    const frontendContext = useContext(FrontendContext);
 
     const [img, setImg] = useState<string>('');
     const [animals, setAnimals] = useState<[]>([]);

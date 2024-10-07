@@ -7,17 +7,17 @@ import PetsIcon from '@mui/icons-material/Pets';
 
 import {ThemeProvider} from "@mui/material/styles";
 import AppTheme  from "./UI/Theme";
-import {UserProfileContext} from "../Internals/ContextStore";
+import {FrontendContext} from "../Internals/ContextStore";
 
 import './LandingNav.css';
 
-const pages = ['Home', 'About', 'Contact']; // TODO Add any other pages here, Must match the routes in App.tsx
+const pages = ['Home', 'About', 'Contact','Enterprise']; // TODO Add any other pages here, Must match the routes in App.tsx
 
 const settings = ['Account', 'Dashboard', 'SignOut']; // TODO Add any other settings here
 
 
 const LandingNav: React.FC= () => {
-    const userContext = useContext(UserProfileContext);
+    const frontendContext = useContext(FrontendContext);
 
     const [mode, setMode] = useState('light');
 
@@ -131,11 +131,11 @@ const LandingNav: React.FC= () => {
                                 </Button>
                             ))}
                         </Box>
-                        {userContext.valid && userContext.contextRef?.current.loggedInState ?
+                        {frontendContext.user.valid && frontendContext.user.contextRef?.current.loggedInState ?
                         <Box sx={{ flexGrow: 0 }}> {/* TODO Replace with user avatar */}
                             <Tooltip title="Open Profile">
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                    <Avatar alt={userContext.contextRef?.current.username}>{userContext.contextRef?.current.initials}</Avatar>
+                                    <Avatar alt={frontendContext.user.contextRef?.current.username}>{frontendContext.user.contextRef?.current.initials}</Avatar>
                                 </IconButton>
                             </Tooltip>
                             <Menu

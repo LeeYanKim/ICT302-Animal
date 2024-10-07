@@ -1,9 +1,9 @@
 import React, {useContext} from 'react';
 
-import { UserProfileContext } from "../Internals/ContextStore";
+import { FrontendContext } from "../Internals/ContextStore";
 
 const About: React.FC = () => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 
   return (
     <div style={{ padding: '0 20px' }}>

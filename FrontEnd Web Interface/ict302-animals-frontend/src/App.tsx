@@ -12,6 +12,7 @@ import LandingNav from './Components/LandingNav';
 import LandingPage from './Pages/LandingPage';
 import About from './Pages/About';
 import Contact from './Pages/Contact';
+import Enterprise from './Pages/Enterprise';
 import SignIn from './Pages/SignIn';
 import SignUp from './Pages/SignUp';
 import SignOut from './Pages/SignOut';
@@ -23,7 +24,7 @@ import View from './Pages/View';
 import BackendTest from './Pages/Test/BackendTest';
 
 import UserProfile from './Internals/UserProfile';
-import {UserProfileContext} from './Internals/ContextStore';
+import {FrontendContext} from './Internals/ContextStore';
 
 
 // Imports of MUI and custom Theme components
@@ -81,9 +82,8 @@ const App: React.FC = () => {
         localStorage.setItem('themeMode', newMode); // Save the selected mode to localStorage
     };
 
-    const userContext = useContext(UserProfileContext);
+    const frontendContext = useContext(FrontendContext);
 
-    //console.log('App', userContext);
 
     const dashboardPaghPaths = [
         "/dashboard",
@@ -115,11 +115,12 @@ const App: React.FC = () => {
                             <Route path="/" element={<LandingPage />} /> {/* This is the default route */}
                             <Route path="/about" element={<About />} /> {/* This is the about page */}
                             <Route path="/contact" element={<Contact />} /> {/* This is the contact page */}
+                            <Route path="/enterprise" element={<Enterprise/>} /> {/* This is the enterprise page */}
                             <Route path="/signin" element={<SignIn />} /> {/* This is the sign in page */}
                             <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
                             <Route path="/signout" element={<SignOut />} /> {/* This is the sign in page */}
                             {dashboardPaghPaths.map((dashboardPath, index) => (
-                                <Route key={index} path={dashboardPath} element={userContext.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
+                                <Route key={index} path={dashboardPath} element={frontendContext.user.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
 
                             <Route path="/dashboard/animals/:animalId" element={<AnimalDetails />} /> {/* Animal details page */}

@@ -1,4 +1,4 @@
-﻿// FileUploadController.cs
+// FileUploadController.cs
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 
-import { UserProfileContext } from "../../Internals/UserProfileProps";
+import { FrontendContext } from "../../Internals/ContextStore";
 
 interface DashboardPageDisplayProps {
     children?: React.ReactNode;
@@ -8,7 +8,7 @@ interface DashboardPageDisplayProps {
 }
 
 const DashboardPageDisplay: React.FC<DashboardPageDisplayProps> = ({ children, pageDisplaying }) => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
   return (
     <div>
         {children}

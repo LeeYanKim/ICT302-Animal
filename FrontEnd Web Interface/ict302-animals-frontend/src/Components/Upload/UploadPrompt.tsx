@@ -15,6 +15,9 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import NewAnimal from './NewAnimal';
 import NewUpload from './NewUpload';
 import { UploadProps } from './UploadProps';
+        
+import { FrontendContext } from "../../Internals/ContextStore";
+import API from '../../Internals/API';
 
 
 const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUploadSuccess }) => {
@@ -29,6 +32,8 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+    const frontendContext = useContext(FrontendContext);
+    
   // Handle file selection and open the animal form
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -36,6 +41,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
       setIsAnimalFormOpen(true);
     }
   };
+    
 
   // Handle submission of the animal form
   const handleAnimalFormSubmit = (animalData: {

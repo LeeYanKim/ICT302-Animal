@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 
 WORKDIR /app
 
@@ -28,5 +28,5 @@ COPY --from=publish /out .
 
 #ENV DOTNET_EnableDiagnostics=0
 
-#ENTRYPOINT ["dotnet", "DotNet..dll"]
+#ENTRYPOINT ["dotnet", "DotNet.Docker.dll"]
 ENTRYPOINT ["dotnet", "ICT302-BackendAPI.dll"]

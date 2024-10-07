@@ -1,13 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { Typography, Button, Box, Grid } from '@mui/material';
-import { UserProfileContext } from '../Internals/ContextStore';
+import { FrontendContext } from '../Internals/ContextStore';
 import UploadPrompt from '../Components/Upload/UploadPrompt';
 import { UploadProps } from '../Components/Upload/UploadProps';
 import RecentlyUploaded from '../Components/Upload/RecentlyUploaded';
 
 const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
+
   const userContext = useContext(UserProfileContext);
   const [refreshThumbnails, setRefreshThumbnails] = React.useState(false);
+  const frontendContext = useContext(FrontendContext);
+
 
   // Function to trigger a refresh of the thumbnails
   const triggerThumbnailRefresh = () => {

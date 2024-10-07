@@ -7,7 +7,7 @@ import CardAlert from './CardAlert';
 import OptionsMenu from './OptionsMenu';
 
 import ProjectLogo from '../UI/ProjectLogo';
-import { UserProfileContext } from "../../Internals/ContextStore";
+import { FrontendContext } from "../../Internals/ContextStore";
 import DashboardPages, {DashboardMenuProps}  from './DashboardHelpers';
 
 //This is to make it possible for the side menu props to be optional
@@ -40,7 +40,7 @@ const SideMenu: React.FC<SideMenuProps> = ({
   open = true, // For permanent, the drawer is always open
   onClose = () => {} // No-op for permanent drawer
 }) => {
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 
   return (
     <Drawer
@@ -81,15 +81,15 @@ const SideMenu: React.FC<SideMenuProps> = ({
       >
         <Avatar
           sizes="small"
-          alt={userContext.contextRef?.current.username}
+          alt={frontendContext.user.contextRef?.current.username}
           sx={{ width: 36, height: 36 }}
-        >{userContext.contextRef?.current.initials}</Avatar>
+        >{frontendContext.user.contextRef?.current.initials}</Avatar>
         <Box sx={{ mr: 'auto' }}>
           <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            {userContext.contextRef?.current.username}
+            {frontendContext.user.contextRef?.current.username}
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {userContext.contextRef?.current.email}
+            {frontendContext.user.contextRef?.current.email}
           </Typography>
         </Box>
         <OptionsMenu  currentDashboardPage={currentDashboardPage} setCurrentDashboardPage={setCurrentDashboardPage}/>

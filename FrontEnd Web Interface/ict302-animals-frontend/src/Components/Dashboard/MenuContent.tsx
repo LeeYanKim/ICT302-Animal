@@ -16,11 +16,11 @@ import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import PetsIcon from '@mui/icons-material/Pets';
 
 
-import { UserProfileContext } from "../../Internals/ContextStore";
+import { FrontendContext } from "../../Internals/ContextStore";
 
 const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCurrentDashboardPage}) => {
 
-  const userContext = useContext(UserProfileContext);
+  const frontendContext = useContext(FrontendContext);
 
   const mainListItems = [
     { text: 'Home', icon: <HomeRoundedIcon /> },
@@ -48,7 +48,7 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
       <List dense>
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            {item.text === 'Queue' ? <Badge badgeContent={userContext.contextRef?.current.currentItemsInQueue} color='secondary' variant='dot' anchorOrigin={{vertical: 'top', horizontal: 'right'}}>
+            {item.text === 'Queue' ? <Badge badgeContent={frontendContext.user.contextRef?.current.currentItemsInQueue} color='secondary' variant='dot' anchorOrigin={{vertical: 'top', horizontal: 'right'}}>
             <Button
                 onClick={() => menuItemClicked(item.text.toLowerCase())}
                 >

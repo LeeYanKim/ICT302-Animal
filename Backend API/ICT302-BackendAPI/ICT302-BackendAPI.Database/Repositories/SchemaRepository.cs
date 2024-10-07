@@ -1,4 +1,3 @@
-﻿// Database/Repositories/SchemaRepository.cs
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
