@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogActions,
+  Chip,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import NewAnimal from './NewAnimal';
@@ -94,6 +95,12 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         <Typography variant="body1" sx={{ alignSelf: 'center' }}>
           Accepted file types
         </Typography>
+        <Box sx={{display: 'flex', justifyContent: 'center'}}>
+          <Chip label='mp4' />
+          <Chip label='mkv' />
+          <Chip label='mov' />
+          <Chip label='webm' />
+        </Box>
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
             Select File
