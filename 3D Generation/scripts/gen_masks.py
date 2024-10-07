@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import os
 import numpy as np
 import torch
@@ -11,12 +14,15 @@ import fnmatch
 import statistics
 import clip
 from PIL import Image
-
+import io
+from contextlib import redirect_stdout
+import urllib.request
 
 parser=argparse.ArgumentParser(description="sample argument parser")
 parser.add_argument("-p", '--path', nargs='?', default="./", help='Root path for mask generation') # Root path for masking.
 parser.add_argument("-m", '--mask_hint', nargs='?', default="dog", help='Mask hint') # text hint for mask generation.
 parser.add_argument("-d", '--dry', action='store_true', help='Run dry without saving output masks') # Do a dry run and not output files
+parser.add_argument("-s", '--silent', action='store_true', help='Silence output')
 args=parser.parse_args()
 
 def show_anns(anns):
@@ -64,7 +70,7 @@ def get_clip_similarity(image, text):
     similarity = (image_features @ text_features.T).item()
     return similarity
 
-def refine_mask_with_clip(image, mask_tensor, text_hint, mask_quality_tensor):
+def refine_mask_with_clip(image, mask_tensor, text_hint, mask_quality_tensor, preprocess, clip_model):
     num_masks = mask_tensor.shape[0] 
     height, width = mask_tensor.shape[1], mask_tensor.shape[2]
 
@@ -148,88 +154,101 @@ maskFolder = "/masks"
 sam_checkpoint = "sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
+if not os.path.isfile("./" + sam_checkpoint): # Download model if its not found
+    print("IT01: SAM Model not found... Please wait while it's downloaded....")
+    urllib.request.urlretrieve("https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth", "sam_vit_h_4b8939.pth")
+
 text_hint = args.mask_hint
-
-if args.dry == True:
-    print("\nIT01: Running DRY mask generation")
-    print("\tRoot Path: {path}".format(path = imageRoot))
-    print("\tImage Path: {imgPath}".format(imgPath = imageRoot + imageFolder))
-    print("\tMask Output Path: {outPath}".format(outPath = imageRoot + maskFolder))
-    print("\tMask Gen Hint: {hint}\n".format(hint = text_hint))
-else:
-    print("IT01: Running mask generation with the following arguments:")
-    print("\tRoot Path: {path}".format(path = imageRoot))
-    print("\tImage Path: {imgPath}".format(imgPath = imageRoot + imageFolder))
-    print("\tMask Output Path: {outPath}".format(outPath = imageRoot + maskFolder))
-    print("\tMask Gen Hint: {hint}\n".format(hint = text_hint))
-
-# Load CLIP model
-print("IT01: Setting up CLIP")
 device = "cuda" if torch.cuda.is_available() else "cpu"
-clip_model, preprocess = clip.load("ViT-B/32", device=device)
 
+def main():
+    if args.dry == True:
+        print("\nIT01: Running DRY mask generation")
+        print("\tRoot Path: {path}".format(path = imageRoot))
+        print("\tImage Path: {imgPath}".format(imgPath = imageRoot + imageFolder))
+        print("\tMask Output Path: {outPath}".format(outPath = imageRoot + maskFolder))
+        print("\tMask Gen Hint: {hint}\n".format(hint = text_hint))
+    else:
+        print("IT01: Running mask generation with the following arguments:")
+        print("\tRoot Path: {path}".format(path = imageRoot))
+        print("\tImage Path: {imgPath}".format(imgPath = imageRoot + imageFolder))
+        print("\tMask Output Path: {outPath}".format(outPath = imageRoot + maskFolder))
+        print("\tMask Gen Hint: {hint}\n".format(hint = text_hint))
 
-# Load SAM model
-print("IT01: Setting up SAM")
-sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
-sam.to(device=device)
-sam_predictor = SamPredictor(sam)
-
-mask_generator = SamAutomaticMaskGenerator(
-    model=sam,
-    points_per_side=32,
-    pred_iou_thresh=0.86,
-    stability_score_thresh=0.92,
-    crop_n_layers=1,
-    crop_n_points_downscale_factor=2,
-    min_mask_region_area=1000,
-)
-
-print("IT01: Checking total frames in path: {imagePath}".format(imagePath = (imageRoot + imageFolder)))
-numOfFrames = len(fnmatch.filter(os.listdir(imageRoot + imageFolder), '*.png'))
-print("IT01: Found {totalFrames} in path {imagePath}".format(totalFrames = numOfFrames, imagePath = (imageRoot + imageFolder)))
-
-print("IT01: Mask generation starting...")
-print("IT01: Output masks into path: {outRoot}".format(outRoot = imageRoot + maskFolder + "/**.png"))
-try:
-    os.makedirs(imageRoot + maskFolder)
-except FileExistsError:
-    # directory already exists
-    pass
-for i in range(1, numOfFrames+1):
-    n = ""
-    if i <= 9:
-        n = "00" + str(i)
-    else: 
-        if i <= 99:
-            n = "0" + str(i)
-        else:
-            n = str(i)
+    # Load CLIP model
+    print("IT01: Setting up CLIP")
     
-    path = imageRoot + imageFolder +"/{frame}.png".format(frame = n)
-    image = cv2.imread(path)
-    outpath = imageRoot + maskFolder + "/{frame}.png".format(frame = n)
-
-    sam_predictor.set_image(image)
-    mask_tensor, mask_quality_tensor, low_res_logits  = sam_predictor.predict()
-
-    mask_array = select_best_masks(mask_tensor, mask_quality_tensor)
-
-    binary_mask = refine_mask_with_clip(image, mask_array, text_hint, mask_quality_tensor)
-
-    refined_mask = refine_mask(binary_mask)
- 
-    output_image = apply_mask_to_image(image, refined_mask)
+    clip_model, preprocess = clip.load("ViT-B/32", device=device)
 
 
-    print("\033[K", end="\r")
-    print("{:.1%} - {pros}/{tot}".format(i / numOfFrames, pros = i, tot = numOfFrames), end="\r")
-    
-    #print("{:.1%} - {pros}/{tot}".format(i / numOfFrames, pros = i, tot = numOfFrames), end="\r")
+    # Load SAM model
+    print("IT01: Setting up SAM")
+    sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
+    sam.to(device=device)
+    sam_predictor = SamPredictor(sam)
 
-    if args.dry == False:
-        cv2.imwrite(outpath, output_image)
+    mask_generator = SamAutomaticMaskGenerator(
+        model=sam,
+        points_per_side=32,
+        pred_iou_thresh=0.86,
+        stability_score_thresh=0.92,
+        crop_n_layers=1,
+        crop_n_points_downscale_factor=2,
+        min_mask_region_area=1000,
+    )
+
+    print("IT01: Checking total frames in path: {imagePath}".format(imagePath = (imageRoot + imageFolder)))
+    numOfFrames = len(fnmatch.filter(os.listdir(imageRoot + imageFolder), '*.png'))
+    print("IT01: Found {totalFrames} in path {imagePath}".format(totalFrames = numOfFrames, imagePath = (imageRoot + imageFolder)))
+
+    print("IT01: Mask generation starting...")
+    print("IT01: Output masks into path: {outRoot}".format(outRoot = imageRoot + maskFolder + "/**.png"))
+    try:
+        os.makedirs(imageRoot + maskFolder)
+    except FileExistsError:
+        # directory already exists
+        pass
+    for i in range(1, numOfFrames+1):
+        n = ""
+        if i <= 9:
+            n = "00" + str(i)
+        else: 
+            if i <= 99:
+                n = "0" + str(i)
+            else:
+                n = str(i)
         
-print("\nIT01: Complete")
+        path = imageRoot + imageFolder +"/{frame}.png".format(frame = n)
+        image = cv2.imread(path)
+        outpath = imageRoot + maskFolder + "/{frame}.png".format(frame = n)
+
+        sam_predictor.set_image(image)
+        mask_tensor, mask_quality_tensor, low_res_logits  = sam_predictor.predict()
+
+        mask_array = select_best_masks(mask_tensor, mask_quality_tensor)
+
+        binary_mask = refine_mask_with_clip(image, mask_array, text_hint, mask_quality_tensor, preprocess, clip_model)
+
+        refined_mask = refine_mask(binary_mask)
     
+        output_image = apply_mask_to_image(image, refined_mask)
+
+
+        print("\033[K", end="\r")
+        print("{:.1%} - {pros}/{tot}".format(i / numOfFrames, pros = i, tot = numOfFrames), end="\r")
+        
+        #print("{:.1%} - {pros}/{tot}".format(i / numOfFrames, pros = i, tot = numOfFrames), end="\r")
+
+        if args.dry == False:
+            cv2.imwrite(outpath, output_image)
+            
+    print("\nIT01: Complete")
     
+
+if __name__ == "__main__":
+    if args.silent == True:
+        trap = io.StringIO()
+        with redirect_stdout(trap):
+            main()
+    else:
+        main()
