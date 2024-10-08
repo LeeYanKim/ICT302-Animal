@@ -45,7 +45,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
   const handleAnimalClick = (animalID: string) => {
     console.log('Navigating to animalID:', animalID);
     if (animalID) {
-      navigate(`/animals/${animalID}`);
+      navigate(`/dashboard/animals/${animalID}`);
     } else {
       console.error('Animal ID is undefined. Cannot navigate to animal details.');
     }
