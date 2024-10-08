@@ -28,6 +28,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 // Adding Access to our custom DB Context
 builder.Services.AddTransient<SchemaContext>();
 

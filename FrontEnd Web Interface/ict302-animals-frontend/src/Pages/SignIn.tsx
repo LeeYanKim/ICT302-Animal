@@ -155,7 +155,7 @@ const SignIn: React.FC = () => {
         const payload = {
             userName: user.displayName || "Anonymous", // Only allow the frontend to set this
             userEmail: user.email, // Set the user's email
-            permissionLevel: "user" // Permission level (can be adjusted later)
+            permissionLevel: "user", // Permission level (can be adjusted later)
             // No need to send userID, userPassword, userDateJoin, or subscription fields
         };
 
@@ -282,7 +282,7 @@ const SignIn: React.FC = () => {
                   onClick={handleGoogleSignIn}
                   startIcon={<GoogleIcon />}
                 >
-                  Sign up with Google
+                  Sign In with Google
                 </Button>
                 <Button
                   type="submit"
@@ -291,7 +291,7 @@ const SignIn: React.FC = () => {
                   onClick={handleFacebookSignIn}
                   startIcon={<FacebookIcon />}
                 >
-                  Sign up with Facebook
+                  Sign In with Facebook
                 </Button>
               </Box>
 
