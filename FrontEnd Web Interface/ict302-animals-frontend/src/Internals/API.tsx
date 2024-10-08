@@ -1,6 +1,10 @@
 import React, {ReactNode, createContext, useContext, createRef, useRef, useState, useEffect} from 'react';
 
+    /**
+     * Internal class to define API endpoints
+     */
 class APIEndpoints {
+
     isDev: boolean;
     baseUrl: string = '';
     dbEndpoint: string = '/db';
@@ -30,11 +34,24 @@ class APIEndpoints {
     }
 }
 
+/**
+ * API class to provide endpoint URLs dynamically based on the environment
+ * 
+ * Note: This class should be used to get the endpoint URLs for the API calls
+ * 
+ * @example
+ * API.Upload() // Returns the url for the File Upload controller endpoint
+ * API.Animals() // Returns the url for the Animals controller endpoint
+ * 
+ */
 class API {
     private static endpoint: APIEndpoints | undefined;
     private static devEndpointAddress = 'http://localhost:5173/api';
     private static prodEndpointAddress = 'https://api.wildvision.co/api'
 
+    /**
+     * Initialize the API endpoints based on the environment
+     */
     public static init() {
         if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development')
         {
@@ -54,6 +71,12 @@ class API {
         }
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Animal controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/animals
+     */
     public static Animals() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -62,6 +85,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API AccessType controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/accessType
+     */
     public static AccessType() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -70,6 +99,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API AnimalAccess controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/animalAccess
+     */
     public static AnimalAccess() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -78,6 +113,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Billing controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/billing
+     */
     public static Billing() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -86,6 +127,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Graphic controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/graphic
+     */
     public static Graphic() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -94,6 +141,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API JobDetails controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/jobDetails
+     */
     public static JobDetails() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -102,6 +155,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API JobPending controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/jobsPending
+     */
     public static JobPending() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -110,6 +169,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API JobsCompleted controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/jobsCompleted
+     */
     public static JobsCompleted() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -118,6 +183,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Model3D controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/model3D
+     */
     public static Model3D() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -126,6 +197,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Organization controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/organization
+     */
     public static Organization() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -134,6 +211,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API OrganizationAccess controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/organiationAccess
+     */
     public static OrganizationAccess() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -142,6 +225,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API OrgRequests controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/orgRequests
+     */
     public static OrgRequests() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -150,6 +239,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Subscription controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/subscription
+     */
     public static Subscription() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -158,6 +253,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Transaction controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/transcation
+     */
     public static Transaction() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -166,6 +267,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API TransactionType controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/transcationType
+     */
     public static TransactionType() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -174,6 +281,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API User controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/user
+     */
     public static User() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -182,6 +295,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API UserAccess controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/db/userAccess
+     */
     public static UserAccess() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -190,6 +309,12 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API File Upload controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/upload
+     */
     public static Upload() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
@@ -197,6 +322,12 @@ class API {
         return base + endpoint;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API File controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/files
+     */
     public static Download() {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
