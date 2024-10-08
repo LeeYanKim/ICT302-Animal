@@ -45,7 +45,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
   const handleAnimalClick = (animalID: string) => {
     console.log('Navigating to animalID:', animalID);
     if (animalID) {
-      navigate(`/animals/${animalID}`);
+      navigate(`/dashboard/animals/${animalID}`);
     } else {
       console.error('Animal ID is undefined. Cannot navigate to animal details.');
     }
@@ -91,7 +91,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
 
       <Grid container spacing={3}>
         {filteredAnimals.map((animal) => {
-          console.log('Animal data:', animal); // Log the entire animal object to verify
+          //console.log('Animal data:', animal); // Log the entire animal object to verify
           if (!animal.animalID) {
             console.error('Animal ID is undefined. Cannot navigate to animal details.');
           }

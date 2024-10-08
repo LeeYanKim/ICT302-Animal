@@ -96,8 +96,7 @@ const App: React.FC = () => {
         "/dashboard/feedback",
         "/dashboard/help",
         "/dashboard/account",
-        "/dashboard/animals",
-        "/dashboard/animals/:animalId"
+        "/dashboard/animals"
     ];
 
 // Returns the main component of the app with the navigation bar and the routes
