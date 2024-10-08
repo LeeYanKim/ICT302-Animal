@@ -91,7 +91,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
 
       <Grid container spacing={3}>
         {filteredAnimals.map((animal) => {
-          console.log('Animal data:', animal); // Log the entire animal object to verify
+          //console.log('Animal data:', animal); // Log the entire animal object to verify
           if (!animal.animalID) {
             console.error('Animal ID is undefined. Cannot navigate to animal details.');
           }
