@@ -75,7 +75,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
   };
 
   return (
-    <div>
+    <div style ={{width: `85vw`, margin:10 , padding : 0 }}>
       <Box
         component="form"
         noValidate
