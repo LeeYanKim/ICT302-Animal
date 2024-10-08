@@ -189,6 +189,7 @@ class API {
         const endpoint = this.endpoint?.userAccess;
         return base + db + endpoint;
     }
+    
 
     public static Upload() {
         this.ensureInitialized();

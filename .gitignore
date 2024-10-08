@@ -1,6 +1,7 @@
 # This file is used to ignore files which should not be pushed to the repository.
 
 # Backend API Ignore files
+firebase-adminsdk.json
 
 # Jetbrains idea files
 .idea

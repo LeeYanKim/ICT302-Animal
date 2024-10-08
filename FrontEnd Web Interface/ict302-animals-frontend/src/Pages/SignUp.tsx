@@ -13,6 +13,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState(''); // New username state
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState('');
   const frontendContext = useContext(FrontendContext); // Get the frontend context
@@ -33,12 +34,16 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 
     try {
       // Create user with Firebase authentication
-      await createUserWithEmailAndPassword(frontendContext.firebaseAuth.current, email, password);
+      const userCredential = await createUserWithEmailAndPassword(frontendContext.firebaseAuth.current, email, password);
+
+      // Optionally, you could store the username in the database along with the email/password
+      // E.g., you could call your backend to save the user info
+
       // On successful sign up
       if (onSignUpSuccess) onSignUpSuccess();
       nav('/dashboard'); // Navigate to the dashboard or desired page
     } catch (error) {
-      setError('Error creating account: ' + error.message);
+      setError('Error creating account: ' + (error as Error).message);
     }
   };
 
@@ -48,6 +53,20 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 
   return (
     <Box component="form" onSubmit={handleSignUpSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
+      <FormControl>
+        <FormLabel htmlFor="username">Username</FormLabel> {/* Username label */}
+        <TextField
+          id="username"
+          type="text"
+          name="username"
+          placeholder="Your Username"
+          required
+          fullWidth
+          value={username}
+          onChange={(e) => setUsername(e.target.value)} // Update username state
+        />
+      </FormControl>
+
       <FormControl>
         <FormLabel htmlFor="email">Email</FormLabel>
         <TextField
@@ -94,7 +113,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 
       <FormControl>
         <ReCAPTCHA
-          sitekey="6LdD8VgqAAAAAFZ2fzniAJ9rmDc_es3C0fp9P9Ma"  
+          sitekey="6LdD8VgqAAAAAFZ2fzniAJ9rmDc_es3C0fp9P9Ma"
           onChange={handleRecaptchaChange}
         />
       </FormControl>
@@ -107,3 +126,4 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 };
 
 export default SignUp;
+
