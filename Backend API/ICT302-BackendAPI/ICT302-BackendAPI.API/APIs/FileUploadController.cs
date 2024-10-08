@@ -88,7 +88,7 @@ public async Task<IActionResult> UploadFileAsync(IFormFile file, [FromForm] stri
             return BadRequest(new { message = "Unsupported file type." });
         }
 
-        // Sanitize and generate a unique file name
+        //Sanitize and generate a unique file name
         string sanitizedFileName = Path.GetFileNameWithoutExtension(file.FileName);
         sanitizedFileName = string.Join("_", sanitizedFileName.Split(Path.GetInvalidFileNameChars()));
         string uniqueFileName = $"{sanitizedFileName}_{Guid.NewGuid()}{fileExtension}";

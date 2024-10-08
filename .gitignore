@@ -27,7 +27,8 @@ Backend API/ICT302-BackendAPI/ICT302-BackendAPI.API/obj/
 /node_modules
 /dist
 
-
+#ignore local path for uploading videos
+/Backend API/ICT302-BackendAPI/ICT302-BackendAPI/C:/
 
 
 Backend API/ICT302-BackendAPI/obj/
