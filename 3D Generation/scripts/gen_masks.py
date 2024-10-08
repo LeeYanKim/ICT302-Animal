@@ -17,10 +17,11 @@ from PIL import Image
 import io
 from contextlib import redirect_stdout
 import urllib.request
+import time
 
 parser=argparse.ArgumentParser(description="sample argument parser")
-parser.add_argument("-p", '--path', nargs='?', default="./", help='Root path for mask generation') # Root path for masking.
-parser.add_argument("-m", '--mask_hint', nargs='?', default="dog", help='Mask hint') # text hint for mask generation.
+parser.add_argument("-p", '--path', nargs='?', default="", help='Root path for mask generation') # Root path for masking.
+parser.add_argument("-m", '--mask_hint', nargs='?', default="", help='Mask subject hint') # text hint for mask generation.
 parser.add_argument("-d", '--dry', action='store_true', help='Run dry without saving output masks') # Do a dry run and not output files
 parser.add_argument("-s", '--silent', action='store_true', help='Silence output')
 args=parser.parse_args()
@@ -147,13 +148,25 @@ def combine_masks(masks):
         combined_mask = np.maximum(combined_mask, mask)
     return combined_mask
 
+def progress_bar(processed, total, start_time):
+    """Display the progress bar and associated metrics."""
+    percentage = (processed / total) * 100
+    elapsed_time = time.time() - start_time
+    files_per_second = processed / elapsed_time if elapsed_time > 0 else 0
+    eta = (total - processed) / files_per_second if files_per_second > 0 else 0
+    
+    # Format display
+    bar = f"{int(percentage)}% | {processed}/{total} files | ETA: {time.strftime('%H:%M:%S', time.gmtime(eta))} [{files_per_second:.2f} files/sec]"
+    print(f"\r{bar}", end="")
+
 imageRoot = args.path
-imageFolder = "/images"
-maskFolder = "/masks"
+imageFolder = "images"
+maskFolder = "masks"
 
 sam_checkpoint = "sam_vit_h_4b8939.pth"
 model_type = "vit_h"
 
+#TODO: update this to download the model into a different directory
 if not os.path.isfile("./" + sam_checkpoint): # Download model if its not found
     print("IT01: SAM Model not found... Please wait while it's downloaded....")
     urllib.request.urlretrieve("https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth", "sam_vit_h_4b8939.pth")
@@ -165,14 +178,14 @@ def main():
     if args.dry == True:
         print("\nIT01: Running DRY mask generation")
         print("\tRoot Path: {path}".format(path = imageRoot))
-        print("\tImage Path: {imgPath}".format(imgPath = imageRoot + imageFolder))
-        print("\tMask Output Path: {outPath}".format(outPath = imageRoot + maskFolder))
+        print("\tImage Path: {imgPath}".format(imgPath = os.path.join(imageRoot, imageFolder)))
+        print("\tMask Output Path: {outPath}".format(outPath = os.path.join(imageRoot, maskFolder)))
         print("\tMask Gen Hint: {hint}\n".format(hint = text_hint))
     else:
         print("IT01: Running mask generation with the following arguments:")
         print("\tRoot Path: {path}".format(path = imageRoot))
-        print("\tImage Path: {imgPath}".format(imgPath = imageRoot + imageFolder))
-        print("\tMask Output Path: {outPath}".format(outPath = imageRoot + maskFolder))
+        print("\tImage Path: {imgPath}".format(imgPath = os.path.join(imageRoot, imageFolder)))
+        print("\tMask Output Path: {outPath}".format(outPath = os.path.join(imageRoot, maskFolder)))
         print("\tMask Gen Hint: {hint}\n".format(hint = text_hint))
 
     # Load CLIP model
@@ -187,22 +200,14 @@ def main():
     sam.to(device=device)
     sam_predictor = SamPredictor(sam)
 
-    mask_generator = SamAutomaticMaskGenerator(
-        model=sam,
-        points_per_side=32,
-        pred_iou_thresh=0.86,
-        stability_score_thresh=0.92,
-        crop_n_layers=1,
-        crop_n_points_downscale_factor=2,
-        min_mask_region_area=1000,
-    )
-
-    print("IT01: Checking total frames in path: {imagePath}".format(imagePath = (imageRoot + imageFolder)))
-    numOfFrames = len(fnmatch.filter(os.listdir(imageRoot + imageFolder), '*.png'))
-    print("IT01: Found {totalFrames} in path {imagePath}".format(totalFrames = numOfFrames, imagePath = (imageRoot + imageFolder)))
+    print("IT01: Checking total frames in path: {imagePath}".format(imagePath = os.path.join(imageRoot, imageFolder)))
+    numOfFrames = len(fnmatch.filter(os.listdir(os.path.join(imageRoot, imageFolder)), '*.png'))
+    print("IT01: Found {totalFrames} in path {imagePath}".format(totalFrames = numOfFrames, imagePath = os.path.join(imageRoot + imageFolder)))
 
     print("IT01: Mask generation starting...")
-    print("IT01: Output masks into path: {outRoot}".format(outRoot = imageRoot + maskFolder + "/**.png"))
+    print("IT01: Output masks into path: {outRoot}".format(outRoot = os.path.join(imageRoot, maskFolder, "/**.png")))
+
+    start_time = time.time()
     try:
         os.makedirs(imageRoot + maskFolder)
     except FileExistsError:
@@ -234,10 +239,12 @@ def main():
         output_image = apply_mask_to_image(image, refined_mask)
 
 
-        print("\033[K", end="\r")
-        print("{:.1%} - {pros}/{tot}".format(i / numOfFrames, pros = i, tot = numOfFrames), end="\r")
+        #print("\033[K", end="\r")
+        #print("{:.1%} - {pros}/{tot}".format(i / numOfFrames, pros = i, tot = numOfFrames), end="\r")
         
         #print("{:.1%} - {pros}/{tot}".format(i / numOfFrames, pros = i, tot = numOfFrames), end="\r")
+
+        progress_bar(i, numOfFrames, start_time)
 
         if args.dry == False:
             cv2.imwrite(outpath, output_image)
@@ -246,6 +253,13 @@ def main():
     
 
 if __name__ == "__main__":
+    if args.path == "":
+        print("Provide a path for mask generation")
+        exit()
+    if args.mask_hint == "":
+        print("Provide a mask subject hint")
+        exit()
+
     if args.silent == True:
         trap = io.StringIO()
         with redirect_stdout(trap):
