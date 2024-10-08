@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import ModelViewer from "../ModelViewer/ModelViewer";
+import API from '../../Internals/API';
 
 const AnimalDetails: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>(); // Extract animalId from the URL
@@ -13,11 +14,11 @@ const AnimalDetails: React.FC = () => {
   useEffect(() => {
     const fetchAnimalData = async () => {
       try {
-        const response = await fetch(`http://localhost:5173/api/files/animals/details/${animalId}`);
+        const response = await fetch(API.Download() + "/animals/details/" + animalId);
         if (!response.ok) throw new Error('Failed to fetch animal data');
         const data = await response.json();
         setAnimalData(data);
-        setVideoUrl(`http://localhost:5173/api/files/animals/videos/${data.videoFileName}`);
+        setVideoUrl(API.Download() + "/animals/videos/" + data.videoFileName);
         const fileExtension = data.videoFileName.split('.').pop();
         let mimeType = '';
         switch (fileExtension) {
