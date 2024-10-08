@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Globalization;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -56,9 +57,15 @@ public async Task<IActionResult> UploadFileAsync(IFormFile file, [FromForm] stri
         }
 
         // Determine stored file path
+        /*for development, it doesnt matter (?) the os platform as the vm storing the data is windows, this check was just for development in my (David) local env
         string storedFilesPath = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
             ? _configuration["StoredFilesPath_Linux"]
             : _configuration["StoredFilesPath"];
+
+        */
+
+        //there should be just one path.
+        string storedFilesPath = _configuration["StoredFilesPath"];
 
         if (string.IsNullOrEmpty(storedFilesPath))
         {
