@@ -1,115 +1,133 @@
+// API/Controllers/FilesController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
-using ICT302_BackendAPI.Database.Repositories;
-using ICT302_BackendAPI.Database.Models;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
+using ICT302_BackendAPI.Database.Repositories; 
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.StaticFiles;
+using ICT302_BackendAPI.Database.Models;
+using System;
+using System.Linq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
-namespace ICT302_BackendAPI.API.APIs;
-
-// Controller for getting files from the backend
-[ApiController]
-[Route("api/files")]
-public class FileController : ControllerBase
+namespace ICT302_BackendAPI.API.Controllers
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<FileController> _logger;
-    private readonly ISchemaRepository _schemaRepository;
-
-    public FileController(IConfiguration configuration, ILogger<FileController> logger, ISchemaRepository schemaRepository)
+    [Route("api/files")]
+    [ApiController]
+    public class FilesController : ControllerBase
     {
-        _configuration = configuration;
-        _logger = logger;
-        _schemaRepository = schemaRepository;
-    }
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<FilesController> _logger;
+        private readonly ISchemaRepository _schemaRepository;
 
-    [HttpGet("{fileName}")]
-    public async Task<IActionResult> GetUserFileAsync(string fileName)
-    {
-        string contentType;
-        var filePath = Path.Combine(_configuration["dev_StoredFilesPath"]!, fileName);
-
-        if (!System.IO.File.Exists(filePath))
+        public FilesController(IConfiguration configuration, ILogger<FilesController> logger, ISchemaRepository schemaRepository, IWebHostEnvironment webHostEnvironment)
         {
-            _logger.LogWarning("File not found: {0}", fileName);
-            return NotFound(new { message = "File not found." });
+            _configuration = configuration;
+            _logger = logger;
+            _schemaRepository = schemaRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
-        if (!new FileExtensionContentTypeProvider().TryGetContentType(filePath, out contentType))
+        // Endpoint to get a video file by its filename
+        [HttpGet("animals/videos/{fileName}")]
+        public IActionResult GetAnimalVideo(string fileName)
         {
-            contentType = "application/octet-stream";
+            try
+            {
+                string storedFilesPath = "";
+                if (_webHostEnvironment.IsDevelopment())
+                {
+                    // Dev environment
+                    var path = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                        ? _configuration["dev_StoredFilesPath_Linux"]
+                        : _configuration["dev_StoredFilesPath"];
+                    storedFilesPath = path ?? "";
+                }
+                else
+                {
+                    // Prod environment
+                    storedFilesPath = _configuration["StoredFilesPath"] ?? "";
+                }
+
+                var filePath = Path.Combine(storedFilesPath, fileName);
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    _logger.LogWarning("Requested video file not found: {FilePath}", filePath);
+                    return NotFound(new { message = "Video file not found." });
+                }
+
+                var mimeType = GetMimeType(filePath);
+
+                // Return the video file as a stream
+                var videoStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                return File(videoStream, mimeType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while serving video file: {FileName}", fileName);
+                return StatusCode(500, new { message = "Internal server error while fetching video." });
+            }
         }
 
-        var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
-        return new FileStreamResult(stream, contentType);
-    }
-
-    [HttpGet("videos/list")]
-    public IActionResult GetVideoList()
-    {
-        string videoDirectory;
-
-        _logger.LogInformation("Retrieving video list");
-
-        // Retrieve the allowed file extensions from the config
-        var allowedFileTypes = _configuration.GetSection("AllowedFileUploadTypes")
-                                             .GetChildren()
-                                             .Select(x => x.Value)
-                                             .ToList();
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        // Endpoint to get the list of animals
+        [HttpGet("animals/list")]
+        public async Task<IActionResult> GetAnimalsListAsync()
         {
-            videoDirectory = Path.Combine(_configuration["dev_StoredFilesPath_Linux"]!);
-        }
-        else
-        {
-            videoDirectory = Path.Combine(_configuration["dev_StoredFilesPath"]!);
+            try
+            {
+                var animals = await _schemaRepository.GetAnimalsAsync();
+
+                if (animals == null || !animals.Any())
+                {
+                    return NotFound(new { message = "No animals found" });
+                }
+
+                return Ok(animals);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching the list of animals");
+                return StatusCode(500, new { message = "Internal server error while fetching animals list." });
+            }
         }
 
-        if (!Directory.Exists(videoDirectory))
+        // Updated endpoint to get animal details by ID
+        [HttpGet("animals/details/{animalID}")]
+        public async Task<IActionResult> GetAnimalByIdAsync(Guid animalID)
         {
-            _logger.LogWarning("Video directory not found: {0}", videoDirectory);
-            return NotFound(new { message = "Video directory not found." });
+            try
+            {
+                var animal = await _schemaRepository.GetAnimalByIDAsync(animalID);
+
+                if (animal == null)
+                {
+                    return NotFound(new { message = "Animal not found" });
+                }
+
+                return Ok(animal);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching animal data: {AnimalID}", animalID);
+                return StatusCode(500, new { message = "Internal server error while fetching animal data." });
+            }
         }
 
-        var videoFiles = Directory.GetFiles(videoDirectory)
-                                  .Where(f => allowedFileTypes.Any(ext => f.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
-                                  .Select(Path.GetFileName)
-                                  .ToList();
-
-        _logger.LogInformation("Returning video files: {@videoFiles}", videoFiles);
-        return Ok(videoFiles);
-    }
-
-   [HttpGet("animals/list")]
-public async Task<IActionResult> GetUploadedAnimalsAsync()
-{
-    _logger.LogInformation("Retrieving uploaded animals list");
-
-    try
-    {
-        var animals = await _schemaRepository.GetAnimalsAsync();
-
-        var animalDataList = animals.Select(animal => new
+        private string GetMimeType(string filePath)
         {
-            animal.AnimalID,
-            animal.AnimalName,
-            animal.AnimalType,
-            animal.VideoUploadDate
-        }).ToList();
-
-        return Ok(animalDataList);
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            return extension switch
+            {
+                ".mp4" => "video/mp4",
+                ".mov" => "video/quicktime",
+                ".avi" => "video/x-msvideo",
+                ".mkv" => "video/x-matroska",
+                _ => "application/octet-stream",
+            };
+        }
     }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error occurred while retrieving uploaded animals list");
-        return StatusCode(500, new { message = "Internal server error." });
-    }
-}
-
 }

@@ -18,10 +18,6 @@ import SignOut from './Pages/SignOut';
 import Dashboard from './Pages/Dashboard';
 import AnimalDetails from './Components/Animal/AnimalDetails';  // Import the AnimalDetails component for animal page
 
-// Imports of testing pages
-import View from './Pages/View';
-import BackendTest from './Pages/Test/BackendTest';
-
 import UserProfile from './Internals/UserProfile';
 import {FrontendContext} from './Internals/ContextStore';
 
@@ -95,8 +91,7 @@ const App: React.FC = () => {
         "/dashboard/feedback",
         "/dashboard/help",
         "/dashboard/account",
-        "/dashboard/animals",
-        "/dashboard/animals/:animalId"
+        "/dashboard/animals"
     ];
 
 // Returns the main component of the app with the navigation bar and the routes
@@ -124,10 +119,6 @@ const App: React.FC = () => {
                             <Route path="/dashboard/animals/:animalId" element={<AnimalDetails />} /> {/* Animal details page */}
 
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
-
-                            {/* TODO Remove testing routes*/}
-                            <Route path={"/test/viewer"} element={<View />} />
-                            <Route path={"/test/backend"} element={<BackendTest />} />
 
                         </Routes>
                     </div>

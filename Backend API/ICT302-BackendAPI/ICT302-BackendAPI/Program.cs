@@ -1,7 +1,12 @@
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
+
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+
+
+using ICT302_BackendAPI.Utility;
+
 
 var cors = "_localCORSOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -72,5 +77,10 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
+
+var util = new Utility(app.Configuration, app.Logger, app.Environment);
+
+util.PrintStartingConfig();
+
 
 app.Run();

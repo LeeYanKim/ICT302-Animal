@@ -1,30 +1,59 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Box, Typography, CircularProgress, Button } from "@mui/material";
+import API from "../../Internals/API"; 
+import { useNavigate } from 'react-router-dom';
+
+interface Animal {
+  animalID: string;
+  animalName: string;
+  animalType: string;
+  animalDOB: string;
+  videoFileName?: string;
+}
 
 const AnimalDetails: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>(); // Extract animalId from the URL
-  const [animalData, setAnimalData] = useState<any>(null);
-  const [videoUrl, setVideoUrl] = useState<string>('');
-
-  // Fetch the animal data (including video) based on the animalId
+  const [animalData, setAnimalData] = useState<Animal | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
+  // Ensure animalId is available before making a request
   useEffect(() => {
+    if (!animalId) return;
+
     const fetchAnimalData = async () => {
       try {
-        const response = await fetch(`http://localhost:5173/api/files/animals/details/${animalId}`);
-        if (!response.ok) throw new Error('Failed to fetch animal data');
+        const response = await fetch(API.Download() + `/animals/details/${animalId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch animal data");
+        }
         const data = await response.json();
         setAnimalData(data);
-        setVideoUrl(`http://localhost:5173/api/files/animals/videos/${data.videoFileName}`);
       } catch (error) {
-        console.error('Error fetching animal data:', error);
+        console.error("Error fetching animal data:", error);
+      } finally {
+        setLoading(false); // Set loading to false after API call
       }
     };
 
     fetchAnimalData();
   }, [animalId]);
 
-  if (!animalData) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress /> {/* Better loading feedback */}
+      </Box>
+    );
+  }
+
+  if (!animalData) {
+    return <div>No animal data available.</div>;
+  }
+
+  const videoUrl = animalData.videoFileName
+    ? API.Download() + `/animals/videos/${animalData.videoFileName}`
+    : null;
 
   return (
     <Box textAlign="center" sx={{ mt: 5 }}>
@@ -34,11 +63,25 @@ const AnimalDetails: React.FC = () => {
       
       {/* Display video */}
       <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <video controls width="600">
-          <source src={videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        {videoUrl ? (
+          <video controls width="600">
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <Typography>No video available.</Typography>
+        )}
+
       </Box>
+      <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Button component="label" variant="contained"
+          onClick={() => {
+            navigate('/dashboard/animals/');
+          }}
+          >
+            Back
+          </Button>
+        </Box>
     </Box>
   );
 };

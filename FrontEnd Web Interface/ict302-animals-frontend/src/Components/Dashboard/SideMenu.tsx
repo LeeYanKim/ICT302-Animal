@@ -5,6 +5,7 @@ import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
 import CardAlert from './CardAlert';
 import OptionsMenu from './OptionsMenu';
+import {Link} from 'react-router-dom';
 
 import ProjectLogo from '../UI/ProjectLogo';
 import { FrontendContext } from "../../Internals/ContextStore";
@@ -56,7 +57,20 @@ const SideMenu: React.FC<SideMenuProps> = ({
       },
     }}
     >
-      <ProjectLogo />
+      <div style={{justifyContent: 'center', alignItems: 'center', display: 'flex'}}>
+          <Link style={{textDecoration: 'none'}} to="/">
+              <img style={{width: 100, height: 100, alignSelf: 'center'}} src={"/assets/images/project/ProjectLogo-Trim.png"} alt="logo" />
+              <Typography sx={{
+                              textAlign: 'center',
+                              mr: 2,
+                              fontFamily: 'monospace',
+                              fontWeight: 700,
+                              color: 'black',
+                          }} variant="h6" component="h2" gutterBottom>
+                  WildVision
+              </Typography>
+          </Link>
+      </div>
       <Box
         sx={{
           display: 'flex',
