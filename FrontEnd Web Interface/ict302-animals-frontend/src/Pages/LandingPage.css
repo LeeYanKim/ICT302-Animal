@@ -16,3 +16,7 @@ header p {
 .text-white {
     color: #fff;
 }
+
+header h4 {
+    font-family: 'Kanit', sans-serif;
+}
