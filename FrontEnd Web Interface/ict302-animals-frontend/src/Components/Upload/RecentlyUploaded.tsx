@@ -13,6 +13,7 @@ interface AnimalData {
   animalName: string;
   animalType: string;
   videoUploadDate: string | null;
+  videoFileName: string | null; // Include video file name
 }
 
 const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) => {
@@ -20,9 +21,13 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
   const [filteredAnimals, setFilteredAnimals] = useState<AnimalData[]>([]);
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  //const navigate = useNavigate();
+  const [selectedAnimal, setSelectedAnimal] = useState<AnimalData | null>(null); // State to hold the selected animal
 
   const fetchUploadedAnimals = async () => {
+    setLoading(true);
     try {
       const response = await fetch(API.Download() + '/animals/list');
       if (!response.ok) {
@@ -35,6 +40,9 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
       setAnimalTypes(types);
     } catch (error) {
       console.error(error);
+      setError('An error occurred while fetching animal data. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,14 +50,10 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     fetchUploadedAnimals();
   }, [triggerRefresh]);
 
-  const handleAnimalClick = (animalID: string) => {
-    console.log('Navigating to animalID:', animalID);
-    if (animalID) {
-      navigate(`/dashboard/animals/${animalID}`);
-    } else {
-      console.error('Animal ID is undefined. Cannot navigate to animal details.');
-    }
+  const handleAnimalClick = (animal: AnimalData) => {
+    setSelectedAnimal(animal); // Set the selected animal
   };
+
 
   const handleFilterButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -68,12 +72,16 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     setAnchorEl(null);
   };
 
+  if (loading) {
+    return <Typography>Loading...</Typography>;
+  }
+
+
   return (
-    <>
+      <div>
+      {error && <Typography color="error">{error}</Typography>}
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          Recently uploaded:
-        </Typography>
+        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Recently uploaded:</Typography>
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
           <Button variant="outlined" onClick={handleFilterButtonClick} sx={{ marginRight: '10px' }}>
             Filter by Animal Type
@@ -89,47 +97,51 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         </Box>
       </Box>
 
+      {/* Video Player */}
+      {selectedAnimal && (
+        <Box sx={{ marginTop: '20px' }}>
+          <h2>{selectedAnimal.animalName}</h2>
+          <p>Type: {selectedAnimal.animalType}</p>
+          <p>Date of Birth: {new Date(selectedAnimal.videoUploadDate!).toLocaleDateString()}</p>
+          {selectedAnimal.videoFileName ? (
+            <video controls width="600">
+              <source src={`http://localhost:5173/api/files/animals/videos/${selectedAnimal.videoFileName}`} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          ) : (
+            <p>No video available.</p>
+          )}
+        </Box>
+      )}
+
       <Grid container spacing={3}>
-        {filteredAnimals.map((animal) => {
-          //console.log('Animal data:', animal); // Log the entire animal object to verify
-          if (!animal.animalID) {
-            console.error('Animal ID is undefined. Cannot navigate to animal details.');
-          }
-          return (
-            <Grid item xs={12} sm={6} md={4} key={animal.animalID}>
-              <Box
-                sx={{
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: '5px',
-                  height: '150px',
-                  cursor: 'pointer',
-                }}
-                onClick={() => {
-                  if (animal.animalID) {
-                    handleAnimalClick(animal.animalID);
-                  }
-                }}
-              >
-                {animal.animalName && (
-                  <>
-                    <Typography variant="subtitle1">{animal.animalName}</Typography>
-                    <Typography variant="body2">{`Type: ${animal.animalType}`}</Typography>
-                    <Typography variant="subtitle2">
-                      {`Uploaded on: ${
-                        animal.videoUploadDate
-                          ? new Date(animal.videoUploadDate).toLocaleDateString()
-                          : 'N/A'
-                      }`}
-                    </Typography>
-                  </>
-                )}
-              </Box>
-            </Grid>
-          );
-        })}
+        {filteredAnimals.map((animal) => (
+          <Grid item xs={12} sm={6} md={4} key={animal.animalID}>
+            <Box
+              sx={{
+                padding: '10px',
+                border: '1px solid #ddd',
+                borderRadius: '5px',
+                height: '150px',
+                cursor: 'pointer',
+              }}
+              onClick={() => handleAnimalClick(animal)} // Pass the entire animal object
+            >
+              {animal.animalName && (
+                <>
+                  <Typography variant="subtitle1">{animal.animalName}</Typography>
+                  <Typography variant="body2">{`Type: ${animal.animalType}`}</Typography>
+                  <Typography variant="subtitle2">
+                    {`Uploaded on: ${animal.videoUploadDate ? new Date(animal.videoUploadDate).toLocaleDateString() : 'N/A'}`}
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </Grid>
+        ))}
       </Grid>
-    </>
+
+    </div>
   );
 };
 
