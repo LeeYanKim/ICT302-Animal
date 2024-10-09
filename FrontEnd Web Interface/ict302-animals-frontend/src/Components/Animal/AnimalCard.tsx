@@ -17,18 +17,11 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
   const [animalImage, setAnimalImage] = useState<string>('');
 
   const handleGetAnimalImage = useCallback(async () => {
-    const filePath = `${API.Download()}/${animalType.toLowerCase()}.png`;
 
-    try {
-      const response = await fetch(filePath);
-      if (response.ok) {
-        const data = await response.blob();
-        const imageObjectUrl = URL.createObjectURL(data);
-        setAnimalImage(imageObjectUrl);
-      } else {
-        const fallbackImage = `/assets/images/fallback/${animalType.toLowerCase()}.png`;
-        setAnimalImage(fallbackImage);
-      }
+    try {// Use local fallback images rather than fetching missing images from the API
+      const fallbackImage = `/assets/images/fallback/${animalType.toLowerCase()}.png`;
+      setAnimalImage(fallbackImage);
+      
     } catch (error) {
       console.error('Error fetching animal image:', error);
     }

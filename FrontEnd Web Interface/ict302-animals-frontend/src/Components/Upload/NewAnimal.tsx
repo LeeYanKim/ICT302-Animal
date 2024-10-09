@@ -125,7 +125,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
               <InputLabel id="animal-type-label">Animal Type</InputLabel>
               <Select
                 labelId="animal-type-label"
-                value={animalType}
+                value={animalType[0]}
                 onChange={handleAnimalTypeChange}
                 label="Animal Type"
                 required={requireFile} // Required only if file is required

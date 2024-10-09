@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import NewAnimal from "./NewAnimal";
 import { Button } from "@mui/material";
+import API from '../../Internals/API';
 
 const ParentComponent: React.FC = () => {
   const [isNewAnimalDialogOpen, setIsNewAnimalDialogOpen] = useState<boolean>(false);
@@ -22,7 +23,7 @@ const ParentComponent: React.FC = () => {
     formData.append("dateOfBirth", dateOfBirth);
 
     // Perform the upload
-    fetch("http://localhost:5173/api/upload", {
+    fetch(API.Upload(), {
       method: "POST",
       body: formData,
     })
