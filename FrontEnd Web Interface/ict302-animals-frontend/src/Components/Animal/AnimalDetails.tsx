@@ -1,55 +1,60 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
-import ModelViewer from "../ModelViewer/ModelViewer";
-import API from '../../Internals/API';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Box, Typography, CircularProgress } from "@mui/material";
+import API from "../../Internals/API"; 
+
+interface Animal {
+  animalID: string;
+  animalName: string;
+  animalType: string;
+  animalDOB: string;
+  videoFileName?: string;
+}
 
 const AnimalDetails: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>(); // Extract animalId from the URL
-  const [animalData, setAnimalData] = useState<any>(null);
-  const [videoUrl, setVideoUrl] = useState<string>('');
-  const [videoType, setVideoType] = useState<string>('');
+  const [animalData, setAnimalData] = useState<Animal | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch the animal data (including video) based on the animalId
+  // Ensure animalId is available before making a request
   useEffect(() => {
+    if (!animalId) return;
+
     const fetchAnimalData = async () => {
       try {
-        const response = await fetch(API.Download() + "/animals/details/" + animalId);
-        if (!response.ok) throw new Error('Failed to fetch animal data');
+        const response = await fetch(API.Download() + `/animals/details/${animalId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch animal data");
+        }
         const data = await response.json();
         setAnimalData(data);
-        setVideoUrl(API.Download() + "/animals/videos/" + data.videoFileName);
-        const fileExtension = data.videoFileName.split('.').pop();
-        let mimeType = '';
-        switch (fileExtension) {
-          case 'webm':
-            mimeType = 'video/webm';
-            break;
-          case 'mp4':
-            mimeType = 'video/mp4';
-            break;
-          case 'mkv':
-            mimeType = 'video/x-matroska';
-            break;
-          case 'mov':
-            mimeType = 'video/quicktime';
-            break;
-          default:
-            console.error('Unsupported video format');
-        }
-        setVideoType(mimeType);
       } catch (error) {
-        console.error('Error fetching animal data:', error);
+        console.error("Error fetching animal data:", error);
+      } finally {
+        setLoading(false); // Set loading to false after API call
       }
     };
 
     fetchAnimalData();
   }, [animalId]);
 
-  if (!animalData) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress /> {/* Better loading feedback */}
+      </Box>
+    );
+  }
+
+  if (!animalData) {
+    return <div>No animal data available.</div>;
+  }
+
+  const videoUrl = animalData.videoFileName
+    ? `http://localhost:5173/api/files/animals/videos/${animalData.videoFileName}`
+    : null;
 
   return (
-    <div>
     <Box textAlign="center" sx={{ mt: 5 }}>
       <Typography variant="h4">{animalData.animalName}</Typography>
       <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
@@ -57,18 +62,16 @@ const AnimalDetails: React.FC = () => {
       
       {/* Display video */}
       <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <video controls width="600">
-          <source src={videoUrl} type={videoType} />
-          Your browser does not support the video tag.
-        </video>
-      </Box>
-      <Typography mt={3} variant="subtitle1">GART model:</Typography>
-      <Box  sx={{ display: 'flex' , justifyContent: 'center'}}>
-        {/*Change this when we have models*/}
-      <ModelViewer modelPath={'/3d_test_files/toon_cat_free.glb'}/>
+        {videoUrl ? (
+          <video controls width="600">
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <Typography>No video available.</Typography>
+        )}
       </Box>
     </Box>
-    </div>
   );
 };
 
