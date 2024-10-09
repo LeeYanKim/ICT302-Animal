@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import PetsIcon from '@mui/icons-material/Pets';
 
 import { FrontendContext } from "../../Internals/ContextStore";
@@ -23,6 +24,7 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
   ];
   
   const secondaryListItems = [
+    { text: 'Settings', icon: <SettingsRoundedIcon /> },
     { text: 'About', icon: <InfoRoundedIcon /> },
   ];
 
