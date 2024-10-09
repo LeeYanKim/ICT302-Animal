@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from 'react-google-recaptcha'; // Import the reCAPTCHA component
 import { FrontendContext } from "../Internals/ContextStore"; // Import frontend context
+import API from '../Internals/API';
 
 interface SignUpProps {
   onSignUpSuccess?: () => void;
@@ -35,16 +36,63 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
     try {
       // Create user with Firebase authentication
       const userCredential = await createUserWithEmailAndPassword(frontendContext.firebaseAuth.current, email, password);
+      const user = userCredential.user; // Firebase authenticated user
 
-      // Optionally, you could store the username in the database along with the email/password
-      // E.g., you could call your backend to save the user info
+      // Retrieve the ID token
+      const idToken = await user.getIdToken();
 
+      // Store the user in the backend
+      await storeUserInBackend(user, idToken);
+      
       // On successful sign up
       if (onSignUpSuccess) onSignUpSuccess();
+
+      updateContextAndNavigate(user);
+
       nav('/dashboard'); // Navigate to the dashboard or desired page
     } catch (error) {
       setError('Error creating account: ' + (error as Error).message);
     }
+  };
+
+  const storeUserInBackend = async (user: { uid: string; displayName: string | null; email: string | null }, idToken: string) => {
+    try {
+      const payload = {
+        userName: username, // Set the username from the form input
+        userEmail: user.email, // Set the user's email
+        permissionLevel: "user", // You can set the permission level accordingly
+      };
+  
+      const response = await fetch(API.User(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`, // Send Firebase token
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to store user in the backend");
+      }
+  
+      console.log("User stored/updated successfully in backend");
+    } catch (error) {
+      console.error("Error storing user in backend:", error);
+    }
+  };
+  
+  // Helper function to update frontend context
+  const updateContextAndNavigate = (user: { displayName?: string | null, email?: string | null }) => {
+    frontendContext.user.valid = true;
+    frontendContext.user.contextRef.current.username = user.displayName || '';
+    frontendContext.user.contextRef.current.email = user.email || '';
+    frontendContext.user.contextRef.current.initials = user.displayName
+      ? user.displayName.split(' ').map(name => name[0]).join('')
+      : '';
+    frontendContext.user.contextRef.current.loggedInState = true;
+  
+    nav('/dashboard');
   };
 
   const handleRecaptchaChange = (token: string | null) => {
