@@ -12,8 +12,8 @@ interface AnimalData {
   animalID: string;
   animalName: string;
   animalType: string;
-  videoUploadDate: string | null;
-  videoFileName: string | null; // Include video file name
+  videoUploadDate: string;
+  videoFileName: string; // Include video file name
 }
 
 const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) => {
@@ -25,6 +25,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
   const [error, setError] = useState<string | null>(null);
   //const navigate = useNavigate();
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalData | null>(null); // State to hold the selected animal
+  const [animalData, setAnimalData] = useState<AnimalData | null>(null);
 
   const fetchUploadedAnimals = async () => {
     setLoading(true);
@@ -72,6 +73,11 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     setAnchorEl(null);
   };
 
+  /*const videoUrl = animalData.videoFileName
+    ? API.Download() + `/animals/videos/${selectedAnimal.videoFileName}`
+    : null;
+  */
+ 
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
@@ -105,7 +111,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
           <p>Date of Birth: {new Date(selectedAnimal.videoUploadDate!).toLocaleDateString()}</p>
           {selectedAnimal.videoFileName ? (
             <video controls width="600">
-              <source src={`http://localhost:5173/api/files/animals/videos/${selectedAnimal.videoFileName}`} type="video/mp4" />
+              <source src={API.Download() +`/animals/videos/${selectedAnimal.videoFileName}`}/>
               Your browser does not support the video tag.
             </video>
           ) : (
