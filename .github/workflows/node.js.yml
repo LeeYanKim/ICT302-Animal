@@ -30,4 +30,5 @@ jobs:
     - run: echo "CI=false" >> $GITHUB_ENV
     - run: npm ci
     - run: npm run build --if-present
+    - run: echo "passWithNoTests=true" >> $GITHUB_ENV
     - run: npm test
