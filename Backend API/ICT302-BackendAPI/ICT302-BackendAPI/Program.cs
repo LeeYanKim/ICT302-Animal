@@ -1,17 +1,30 @@
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+
+
 using ICT302_BackendAPI.Utility;
+
 
 var cors = "_localCORSOrigins";
 var builder = WebApplication.CreateBuilder(args);
+
+// Initialize Firebase Admin SDK
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("wildvision-firebase-adminsdk.json") //To check
+});
 
 // Allowing Cross-Origin from frontend to API via localhost on different ports
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: cors, policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "http://10.51.33.50", "http://localhost:*", "http://17.19.0.1", "https://api.wildvision.co", "https://wildvision.co");
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "http://10.51.33.50", "http://localhost:*", "http://17.19.0.1", "https://api.wildvision.co", "https://wildvision.co")
+        .WithHeaders("Authorization", "Content-Type")
+        .AllowCredentials();
     });
 });
 
@@ -19,6 +32,7 @@ builder.Services.AddCors(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 // Adding Access to our custom DB Context
 builder.Services.AddTransient<SchemaContext>();
