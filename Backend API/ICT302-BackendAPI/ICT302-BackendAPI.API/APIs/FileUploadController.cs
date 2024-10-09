@@ -10,7 +10,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
 namespace ICT302_BackendAPI.API.Controllers
 {
@@ -21,12 +23,14 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<FileUploadController> _logger;
         private readonly ISchemaRepository _schemaRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, ISchemaRepository schemaRepository)
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, ISchemaRepository schemaRepository, IWebHostEnvironment webHostEnvironment)
         {
             _configuration = configuration;
             _logger = logger;
             _schemaRepository = schemaRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpPost]
@@ -39,27 +43,41 @@ namespace ICT302_BackendAPI.API.Controllers
                 // Validate input fields
                 if (file == null || file.Length == 0)
                 {
-                    _logger.LogWarning("Invalid request: No file provided.");
-                    return BadRequest(new { message = "Invalid file or missing animal details." });
+                    string msg = String.Format("Invalid request: No file provided {0} is empty", file.FileName);
+                    _logger.LogWarning(msg);
+                    return BadRequest(new { message = msg});
                 }
 
                 if (string.IsNullOrEmpty(animalName) || string.IsNullOrEmpty(animalType) || string.IsNullOrEmpty(dateOfBirth))
                 {
-                    _logger.LogWarning("Missing animal details. AnimalName: {AnimalName}, AnimalType: {AnimalType}, DateOfBirth: {DateOfBirth}", animalName, animalType, dateOfBirth);
-                    return BadRequest(new { message = "Invalid file or missing animal details." });
+                    string msg = String.Format("Invalid request: Missing animal details. AnimalName: {AnimalName}, AnimalType: {AnimalType}, DateOfBirth: {DateOfBirth}", animalName, animalType , dateOfBirth);
+                    _logger.LogWarning(msg);
+                    return BadRequest(new { message = msg });
                 }
 
                 if (!DateTime.TryParseExact(dateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedAnimalDOB))
                 {
-                    _logger.LogWarning("Invalid date of birth format: {0}", dateOfBirth);
-                    return BadRequest(new { message = "Invalid date of birth format." });
+                    string msg = String.Format("Invalid date of birth format: {0}, Required format: yyyy-MM-dd", dateOfBirth);
+                    _logger.LogWarning(msg, dateOfBirth);
+                    return BadRequest(new { message = msg });
                 }
 
                 // Determine stored file path
-                string storedFilesPath = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                    ? _configuration["StoredFilesPath_Linux"]
-                    : _configuration["StoredFilesPath"];
-
+                string storedFilesPath = "";
+                if (_webHostEnvironment.IsDevelopment())
+                {
+                    // Dev environment
+                    var path = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                        ? _configuration["dev_StoredFilesPath_Linux"]
+                        : _configuration["dev_StoredFilesPath"];
+                    storedFilesPath = path ?? "";
+                }
+                else
+                {
+                    // Prod environment
+                    storedFilesPath = _configuration["StoredFilesPath"] ?? "";
+                }
+                
                 if (string.IsNullOrEmpty(storedFilesPath))
                 {
                     _logger.LogError("StoredFilesPath is not configured.");
@@ -77,8 +95,9 @@ namespace ICT302_BackendAPI.API.Controllers
                 string fileExtension = Path.GetExtension(file.FileName);
                 if (!IsFileTypeAllowed(fileExtension))
                 {
-                    _logger.LogWarning("Uploaded file: {FileName} is not an allowed type", file.FileName);
-                    return BadRequest(new { message = "Unsupported file type." });
+                    string msg = String.Format("Uploaded file: {FileName} is of a file type that is not supported", file.FileName);
+                    _logger.LogWarning(msg);
+                    return BadRequest(new { message = msg });
                 }
 
                 // Sanitize and generate a unique file name
