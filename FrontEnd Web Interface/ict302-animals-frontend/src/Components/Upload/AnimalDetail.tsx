@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
+import API from '../../Internals/API';
 
 interface Animal {
   animalID: string;
@@ -21,7 +22,7 @@ const AnimalDetails: React.FC = () => {
     const fetchAnimalData = async () => {
       try {
         // Use the correct endpoint for fetching animal details
-        const response = await fetch(`http://localhost:5173/api/files/animals/details/${animalId}`);
+        const response = await fetch(API.Download() + `animals/details/${animalId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch animal data");
         }
@@ -40,7 +41,7 @@ const AnimalDetails: React.FC = () => {
   }
 
   const videoUrl = animalData.videoFileName
-    ? `http://localhost:5173/api/files/animals/videos/${animalData.videoFileName}`
+    ? API.Download() + `/animals/videos/${animalData.videoFileName}`
     : null;
 
   return (

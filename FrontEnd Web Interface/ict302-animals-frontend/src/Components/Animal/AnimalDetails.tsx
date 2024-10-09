@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography, CircularProgress, Button } from "@mui/material";
 import API from "../../Internals/API"; 
+import { useNavigate } from 'react-router-dom';
 
 interface Animal {
   animalID: string;
@@ -15,7 +16,7 @@ const AnimalDetails: React.FC = () => {
   const { animalId } = useParams<{ animalId: string }>(); // Extract animalId from the URL
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
+  const navigate = useNavigate();
   // Ensure animalId is available before making a request
   useEffect(() => {
     if (!animalId) return;
@@ -51,7 +52,7 @@ const AnimalDetails: React.FC = () => {
   }
 
   const videoUrl = animalData.videoFileName
-    ? `http://localhost:5173/api/files/animals/videos/${animalData.videoFileName}`
+    ? API.Download() + `/animals/videos/${animalData.videoFileName}`
     : null;
 
   return (
@@ -70,7 +71,17 @@ const AnimalDetails: React.FC = () => {
         ) : (
           <Typography>No video available.</Typography>
         )}
+
       </Box>
+      <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Button component="label" variant="contained"
+          onClick={() => {
+            navigate('/dashboard/animals/');
+          }}
+          >
+            Back
+          </Button>
+        </Box>
     </Box>
   );
 };
