@@ -16,7 +16,85 @@ const LandingPage: React.FC = () => {
     const frontendContext = useContext(FrontendContext);
     return (
         <>
-            <Container sx={{ my: 5 }}>
+            {/* Right side with the quote */}
+            <Container style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: 0 }}>
+
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '30%',
+                        textAlign: 'center',
+                        padding: '20px', // Add padding for breathing space
+                        //backgroundColor: '#linear-gradient(270deg, rgba(255,105,105,0.3), rgba(173,216,230,0.6))', // Optional: add background color for contrast
+                        //borderRadius: '8px', // Rounded corners for a softer look
+                    }}
+                >
+                    {/* Upper Divider */}
+                    <Box
+                        sx={{
+                            width: '80%', // Make it slightly smaller for better visual hierarchy
+                            borderBottom: 4,
+                            borderColor: '#ae0001',
+                            mb: 3, // More space below the divider
+                        }}
+                    />
+
+                    {/* Title */}
+                    <Typography
+                        variant="h4"
+                        gutterBottom
+                        sx={{
+                            fontFamily: 'Poppins, sans-serif', // Custom font
+                            fontWeight: 'bold', // Make it bold for emphasis
+                            textAlign: 'center', // Center the text
+                            mb: 1, // Reduce bottom margin for better spacing
+                        }}
+                    >
+                        Building 3D Models
+                    </Typography>
+
+                    <Typography
+                        variant="h4"
+                        component="p"
+                        sx={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontWeight: 'normal', // Keep normal weight for contrast
+                            textAlign: 'center',
+                            mb: 1, // Adjust spacing
+                        }}
+                    >
+                        using
+                    </Typography>
+
+                    <Typography
+                        variant="h4"
+                        gutterBottom
+                        sx={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            mb: 3, // Add some margin to balance with the lower divider
+                        }}
+                    >
+                        Artificial Intelligence
+                    </Typography>
+                    {/* Lower Divider */}
+                    <Box
+                        sx={{
+                            width: '80%',
+                            borderTop: 4,
+                            borderColor: '#ae0001',
+                            mt: 3, // Adjust margin for consistent spacing
+                        }}
+                    />
+                </Box>
+
+            </Container>
+            <Container sx={{ my: 5 }} style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: 0 }}>
+            
                 <Box
                     sx={{
                         display: 'flex',
@@ -39,7 +117,7 @@ const LandingPage: React.FC = () => {
                                 style={{ width: 'auto', height: 'auto' }}
                             />
                         </Box>
-                        
+
                         <Box>
                             <img
                                 src="./assets/images/landing/model_no_background.png"
@@ -63,79 +141,7 @@ const LandingPage: React.FC = () => {
                         </Box>
                     </Box>
 
-                    {/* Right side with the quote */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '30%',
-                            textAlign: 'center',
-                            padding: '20px', // Add padding for breathing space
-                            //backgroundColor: '#f2f0e8', // Optional: add background color for contrast
-                            borderRadius: '8px', // Rounded corners for a softer look
-                        }}
-                    >
-                        {/* Upper Divider */}
-                        <Box
-                            sx={{
-                                width: '80%', // Make it slightly smaller for better visual hierarchy
-                                borderBottom: 4,
-                                borderColor: '#ae0001',
-                                mb: 3, // More space below the divider
-                            }}
-                        />
 
-                        {/* Title */}
-                        <Typography
-                            variant="h4"
-                            gutterBottom
-                            sx={{
-                                fontFamily: 'Poppins, sans-serif', // Custom font
-                                fontWeight: 'bold', // Make it bold for emphasis
-                                textAlign: 'center', // Center the text
-                                mb: 1, // Reduce bottom margin for better spacing
-                            }}
-                        >
-                            Building 3D Models
-                        </Typography>
-
-                        <Typography
-                            variant="h4"
-                            component="p"
-                            sx={{
-                                fontFamily: 'Poppins, sans-serif',
-                                fontWeight: 'normal', // Keep normal weight for contrast
-                                textAlign: 'center',
-                                mb: 1, // Adjust spacing
-                            }}
-                        >
-                            using
-                        </Typography>
-
-                        <Typography
-                            variant="h4"
-                            gutterBottom
-                            sx={{
-                                fontFamily: 'Poppins, sans-serif',
-                                fontWeight: 'bold',
-                                textAlign: 'center',
-                                mb: 3, // Add some margin to balance with the lower divider
-                            }}
-                        >
-                            Artificial Intelligence
-                        </Typography>
-                        {/* Lower Divider */}
-                        <Box
-                            sx={{
-                                width: '80%',
-                                borderTop: 4,
-                                borderColor: '#ae0001',
-                                mt: 3, // Adjust margin for consistent spacing
-                            }}
-                        />
-                    </Box>
 
 
                 </Box>
@@ -143,18 +149,19 @@ const LandingPage: React.FC = () => {
 
             {/*About us underneath, on another level*/}
             <Container
-            sx={{my : 3}}>
+                sx={{ my: 3 }}>
                 <Box
-                sx={{
-                background: 'linear-gradient(270deg, rgba(255,105,105,0.3), rgba(173,216,230,0.6))',
-                borderRadius: '5px'}}>
-                <Typography
-                    variant="h3"
                     sx={{
-                        fontFamily: 'Kanit, sans-serif',
-                        fontWeight: '200',
-                    }}>Explore the possibilities of animal modelling using AI
-                </Typography>
+                        background: 'linear-gradient(270deg, rgba(255,105,105,0.3), rgba(173,216,230,0.6))',
+                        borderRadius: '5px'
+                    }}>
+                    <Typography
+                        variant="h3"
+                        sx={{
+                            fontFamily: 'Kanit, sans-serif',
+                            fontWeight: '200',
+                        }}>Explore the possibilities of animal modelling using AI
+                    </Typography>
                 </Box>
                 <Typography>
                     <p>
@@ -174,16 +181,26 @@ const LandingPage: React.FC = () => {
                     </p>
 
                 </Typography>
-                
+
             </Container>
-            <div style={{ width: '90vw', margin: '10 auto', padding: 0 }}>
-    <Box
-        sx={{
-            background: 'linear-gradient(270deg, rgba(255,105,105,0.3), rgba(173,216,230,0.6))',
-            height: '30px',
-        }}
-    />
-</div>
+            <Container
+                sx={{
+                    width: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    padding: 0,
+                    my: 5
+                }}
+            >
+                <Box
+                    sx={{
+                        background: 'linear-gradient(90deg, rgba(255,105,105,0.3), rgba(173,216,230,0.6))',
+                        height: '30px',
+                        width: '80vw', // Set the width to 80% of the viewport width
+                    }}
+                />
+            </Container>
         </>
     );
 };
