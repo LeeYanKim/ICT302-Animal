@@ -1,4 +1,7 @@
 # ICT302-Animals - Wild Vision
+[![Node.js CI](https://github.com/BryceStandley/ICT302-Animals/actions/workflows/node.js.yml/badge.svg)](https://github.com/BryceStandley/ICT302-Animals/actions/workflows/node.js.yml)
+[![.NET](https://github.com/BryceStandley/ICT302-Animals/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BryceStandley/ICT302-Animals/actions/workflows/dotnet.yml)
+
 
 Web application to generate 3D models and animations from images and videos.
 
