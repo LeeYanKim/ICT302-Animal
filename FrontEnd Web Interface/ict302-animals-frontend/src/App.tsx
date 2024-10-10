@@ -11,17 +11,12 @@ import LandingNav from './Components/LandingNav';
 // Imports of our pages
 import LandingPage from './Pages/LandingPage';
 import About from './Pages/About';
-import Contact from './Pages/Contact';
 import Enterprise from './Pages/Enterprise';
 import SignIn from './Pages/SignIn';
 import SignUp from './Pages/SignUp';
 import SignOut from './Pages/SignOut';
 import Dashboard from './Pages/Dashboard';
 import AnimalDetails from './Components/Animal/AnimalDetails';  // Import the AnimalDetails component for animal page
-
-// Imports of testing pages
-import View from './Pages/View';
-import BackendTest from './Pages/Test/BackendTest';
 
 import UserProfile from './Internals/UserProfile';
 import {FrontendContext} from './Internals/ContextStore';
@@ -113,7 +108,6 @@ const App: React.FC = () => {
 
                             <Route path="/" element={<LandingPage />} /> {/* This is the default route */}
                             <Route path="/about" element={<About />} /> {/* This is the about page */}
-                            <Route path="/contact" element={<Contact />} /> {/* This is the contact page */}
                             <Route path="/enterprise" element={<Enterprise/>} /> {/* This is the enterprise page */}
                             <Route path="/signin" element={<SignIn />} /> {/* This is the sign in page */}
                             <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
@@ -125,10 +119,6 @@ const App: React.FC = () => {
                             <Route path="/dashboard/animals/:animalId" element={<AnimalDetails />} /> {/* Animal details page */}
 
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
-
-                            {/* TODO Remove testing routes*/}
-                            <Route path={"/test/viewer"} element={<View />} />
-                            <Route path={"/test/backend"} element={<BackendTest />} />
 
                         </Routes>
                     </div>

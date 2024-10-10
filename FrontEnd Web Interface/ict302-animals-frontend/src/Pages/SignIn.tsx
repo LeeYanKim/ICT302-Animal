@@ -15,6 +15,8 @@ import { getAnalytics } from "firebase/analytics";
 
 import { signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
 
+import API from '../Internals/API';
+
 // Dynamically import the SignUp component
 const SignUp = React.lazy(() => import('../Pages/SignUp'));
 
@@ -90,7 +92,8 @@ const SignIn: React.FC = () => {
       // Signed in
       const user = userCredential.user;
       console.log(user);
-      nav('/dashboard');
+
+      updateContextAndNavigate(user);
       //..
     }).catch((error) => {
       const errorCode = error.code;
@@ -101,9 +104,9 @@ const SignIn: React.FC = () => {
 
   const CreatefrontendContext = () => {
     // TODO: Add authentication logic here, This just uses a dummy user object for now to show logging in and user state change
-    frontendContext.user.contextRef.current.username = 'Bryce Standley';
-    frontendContext.user.contextRef.current.email = 'bryce@vectorpixel.net';
-    frontendContext.user.contextRef.current.initials = 'BS';
+    frontendContext.user.contextRef.current.username = 'No Username';
+    frontendContext.user.contextRef.current.email = 'Null Email';
+    frontendContext.user.contextRef.current.initials = 'Null';
     frontendContext.user.contextRef.current.loggedInState = true;
   }
 
@@ -148,25 +151,56 @@ const SignIn: React.FC = () => {
     return isValid;
   };
 
+  const storeUserInBackend = async (user: { uid: string; displayName: string | null; email: string | null }, idToken: string) => {
+    try {
+        const payload = {
+            userName: user.displayName || "Anonymous", // Only allow the frontend to set this
+            userEmail: user.email, // Set the user's email
+            permissionLevel: "user", // Permission level (can be adjusted later)
+            // No need to send userID, userPassword, userDateJoin, or subscription fields
+        };
+
+        const response = await fetch(API.User(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${idToken}`, // Send Firebase token
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to store user in the backend");
+        }
+
+        console.log("User stored/updated successfully in backend");
+    } catch (error) {
+        console.error("Error storing user in backend:", error);
+    }
+};
+
+
   const handleGoogleSignIn = async () => {
     const googleProvider = new GoogleAuthProvider();
   
     try {
+      // Sign in with Google
       const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
-      const user = result.user;
+      const user = result.user; // This is the authenticated user
   
       console.log('Google sign-in successful:', user);
   
-      // Update the frontendContext with the logged-in user details
+      // Retrieve the ID token
+      const idToken = await user.getIdToken();
+  
+      // Store the user in the backend
+      await storeUserInBackend(user, idToken);
+  
+      // Update the frontend context with the logged-in user details
       updateContextAndNavigate(user);
   
-      // Log before navigating
-      if (user) {
-        console.log('User exists, navigating to dashboard...');
-        nav('/dashboard');
-      } else {
-        console.log('User is null, navigation skipped');
-      }
+      // Navigate to the dashboard
+      nav('/dashboard');
     } catch (error) {
       console.error("Error signing in with Google:", error);
     }
@@ -249,17 +283,17 @@ const SignIn: React.FC = () => {
                   onClick={handleGoogleSignIn}
                   startIcon={<GoogleIcon />}
                 >
-                  Sign up with Google
+                  Sign In with Google
                 </Button>
-                <Button
+                {/* <Button
                   type="submit"
                   fullWidth
                   variant="outlined"
                   onClick={handleFacebookSignIn}
                   startIcon={<FacebookIcon />}
                 >
-                  Sign up with Facebook
-                </Button>
+                  Sign In with Facebook
+                </Button> */}
               </Box>
 
               <Typography sx={{ textAlign: 'center', mt: 2 }}>

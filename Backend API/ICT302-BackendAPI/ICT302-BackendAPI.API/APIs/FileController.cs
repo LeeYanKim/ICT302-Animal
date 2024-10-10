@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using ICT302_BackendAPI.Database.Models;
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace ICT302_BackendAPI.API.Controllers
 {
@@ -17,14 +19,16 @@ namespace ICT302_BackendAPI.API.Controllers
     public class FilesController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<FilesController> _logger;
         private readonly ISchemaRepository _schemaRepository;
 
-        public FilesController(IConfiguration configuration, ILogger<FilesController> logger, ISchemaRepository schemaRepository)
+        public FilesController(IConfiguration configuration, ILogger<FilesController> logger, ISchemaRepository schemaRepository, IWebHostEnvironment webHostEnvironment)
         {
             _configuration = configuration;
             _logger = logger;
             _schemaRepository = schemaRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // Endpoint to get a video file by its filename
@@ -33,9 +37,20 @@ namespace ICT302_BackendAPI.API.Controllers
         {
             try
             {
-                string storedFilesPath = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                    ? _configuration["StoredFilesPath_Linux"]
-                    : _configuration["StoredFilesPath"];
+                string storedFilesPath = "";
+                if (_webHostEnvironment.IsDevelopment())
+                {
+                    // Dev environment
+                    var path = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                        ? _configuration["dev_StoredFilesPath_Linux"]
+                        : _configuration["dev_StoredFilesPath"];
+                    storedFilesPath = path ?? "";
+                }
+                else
+                {
+                    // Prod environment
+                    storedFilesPath = _configuration["StoredFilesPath"] ?? "";
+                }
 
                 var filePath = Path.Combine(storedFilesPath, fileName);
 

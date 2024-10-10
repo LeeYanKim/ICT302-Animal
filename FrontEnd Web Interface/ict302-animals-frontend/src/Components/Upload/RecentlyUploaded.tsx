@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Button, Menu, MenuItem } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-
 import API from '../../Internals/API';
+import AnimalCard from '../Animal/AnimalCard';
 
+// Props for RecentlyUploaded
 interface RecentlyUploadedProps {
-  triggerRefresh: boolean; // Prop to trigger the refresh of uploaded data
+  triggerRefresh: boolean;
 }
 
 interface AnimalData {
   animalID: string;
   animalName: string;
   animalType: string;
+
   videoUploadDate: string;
   videoFileName: string; // Include video file name
 }
@@ -27,6 +29,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
   const [selectedAnimal, setSelectedAnimal] = useState<AnimalData | null>(null); // State to hold the selected animal
   const [animalData, setAnimalData] = useState<AnimalData | null>(null);
 
+  // Fetch uploaded animals
   const fetchUploadedAnimals = async () => {
     setLoading(true);
     try {
@@ -51,6 +54,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     fetchUploadedAnimals();
   }, [triggerRefresh]);
 
+
   const handleAnimalClick = (animal: AnimalData) => {
     setSelectedAnimal(animal); // Set the selected animal
   };
@@ -60,6 +64,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     setAnchorEl(event.currentTarget);
   };
 
+  // Close menu
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -73,15 +78,10 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     setAnchorEl(null);
   };
 
-  /*const videoUrl = animalData.videoFileName
-    ? API.Download() + `/animals/videos/${selectedAnimal.videoFileName}`
-    : null;
-  */
  
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
-
 
   return (
       <div>
@@ -93,9 +93,9 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
             Filter by Animal Type
           </Button>
           <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            <MenuItem onClick={() => handleFilterSelect('All')}>All</MenuItem>
+            <MenuItem onClick={() => setFilteredAnimals(animals)}>All</MenuItem>
             {animalTypes.map((type) => (
-              <MenuItem key={type} onClick={() => handleFilterSelect(type)}>
+              <MenuItem key={type} onClick={() => setFilteredAnimals(animals.filter((animal) => animal.animalType === type))}>
                 {type}
               </MenuItem>
             ))}
