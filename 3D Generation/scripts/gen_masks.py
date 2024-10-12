@@ -160,6 +160,8 @@ def progress_bar(processed, total, start_time):
     print(f"\r{bar}", end="")
 
 imageRoot = args.path
+if not imageRoot.endswith("/"):
+    imageRoot += "/"
 imageFolder = "images"
 maskFolder = "masks"
 
@@ -216,12 +218,13 @@ def main():
     for i in range(1, numOfFrames+1):
         n = ""
         if i <= 9:
+            n = "000" + str(i)
+        elif i <= 99: 
             n = "00" + str(i)
-        else: 
-            if i <= 99:
-                n = "0" + str(i)
-            else:
-                n = str(i)
+        elif i <= 999:
+            n = "0" + str(i)
+        else:
+            n = str(i)
         
         path = imageRoot + imageFolder +"/{frame}.png".format(frame = n)
         image = cv2.imread(path)
