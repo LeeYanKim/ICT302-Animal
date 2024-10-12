@@ -54,7 +54,10 @@ const AnimalDetails: React.FC = () => {
       <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {videoUrl ? (
           <video controls width="600">
-            <source src={videoUrl} type="video/mp4" />
+            {videoUrl.endsWith('.mp4') && <source src={videoUrl} type="video/mp4" />}
+            {videoUrl.endsWith('.webm') && <source src={videoUrl} type="video/webm" />}
+            {videoUrl.endsWith('.mov') && <source src={videoUrl} type="video/quicktime" />}
+            {videoUrl.endsWith('.mkv') && <source src={videoUrl} type="video/x-matroska" />}
             Your browser does not support the video tag.
           </video>
         ) : (
