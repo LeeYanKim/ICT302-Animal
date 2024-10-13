@@ -45,12 +45,12 @@ namespace ICT302_BackendAPI.API.Controllers
                 {
                     string msg = String.Format("Invalid request: No file provided {0} is empty", file.FileName);
                     _logger.LogWarning(msg);
-                    return BadRequest(new { message = msg});
+                    return BadRequest(new { message = msg });
                 }
 
                 if (string.IsNullOrEmpty(animalName) || string.IsNullOrEmpty(animalType) || string.IsNullOrEmpty(dateOfBirth))
                 {
-                    string msg = String.Format("Invalid request: Missing animal details. AnimalName: {AnimalName}, AnimalType: {AnimalType}, DateOfBirth: {DateOfBirth}", animalName, animalType , dateOfBirth);
+                    string msg = String.Format("Invalid request: Missing animal details. AnimalName: {AnimalName}, AnimalType: {AnimalType}, DateOfBirth: {DateOfBirth}", animalName, animalType, dateOfBirth);
                     _logger.LogWarning(msg);
                     return BadRequest(new { message = msg });
                 }
@@ -77,7 +77,7 @@ namespace ICT302_BackendAPI.API.Controllers
                     // Prod environment
                     storedFilesPath = _configuration["StoredFilesPath"] ?? "";
                 }
-                
+
                 if (string.IsNullOrEmpty(storedFilesPath))
                 {
                     _logger.LogError("StoredFilesPath is not configured.");
@@ -135,6 +135,54 @@ namespace ICT302_BackendAPI.API.Controllers
                 return StatusCode(500, new { message = "Internal server error during file upload." });
             }
         }
+        //to delete an animal and all associated (graphics, videos)
+        [HttpDelete("animal/{animalId}")]
+        public async Task<IActionResult> DeleteAnimalAsync(Guid animalId)
+        {
+            try
+            {
+                // Fetch the animal from the database using the animalId
+                var animal = await _schemaRepository.GetAnimalByIDAsync(animalId);
+                if (animal == null)
+                {
+                    return NotFound(new { message = "Animal not found." });
+                }
+
+                // Determine stored file path
+                string storedFilesPath = _webHostEnvironment.IsDevelopment()
+                    ? _configuration["dev_StoredFilesPath"]
+                    : _configuration["StoredFilesPath"];
+
+                if (string.IsNullOrEmpty(storedFilesPath))
+                {
+                    _logger.LogError("StoredFilesPath is not configured.");
+                    return StatusCode(500, new { message = "Configuration error: StoredFilesPath is not defined." });
+                }
+
+                // Delete all associated video files
+                if (!string.IsNullOrEmpty(animal.VideoFileName))
+                {
+                    string filePath = Path.Combine(storedFilesPath, animal.VideoFileName);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                        _logger.LogInformation("File successfully deleted: {FilePath}", filePath);
+                    }
+                }
+
+                // Delete the animal record from the database
+                await _schemaRepository.DeleteAnimalAsync(animal);
+                _logger.LogInformation("Animal and associated videos deleted successfully: {AnimalID}", animalId);
+
+                return Ok(new { message = "Animal and all associated data deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting the animal.");
+                return StatusCode(500, new { message = "Internal server error during animal deletion." });
+            }
+        }
+
 
         private bool IsFileTypeAllowed(string fileExtension)
         {

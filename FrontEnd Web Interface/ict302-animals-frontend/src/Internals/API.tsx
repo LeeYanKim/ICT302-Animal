@@ -335,6 +335,19 @@ class API {
         const endpoint = this.endpoint?.download;
         return base + endpoint;
     }
+    /**
+ * 
+ * @returns The base URL path for the API File Upload controller endpoint/s
+ * This can be used to delete animals in the FileUploadController
+ * 
+ * Example: http://localhost:5173/api/upload/animal/{animalId}
+ */
+public static DeleteAnimal(animalId: string) {
+    this.ensureInitialized();
+    const base = this.endpoint?.baseUrl ?? '';
+    const endpoint = this.endpoint?.fileUpload;
+    return `${base}${endpoint}/animal/${animalId}`;
+}
 
 }
 
