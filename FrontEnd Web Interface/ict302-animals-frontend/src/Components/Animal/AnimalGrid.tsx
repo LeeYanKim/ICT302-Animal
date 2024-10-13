@@ -8,6 +8,7 @@ import AnimalCard from './AnimalCard';
 // Props interface for AnimalsGrid
 interface AnimalsGridProps {
   triggerRefresh: boolean;
+  onAnimalClick: (animalID: string) => void; // Add this line
 }
 
 interface AnimalData {
@@ -17,7 +18,7 @@ interface AnimalData {
   videoUploadDate: string | null;
 }
 
-const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh }) => {
+const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick }) => {
   const [animals, setAnimals] = useState<AnimalData[]>([]);
   const navigate = useNavigate();
 
@@ -41,10 +42,11 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh }) => {
   }, [triggerRefresh]);
 
   // Handle click to navigate to animal details page
-  const handleAnimalClick = (animalID: string) => {
-    console.log('Navigating to animalID:', animalID);
-    navigate(`/dashboard/animals/${animalID}`);
-  };
+  // *** consider remove this handleAnimalClick as onAnimalClick has same effect
+  //const handleAnimalClick = (animalID: string) => {
+    //console.log('Navigating to animalID:', animalID);
+    //navigate(`/dashboard/animals/${animalID}`);
+  //};
 
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
@@ -56,7 +58,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh }) => {
               animalName={animal.animalName}
               animalDOB={animal.videoUploadDate || ''}
               animalType={animal.animalType}
-              onClick={() => handleAnimalClick(animal.animalID)}
+              onClick={() => onAnimalClick(animal.animalID)}
             />
           </Grid2>
         ))}
