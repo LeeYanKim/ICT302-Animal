@@ -13,9 +13,8 @@ interface AnimalData {
   animalID: string;
   animalName: string;
   animalType: string;
-
   videoUploadDate: string;
-  videoFileName: string; // Include video file name
+  videoFileName: string;
 }
 
 const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) => {
@@ -25,10 +24,8 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  //const navigate = useNavigate();
-  const [selectedAnimal, setSelectedAnimal] = useState<AnimalData | null>(null); // State to hold the selected animal
-  const [animalData, setAnimalData] = useState<AnimalData | null>(null);
-
+  const [selectedAnimal, setSelectedAnimal] = useState<AnimalData | null>(null);
+  
   // Fetch uploaded animals
   const fetchUploadedAnimals = async () => {
     setLoading(true);
@@ -38,9 +35,11 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         throw new Error('Failed to fetch uploaded animals');
       }
       const data = await response.json();
-      setAnimals(data);
-      setFilteredAnimals(data);
-      const types: string[] = Array.from(new Set(data.map((animal: AnimalData) => animal.animalType)));
+      // Sort animals by upload date, most recent first
+      const sortedAnimals = data.sort((a: AnimalData, b: AnimalData) => new Date(b.videoUploadDate).getTime() - new Date(a.videoUploadDate).getTime());
+      setAnimals(sortedAnimals);
+      setFilteredAnimals(sortedAnimals);  // Initially set the filtered list to be the same
+      const types: string[] = Array.from(new Set(sortedAnimals.map((animal: AnimalData) => animal.animalType)));
       setAnimalTypes(types);
     } catch (error) {
       console.error(error);
@@ -54,17 +53,14 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     fetchUploadedAnimals();
   }, [triggerRefresh]);
 
-
   const handleAnimalClick = (animal: AnimalData) => {
-    setSelectedAnimal(animal); // Set the selected animal
+    setSelectedAnimal(animal);
   };
-
 
   const handleFilterButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Close menu
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -78,13 +74,12 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     setAnchorEl(null);
   };
 
- 
   if (loading) {
     return <Typography>Loading...</Typography>;
   }
 
   return (
-      <div>
+    <div>
       {error && <Typography color="error">{error}</Typography>}
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Recently uploaded:</Typography>
@@ -111,7 +106,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
           <p>Date of Birth: {new Date(selectedAnimal.videoUploadDate!).toLocaleDateString()}</p>
           {selectedAnimal.videoFileName ? (
             <video controls width="600">
-              <source src={API.Download() +`/animals/videos/${selectedAnimal.videoFileName}`}/>
+              <source src={API.Download() + `/animals/videos/${selectedAnimal.videoFileName}`} />
               Your browser does not support the video tag.
             </video>
           ) : (
@@ -120,8 +115,9 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         </Box>
       )}
 
+      {/* Display only the 6 most recent uploads */}
       <Grid container spacing={3}>
-        {filteredAnimals.map((animal) => (
+        {filteredAnimals.slice(0, 9).map((animal) => (  // Limit to 6 most recent animals
           <Grid item xs={12} sm={6} md={4} key={animal.animalID}>
             <Box
               sx={{
@@ -131,7 +127,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
                 height: '150px',
                 cursor: 'pointer',
               }}
-              onClick={() => handleAnimalClick(animal)} // Pass the entire animal object
+              onClick={() => handleAnimalClick(animal)}
             >
               {animal.animalName && (
                 <>
