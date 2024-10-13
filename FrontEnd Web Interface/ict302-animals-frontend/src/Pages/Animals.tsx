@@ -10,13 +10,17 @@ import {Grid2 as Grid, Box} from "@mui/material";
 import AnimalsGrid from '../Components/Animal/AnimalGrid';
 import AnimalDetails from "../Components/Animal/AnimalDetails"; // Adjust import based on your structure
 
-const Animals: React.FC = () => {
-  const userContext = useContext(FrontendContext);
+interface AnimalProps {
+  actTab: number; // Tab index
+}
+
+const Animals: React.FC<AnimalProps> = ({actTab}) => {
+  const frontendContext = useContext(FrontendContext);
   const navigate = useNavigate();
   const [animals, setAnimals] = useState<[]>([]);
   //below two lines are newly added
   const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState(0); // 0 for AnimalGrid, 1 for AnimalDetails
+  const [activeTab, setActiveTab] = useState(actTab); // 0 for AnimalGrid, 1 for AnimalDetails
 
   const handelDBConnectionTest = async () => {
     try {
@@ -35,7 +39,7 @@ const Animals: React.FC = () => {
 
   useEffect(() => {
     handelDBConnectionTest();
-  }, []);
+  }, [activeTab]);
 
   // Define the handleAnimalClick function here
   const handleAnimalClick = (animalId: string) => {
@@ -55,7 +59,7 @@ const Animals: React.FC = () => {
       )}
 
       {activeTab === 1 && selectedAnimalId && (
-        <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
       )}
       </Box>
   );

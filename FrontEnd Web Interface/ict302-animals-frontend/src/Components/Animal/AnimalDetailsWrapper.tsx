@@ -9,7 +9,7 @@ const AnimalDetailsWrapper: React.FC<{ activeTab: number; setActiveTab: React.Di
     return <div>No animal ID found</div>;
   }
 
-  return <AnimalDetails animalId={animalId} activeTab={activeTab} setActiveTab={setActiveTab} />;
+  return <AnimalDetails animalId={animalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={()=>{}}/>;
 };
 
 export default AnimalDetailsWrapper;

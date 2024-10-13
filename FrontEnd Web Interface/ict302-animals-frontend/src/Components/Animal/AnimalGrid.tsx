@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Grid as Grid2, Box, Typography } from '@mui/material';
+import { Grid2 as Grid, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
 import { Theme } from '@mui/material/styles'; // Import the Theme type
@@ -50,9 +50,9 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
 
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
-      <Grid2 container spacing={2} columns={12} sx={{ mb: (theme: Theme) => theme.spacing(2) }}>
+      <Grid container spacing={2} columns={12} sx={{ mb: (theme: Theme) => theme.spacing(2) }}>
         {animals.map((animal) => (
-          <Grid2 item xs={12} sm={6} md={4} key={animal.animalID}>
+          <Grid sx={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
             <AnimalCard
               animalID={animal.animalID}
               animalName={animal.animalName}
@@ -60,9 +60,9 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
               animalType={animal.animalType}
               onClick={() => onAnimalClick(animal.animalID)}
             />
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
     </Box>
   );
 };

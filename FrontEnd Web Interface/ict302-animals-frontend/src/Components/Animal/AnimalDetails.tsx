@@ -18,16 +18,18 @@ interface AnimalDetailsProps {
   animalId: string; // Expecting animalId as a prop
   activeTab: number; // Tab index
   setActiveTab: React.Dispatch<React.SetStateAction<number>>; // Function to change the active tab
+  setSelectedAnimalId: React.Dispatch<React.SetStateAction<string | null>>; // Function to change the active tab
 }
 
 
-const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab }) => {
+const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
 //const AnimalDetails: React.FC = () => {
   //const { animalId } = useParams<{ animalId: string }>();
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
+  const [backBtnClicked, setBackBtnClicked] = useState(false);
 
   // Ensure animalId is available before making a request
   useEffect(() => {
@@ -49,6 +51,12 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
 
     fetchAnimalData();
   }, [animalId]);
+
+const handleBackBtnClick = () => {
+  navigate('/dashboard/animals');
+  setActiveTab(0);
+  setSelectedAnimalId(null);
+}
 
   if (loading) {
     return (
@@ -128,7 +136,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
 
       {/* Back Button */}
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-        <Button variant="contained" onClick={() => navigate('/dashboard/animals/')}>
+        <Button variant="contained" onClick={handleBackBtnClick}>
           Back to Animals
         </Button>
       </Box>
