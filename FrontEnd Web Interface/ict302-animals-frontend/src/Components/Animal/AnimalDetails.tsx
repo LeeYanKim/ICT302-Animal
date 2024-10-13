@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { Box, Typography, CircularProgress, Button } from "@mui/material";
 import API from "../../Internals/API"; 
 import { useNavigate } from 'react-router-dom';
+import GenerateButton from "../Generation/GenerateButton";
 
 interface Animal {
   animalID: string;
@@ -64,10 +65,13 @@ const AnimalDetails: React.FC = () => {
       {/* Display video */}
       <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {videoUrl ? (
+          <>
           <video controls width="600">
             <source src={videoUrl} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
+          <GenerateButton/>
+          </>
         ) : (
           <Typography>No video available.</Typography>
         )}
@@ -82,6 +86,7 @@ const AnimalDetails: React.FC = () => {
             Back
           </Button>
         </Box>
+        
     </Box>
   );
 };
