@@ -35,10 +35,12 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         throw new Error('Failed to fetch uploaded animals');
       }
       const data = await response.json();
-      // Sort animals by upload date, most recent first
-      const sortedAnimals = data.sort((a: AnimalData, b: AnimalData) => new Date(b.videoUploadDate).getTime() - new Date(a.videoUploadDate).getTime());
+      const sortedAnimals = data.sort((a: AnimalData, b: AnimalData) => {
+        return new Date(b.videoUploadDate).getTime() - new Date(a.videoUploadDate).getTime();
+      });
+
       setAnimals(sortedAnimals);
-      setFilteredAnimals(sortedAnimals);  // Initially set the filtered list to be the same
+      setFilteredAnimals(sortedAnimals); // Initially set the filtered list to be the same
       const types: string[] = Array.from(new Set(sortedAnimals.map((animal: AnimalData) => animal.animalType)));
       setAnimalTypes(types);
     } catch (error) {
