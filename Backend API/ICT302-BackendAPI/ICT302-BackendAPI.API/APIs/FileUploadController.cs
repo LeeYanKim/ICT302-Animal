@@ -141,38 +141,11 @@ namespace ICT302_BackendAPI.API.Controllers
         {
             try
             {
-                // Fetch the animal from the database using the animalId
-                var animal = await _schemaRepository.GetAnimalByIDAsync(animalId);
-                if (animal == null)
+                bool success = await DeleteAnimal(animalId);
+                if (!success)
                 {
                     return NotFound(new { message = "Animal not found." });
                 }
-
-                // Determine stored file path
-                string storedFilesPath = _webHostEnvironment.IsDevelopment()
-                    ? _configuration["dev_StoredFilesPath"]
-                    : _configuration["StoredFilesPath"];
-
-                if (string.IsNullOrEmpty(storedFilesPath))
-                {
-                    _logger.LogError("StoredFilesPath is not configured.");
-                    return StatusCode(500, new { message = "Configuration error: StoredFilesPath is not defined." });
-                }
-
-                // Delete all associated video files
-                if (!string.IsNullOrEmpty(animal.VideoFileName))
-                {
-                    string filePath = Path.Combine(storedFilesPath, animal.VideoFileName);
-                    if (System.IO.File.Exists(filePath))
-                    {
-                        System.IO.File.Delete(filePath);
-                        _logger.LogInformation("File successfully deleted: {FilePath}", filePath);
-                    }
-                }
-
-                // Delete the animal record from the database
-                await _schemaRepository.DeleteAnimalAsync(animal);
-                _logger.LogInformation("Animal and associated videos deleted successfully: {AnimalID}", animalId);
 
                 return Ok(new { message = "Animal and all associated data deleted successfully." });
             }
@@ -181,6 +154,61 @@ namespace ICT302_BackendAPI.API.Controllers
                 _logger.LogError(ex, "An error occurred while deleting the animal.");
                 return StatusCode(500, new { message = "Internal server error during animal deletion." });
             }
+        }
+
+
+
+        private bool DeleteFile(string storedFilesPath, string videoFileName)
+        {
+            if (!string.IsNullOrEmpty(videoFileName))
+            {
+                string filePath = Path.Combine(storedFilesPath, videoFileName);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                    _logger.LogInformation("File successfully deleted: {FilePath}", filePath);
+                    return true;
+                }
+                else
+                {
+                    _logger.LogWarning("File not found: {FilePath}", filePath);
+                }
+            }
+            return false;
+        }
+        private async Task<bool> DeleteAnimal(Guid animalId)
+        {
+            var animal = await _schemaRepository.GetAnimalByIDAsync(animalId);
+            if (animal == null)
+            {
+                return false; // Animal not found
+            }
+
+            // Delete all associated video files
+            string storedFilesPath = GetStoredFilesPath();
+            DeleteFile(storedFilesPath, animal.VideoFileName);
+
+            // Delete the animal record from the database
+            await _schemaRepository.DeleteAnimalAsync(animal);
+            _logger.LogInformation("Animal and associated videos deleted successfully: {AnimalID}", animalId);
+
+            return true;
+        }
+
+
+        private string GetStoredFilesPath()
+        {
+            string storedFilesPath = _webHostEnvironment.IsDevelopment()
+                ? _configuration["dev_StoredFilesPath"]
+                : _configuration["StoredFilesPath"];
+
+            if (string.IsNullOrEmpty(storedFilesPath))
+            {
+                _logger.LogError("StoredFilesPath is not configured.");
+                throw new InvalidOperationException("StoredFilesPath is not defined.");
+            }
+
+            return storedFilesPath;
         }
 
 
@@ -195,5 +223,40 @@ namespace ICT302_BackendAPI.API.Controllers
             // Remove any character that is not a letter, digit, underscore, or dash
             return Regex.Replace(fileName, "[^a-zA-Z0-9_-]", "");
         }
+
+        [HttpDelete("animal/{animalId}/graphic/{graphicId}")]
+public async Task<IActionResult> DeleteGraphicAsync(Guid animalId, string graphicId)
+{
+    try
+    {
+        // Fetch the animal from the database using the animalId
+        var animal = await _schemaRepository.GetAnimalByIDAsync(animalId);
+        if (animal == null)
+        {
+            return NotFound(new { message = "Animal not found." });
+        }
+
+        // Determine the stored file path
+        string storedFilesPath = GetStoredFilesPath();
+
+        // Delete the graphic 
+        bool fileDeleted = DeleteFile(storedFilesPath, graphicId);
+        if (!fileDeleted)
+        {
+            return NotFound(new { message = "Graphic file not found." });
+        }
+
+        // Will need to change when the structure of animal changes
+
+        return Ok(new { message = "Graphic deleted successfully." });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred while deleting the graphic.");
+        return StatusCode(500, new { message = "Internal server error during graphic deletion." });
+    }
+}
+
+
     }
 }

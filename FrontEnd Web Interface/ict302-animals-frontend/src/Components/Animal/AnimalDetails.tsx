@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography, CircularProgress, Button } from "@mui/material";
-import API from "../../Internals/API"; 
+import API from "../../Internals/API";
 import { useNavigate } from 'react-router-dom';
+import DeleteGraphicButton from './DeleteGraphicButton';
 
 interface Animal {
   animalID: string;
@@ -46,6 +47,10 @@ const AnimalDetails: React.FC = () => {
       </Box>
     );
   }
+  const handleDeleteSuccess = () => {
+    // Implement your logic to refresh the graphics list or handle UI changes
+    console.log('Graphic deleted successfully');
+  };
 
   if (!animalData) {
     return <div>No animal data available.</div>;
@@ -60,7 +65,7 @@ const AnimalDetails: React.FC = () => {
       <Typography variant="h4">{animalData.animalName}</Typography>
       <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
       <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
-      
+
       {/* Display video */}
       <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {videoUrl ? (
@@ -78,10 +83,23 @@ const AnimalDetails: React.FC = () => {
           onClick={() => {
             navigate('/dashboard/animals/');
           }}
-          >
-            Back
-          </Button>
-        </Box>
+        >
+          Back
+        </Button>
+        {animalId ? (
+          videoUrl ? (
+            <DeleteGraphicButton
+              animaltoDelId={animalId}
+              graphictoDelId={videoUrl}
+              onDeleteSuccess={handleDeleteSuccess}
+            />
+          ) : (
+            <Typography>No video available.</Typography>
+          )
+        ) : (
+          <Typography>No animal selected.</Typography>
+        )}
+      </Box>
     </Box>
   );
 };
