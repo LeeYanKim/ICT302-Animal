@@ -7,7 +7,7 @@ using Google.Apis.Auth.OAuth2;
 
 
 using ICT302_BackendAPI.Utility;
-
+using System.Text.Json.Serialization;
 
 var cors = "_localCORSOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +17,13 @@ FirebaseApp.Create(new AppOptions()
 {
     Credential = GoogleCredential.FromFile("wildvision-firebase-adminsdk.json") //To check
 });
-
+// Add services to the container.
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+    
 // Allowing Cross-Origin from frontend to API via localhost on different ports
 builder.Services.AddCors(options =>
 {

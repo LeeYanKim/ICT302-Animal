@@ -31,75 +31,60 @@ namespace ICT302_BackendAPI.API.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-<<<<<<< Updated upstream
-     [HttpGet("animals/details/{id}")]
-=======
-      [HttpGet("animals/details/{id}")]
->>>>>>> Stashed changes
-public async Task<IActionResult> GetAnimalDetails(Guid id)
-{
-    try
-    {
-        var animal = await _schemaRepository.GetAnimalByIDAsync(id);
-        if (animal == null)
+        [HttpGet("animals/details/{id}")]
+        public async Task<IActionResult> GetAnimalDetails(Guid id)
         {
-            return NotFound(new { message = "Animal not found" });
+            try
+            {
+                var animal = await _schemaRepository.GetAnimalByIDAsync(id);
+                if (animal == null)
+                {
+                    return NotFound(new { message = "Animal not found" });
+                }
+
+                // Construct video URLs dynamically based on the filename
+                foreach (var graphic in animal.Graphics)
+                {
+                    graphic.FilePath = $"{Request.Scheme}://{Request.Host}/api/files/animals/videos/{graphic.FilePath}";
+                }
+
+                return Ok(animal);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving animal details.");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
         }
 
-        // Construct video URLs dynamically based on the filename
-        foreach (var graphic in animal.Graphics)
+        [HttpGet("animals/videos/{fileName}")]
+        public IActionResult GetAnimalVideo(string fileName)
         {
-            graphic.FilePath = $"{Request.Scheme}://{Request.Host}/api/files/animals/videos/{graphic.FilePath}";
+            try
+            {
+                string storedFilesPath = _webHostEnvironment.IsDevelopment()
+                    ? _configuration["dev_StoredFilesPath"]
+                    : _configuration["StoredFilesPath"];
+
+                var filePath = Path.Combine(storedFilesPath, fileName);
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    _logger.LogWarning("Requested video file not found: {FilePath}", filePath);
+                    return NotFound(new { message = "Video file not found." });
+                }
+
+                var mimeType = GetMimeType(filePath);
+                var videoStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                return File(videoStream, mimeType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while serving video file: {FileName}", fileName);
+                return StatusCode(500, new { message = "Internal server error while fetching video." });
+            }
         }
 
-        return Ok(animal);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error retrieving animal details.");
-        return StatusCode(500, new { message = "Internal server error" });
-    }
-}
-
-
-
-<<<<<<< Updated upstream
-[HttpGet("animals/videos/{fileName}")]
-=======
-
-     [HttpGet("animals/videos/{fileName}")]
->>>>>>> Stashed changes
-public IActionResult GetAnimalVideo(string fileName)
-{
-    try
-    {
-        string storedFilesPath = _webHostEnvironment.IsDevelopment()
-            ? _configuration["dev_StoredFilesPath"]
-            : _configuration["StoredFilesPath"];
-
-        var filePath = Path.Combine(storedFilesPath, fileName);
-
-        if (!System.IO.File.Exists(filePath))
-        {
-            _logger.LogWarning("Requested video file not found: {FilePath}", filePath);
-            return NotFound(new { message = "Video file not found." });
-        }
-
-        var mimeType = GetMimeType(filePath);
-        var videoStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        return File(videoStream, mimeType, enableRangeProcessing: true);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error occurred while serving video file: {FileName}", fileName);
-        return StatusCode(500, new { message = "Internal server error while fetching video." });
-    }
-}
-
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
         // Endpoint to get the list of animals
         [HttpGet("animals/list")]
         public async Task<IActionResult> GetAnimalsListAsync()
@@ -135,4 +120,4 @@ public IActionResult GetAnimalVideo(string fileName)
             };
         }
     }
-} 
+}

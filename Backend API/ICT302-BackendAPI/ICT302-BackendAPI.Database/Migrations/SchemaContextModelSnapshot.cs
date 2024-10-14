@@ -791,14 +791,12 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Navigation("User");
                 });
-<<<<<<< Updated upstream
-=======
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Animal", b =>
                 {
                     b.Navigation("Graphics");
                 });
->>>>>>> Stashed changes
+
 #pragma warning restore 612, 618
         }
     }

@@ -1,4 +1,3 @@
-// SchemaRepository.cs
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -19,35 +18,13 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<IEnumerable<Animal>> GetAnimalsAsync()
         {
-<<<<<<< Updated upstream
-            return await _ctx.Animals.ToListAsync();
-        }
-
-       public async Task<Animal> GetAnimalByIDAsync(Guid id)
-{
-    var animal = await _ctx.Animals
-        .Include(a => a.Graphics)  // Eager load graphics
-        .FirstOrDefaultAsync(a => a.AnimalID == id);
-
-    // Ensure Graphics is never null
-    animal.Graphics ??= new List<Graphic>();
-    return animal;
-}
-
-
-
-        // Get animal by name and date of birth
-        public async Task<Animal> GetAnimalByNameAndDOBAsync(string name, DateTime dob)
-        {
-            return await _ctx.Animals.FirstOrDefaultAsync(a => a.AnimalName == name && a.AnimalDOB == dob);
-=======
             return await _ctx.Animals.Include(a => a.Graphics).ToListAsync();
         }
 
         public async Task<Animal> GetAnimalByIDAsync(Guid id)
         {
-            return await _ctx.Animals.Include(a => a.Graphics).FirstOrDefaultAsync(a => a.AnimalID == id);
->>>>>>> Stashed changes
+            return await _ctx.Animals.Include(a => a.Graphics)
+                                     .FirstOrDefaultAsync(a => a.AnimalID == id);
         }
 
         public async Task<Animal> CreateAnimalAsync(Animal animal)
@@ -70,13 +47,6 @@ namespace ICT302_BackendAPI.Database.Repositories
             return animal;
         }
 
-<<<<<<< Updated upstream
-        // Delete an animal
-        public async Task<int> DeleteAnimalAsync(Animal animal)
-        {
-            _ctx.Animals.Remove(animal);
-            return await _ctx.SaveChangesAsync();
-=======
         public async Task<Animal> UpdateAnimalVideoDataAsync(Guid animalId, string videoFileName, DateTime uploadDate)
         {
             var animal = await _ctx.Animals.FindAsync(animalId);
@@ -96,13 +66,11 @@ namespace ICT302_BackendAPI.Database.Repositories
             return animal;
         }
 
-        // New method to get animal by name and DOB
+        // **Implementation of the missing method**
         public async Task<Animal> GetAnimalByNameAndDOBAsync(string name, DateTime dob)
         {
-            return await _ctx.Animals
-                .Include(a => a.Graphics)
-                .FirstOrDefaultAsync(a => a.AnimalName == name && a.AnimalDOB == dob);
->>>>>>> Stashed changes
+            return await _ctx.Animals.Include(a => a.Graphics)
+                                     .FirstOrDefaultAsync(a => a.AnimalName == name && a.AnimalDOB == dob);
         }
     }
 }

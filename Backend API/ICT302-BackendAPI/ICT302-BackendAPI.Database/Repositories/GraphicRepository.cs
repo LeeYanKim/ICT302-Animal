@@ -46,15 +46,6 @@ namespace ICT302_BackendAPI.Database.Repositories
             await _ctx.SaveChangesAsync();
             return graphic;
         }
-<<<<<<< Updated upstream
 
-        public async Task<int> DeleteGraphicAsync(Graphic graphic)
-        {
-            _ctx.Graphics.Remove(graphic);
-            return await _ctx.SaveChangesAsync();
-        }
-        
-=======
->>>>>>> Stashed changes
     }
 }

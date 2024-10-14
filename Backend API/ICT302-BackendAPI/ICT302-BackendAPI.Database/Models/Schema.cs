@@ -41,12 +41,6 @@ public class AccessType
         public string AnimalType { get; set; }
        // Navigation property
         public virtual ICollection<Graphic> Graphics { get; set; } = new List<Graphic>();
-
-<<<<<<< Updated upstream
-=======
-    // Navigation property: One animal can have many graphics (e.g., videos, images)
-    public virtual ICollection<Graphic> Graphics { get; set; } = new List<Graphic>();
->>>>>>> Stashed changes
     }
 [Table("animalaccess")]
 public class AnimalAccess
@@ -149,11 +143,6 @@ public class Graphic
 
     [ForeignKey("AnimalID")]
     public virtual Animal Animal { get; set; }
-<<<<<<< Updated upstream
-    
-=======
-
->>>>>>> Stashed changes
 }
 
 [Table("jobdetails")]
