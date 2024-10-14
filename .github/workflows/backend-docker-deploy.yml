@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ github.repository_owner }}/ict302-backend
+  IMAGE_NAME: $(echo github.repository_owner | tr '[A-Z]' '[a-z]')/ict302-backend
 
 jobs:
   Build_Docker:
