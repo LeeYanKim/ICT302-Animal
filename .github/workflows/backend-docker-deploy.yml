@@ -1,4 +1,4 @@
-name: Docker Deploy
+name: Backend Docker Deploy
 
 on:   
   push:
@@ -32,7 +32,8 @@ jobs:
           ls -a
 
       - name: Build image
-        run: docker build "./Backend API/ICT302-BackendAPI/"  --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+        working-directory : ./Backend API/ICT302-BackendAPI/
+        run: docker build . --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
 
       - name: Push image
         run: |
