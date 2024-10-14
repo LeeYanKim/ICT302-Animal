@@ -119,7 +119,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         open={isAnimalFormOpen}
         handleClose={() => setIsAnimalFormOpen(false)}
         addNewAnimal={handleAnimalFormSubmit}
-        requireFile={false} // No need to require file here as it's already selected
+        requireFile={false} 
       />
 
       {/* Upload form dialog */}
@@ -128,6 +128,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         handleClose={handleUploadFormClose}
         animalDetails={animalDetails}
         fileToUpload={fileToUpload}
+        onUploadSuccess={onUploadSuccess}
       />
 
       {/* Snackbar for error messages */}
