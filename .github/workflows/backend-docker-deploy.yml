@@ -16,10 +16,10 @@ jobs:
 			packages: write
 			contents: read
 
-    steps:
+  steps:
 
-		- name: Push image
-        uses: trentjones21/github-docker@master
-		with:
-			accessToken: ${{ secrets.GITHUB_TOKEN }}
-			context: ./Backend API/ICT302-BackendAPI/
+  - name: Push image
+    uses: trentjones21/github-docker@master
+    with:
+      accessToken: ${{ secrets.GITHUB_TOKEN }}
+      context: ./Backend API/ICT302-BackendAPI/
