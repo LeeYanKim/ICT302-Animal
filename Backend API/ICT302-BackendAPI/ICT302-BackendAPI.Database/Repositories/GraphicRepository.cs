@@ -33,12 +33,20 @@ namespace ICT302_BackendAPI.Database.Repositories
             return graphic;
         }
 
+        public async Task<int> DeleteGraphicAsync(Graphic graphic)
+        {
+            _ctx.Graphics.Remove(graphic);
+            return await _ctx.SaveChangesAsync();
+        }
+
+        // Implement the missing method
         public async Task<Graphic> UpdateGraphicAsync(Graphic graphic)
         {
             _ctx.Graphics.Update(graphic);
             await _ctx.SaveChangesAsync();
             return graphic;
         }
+<<<<<<< Updated upstream
 
         public async Task<int> DeleteGraphicAsync(Graphic graphic)
         {
@@ -46,5 +54,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return await _ctx.SaveChangesAsync();
         }
         
+=======
+>>>>>>> Stashed changes
     }
 }

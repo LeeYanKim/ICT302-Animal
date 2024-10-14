@@ -31,7 +31,11 @@ namespace ICT302_BackendAPI.API.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
+<<<<<<< Updated upstream
      [HttpGet("animals/details/{id}")]
+=======
+      [HttpGet("animals/details/{id}")]
+>>>>>>> Stashed changes
 public async Task<IActionResult> GetAnimalDetails(Guid id)
 {
     try
@@ -59,7 +63,12 @@ public async Task<IActionResult> GetAnimalDetails(Guid id)
 
 
 
+<<<<<<< Updated upstream
 [HttpGet("animals/videos/{fileName}")]
+=======
+
+     [HttpGet("animals/videos/{fileName}")]
+>>>>>>> Stashed changes
 public IActionResult GetAnimalVideo(string fileName)
 {
     try
@@ -87,6 +96,10 @@ public IActionResult GetAnimalVideo(string fileName)
     }
 }
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         // Endpoint to get the list of animals
         [HttpGet("animals/list")]
         public async Task<IActionResult> GetAnimalsListAsync()
@@ -122,4 +135,4 @@ public IActionResult GetAnimalVideo(string fileName)
             };
         }
     }
-}
+} 

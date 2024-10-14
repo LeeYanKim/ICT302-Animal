@@ -3,29 +3,40 @@ using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+<<<<<<< Updated upstream
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+=======
+>>>>>>> Stashed changes
 using System.IO;
 
-namespace ICT302_BackendAPI.Controllers.Database
+namespace ICT302_BackendAPI.Controllers.Database;
+
+[Route("api/db")]
+[ApiController]
+public class GraphicController : ControllerBase
 {
-    [Route("api/db")]
-    [ApiController]
-    public class GraphicController : ControllerBase
+    private readonly IGraphicRepository _graphicRepo;
+    private readonly ILogger<GraphicController> _logger;
+
+    public GraphicController(IGraphicRepository graphicRepo, ILogger<GraphicController> logger)
     {
-        private readonly IGraphicRepository _graphicRepo;
-        private readonly ILogger<GraphicController> _logger;
+        _graphicRepo = graphicRepo;
+        _logger = logger;
+    }
 
-        public GraphicController(IGraphicRepository graphicRepo, ILogger<GraphicController> logger)
+    [HttpPost("graphic")]
+    public async Task<ActionResult> AddGraphicAsync([FromBody] Graphic graphic)
+    {
+        try
         {
-            _graphicRepo = graphicRepo;
-            _logger = logger;
+            graphic.GPCID = Guid.NewGuid();
+            return Ok(await _graphicRepo.CreateGraphicAsync(graphic));
         }
-
-        [HttpPost("graphic")]
-        public async Task<ActionResult> AddGraphicAsync([FromBody] Graphic graphic)
+        catch (Exception ex)
         {
+<<<<<<< Updated upstream
             try
             {
                 graphic.GPCID = Guid.NewGuid();
@@ -150,6 +161,10 @@ namespace ICT302_BackendAPI.Controllers.Database
                     message = ex.Message
                 });
             }
+=======
+            _logger.LogError(ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+>>>>>>> Stashed changes
         }
     // Endpoint to get a video by GPCID
         [HttpGet("graphics/videos/{gpcID}")]
@@ -198,4 +213,67 @@ namespace ICT302_BackendAPI.Controllers.Database
         }
 
     }
+
+    [HttpGet("graphics")]
+    public async Task<ActionResult> GetGraphicsAsync()
+    {
+        try
+        {
+            var graphics = await _graphicRepo.GetGraphicsAsync();
+            return Ok(graphics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("graphic/{id}")]
+    public async Task<IActionResult> GetGraphicByID(Guid id)
+    {
+        try
+        {
+            var graphic = await _graphicRepo.GetGraphicByIDAsync(id);
+            if (graphic == null)
+                return NotFound(new { message = "Graphic not found" });
+
+            return Ok(graphic);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+        }
+    }
+
+  [HttpDelete("graphic/{id}")]
+public async Task<IActionResult> DeleteGraphic(Guid id)
+{
+    try
+    {
+        var existingGraphic = await _graphicRepo.GetGraphicByIDAsync(id);
+        if (existingGraphic == null)
+        {
+            return NotFound(new
+            {
+                statusCode = 404,
+                message = "Record not found"
+            });
+        }
+
+        await _graphicRepo.DeleteGraphicAsync(existingGraphic);
+        return NoContent();
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex.Message);
+        return StatusCode(StatusCodes.Status500InternalServerError, new
+        {
+            statusCode = 500,
+            message = ex.Message
+        });
+    }
+}
+
 }
