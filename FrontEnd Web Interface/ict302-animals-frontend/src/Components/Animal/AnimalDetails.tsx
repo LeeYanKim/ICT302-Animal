@@ -117,10 +117,8 @@ const AnimalDetails: React.FC = () => {
             border: '1px solid #ccc', 
             borderRadius: '8px', 
             padding: 3 
-          }}
-        >
-          Back
-        </Button>
+          }}>
+        
         {animalId ? (
           videoUrl ? (
             <DeleteGraphicButton
@@ -141,7 +139,7 @@ const AnimalDetails: React.FC = () => {
           <Box sx={{ flex: 1, maxWidth: '1000px' }}>  {/* Set maxWidth here */}
             {videoUrl && PlayerOpen ? (
               <>
-               <Button 
+              <Button 
                   component="label" 
                   variant="contained" 
                   sx={{  marginBottom: 2 }}
@@ -153,8 +151,6 @@ const AnimalDetails: React.FC = () => {
                   <source src={videoUrl} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
-               
-                
               </>
             ) : (
               <Button 
@@ -190,7 +186,7 @@ const AnimalDetails: React.FC = () => {
               )
             )}
           </Box>
-        </Box>
+        
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="subtitle1" color="text.secondary">Generated Video:</Typography>
@@ -210,8 +206,7 @@ const AnimalDetails: React.FC = () => {
             Back to Dashboard
           </Button>
         </Box>
-      </Box>
-
+      
       {/* New Generation Dialog */}
       {newGenOpen && (
         <NewGeneration 
@@ -221,7 +216,7 @@ const AnimalDetails: React.FC = () => {
           graphicID={"Test"} 
         />
       )}
-    </>
+    </Box>
   );
 };
 
