@@ -1,0 +1,52 @@
+name: Docker Deploy
+
+on:   
+  push:
+    # Publish `dev` as Docker `latest` image.
+    branches:
+      - dev
+  
+  # Manual run
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ict302-backend
+
+jobs:
+  Build_Docker:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+
+      #Create a env file for github auth token
+      - name : Create env file
+        run: |
+          touch .env
+          echo GITHUB_AUTH=${{ secrets.GITHUB_TOKEN }} >> .env
+          echo IS_PROD="1" >> .env
+          echo "ls -a"
+          ls -a
+
+      - name: Build image
+        run: docker build "./Backend API/ICT302-BackendAPI/"  --file Dockerfile --tag $IMAGE_NAME --label "runnumber=${GITHUB_RUN_ID}"
+
+      - name: Push image
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push ghcr.io/$IMAGE_ID:$VERSION
