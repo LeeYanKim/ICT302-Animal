@@ -1,4 +1,4 @@
-﻿// SchemaController.cs
+﻿﻿// SchemaController.cs
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -22,6 +22,7 @@ namespace ICT302_BackendAPI.Controllers.Database
             _logger = logger;
         }
 
+ 
         [HttpPost("animal")]
         public async Task<ActionResult> AddAnimalAsync([FromBody] Animal animal)
         {
@@ -39,26 +40,8 @@ namespace ICT302_BackendAPI.Controllers.Database
                     message = ex.Message
                 });
             }
-        }
-
-        [HttpGet("animals")]
-        public async Task<ActionResult> GetAnimalsAsync()
-        {
-            try
-            {
-                var animals = await _schemaRepo.GetAnimalsAsync();
-                return Ok(animals);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving animals.");
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    statusCode = 500,
-                    message = ex.Message
-                });
-            }
-        }
+        } 
+       
 
         [HttpGet("animal/{id}")]
         public async Task<IActionResult> GetAnimalByID(Guid id)
@@ -79,6 +62,35 @@ namespace ICT302_BackendAPI.Controllers.Database
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving animal.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    statusCode = 500,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("animal/{id}")]
+        public async Task<IActionResult> DeleteAnimal(Guid id)
+        {
+            try
+            {
+                var existingAnimal = await _schemaRepo.GetAnimalByIDAsync(id);
+                if (existingAnimal == null)
+                {
+                    return NotFound(new
+                    {
+                        statusCode = 404,
+                        message = "Record not found"
+                    });
+                }
+
+                await _schemaRepo.DeleteAnimalAsync(existingAnimal);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting animal.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     statusCode = 500,
@@ -112,35 +124,6 @@ namespace ICT302_BackendAPI.Controllers.Database
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating animal.");
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    statusCode = 500,
-                    message = ex.Message
-                });
-            }
-        }
-
-        [HttpDelete("animal/{id}")]
-        public async Task<IActionResult> DeleteAnimal(Guid id)
-        {
-            try
-            {
-                var existingAnimal = await _schemaRepo.GetAnimalByIDAsync(id);
-                if (existingAnimal == null)
-                {
-                    return NotFound(new
-                    {
-                        statusCode = 404,
-                        message = "Record not found"
-                    });
-                }
-
-                await _schemaRepo.DeleteAnimalAsync(existingAnimal);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting animal.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     statusCode = 500,

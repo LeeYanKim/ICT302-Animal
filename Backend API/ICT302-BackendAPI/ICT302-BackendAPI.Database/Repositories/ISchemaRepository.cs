@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ICT302_BackendAPI.Database.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
@@ -16,10 +13,6 @@ namespace ICT302_BackendAPI.Database.Repositories
         Task<Animal> GetAnimalByNameAndDOBAsync(string name, DateTime dob);
         Task<Animal> CreateAnimalAsync(Animal animal);
         Task<Animal> UpdateAnimalAsync(Animal animal);
-
         Task<int> DeleteAnimalAsync(Animal animal);
-
-        Task<Animal> UpdateAnimalVideoDataAsync(Guid animalId, string videoFileName, DateTime uploadDate);
-
     }
 }
