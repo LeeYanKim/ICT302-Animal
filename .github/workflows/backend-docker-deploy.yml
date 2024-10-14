@@ -1,25 +1,23 @@
 name: Backend Docker Deploy
 
-on:   
-	push:
+on:
+  push:
     # Publish `dev` as Docker `latest` image.
-		branches:
-			- dev
+    branches:
+    - dev
 
-	# Manual run
-	workflow_dispatch:
+  # Manual run
+  workflow_dispatch:
 
 jobs:
-	Build_Docker:
-		runs-on: ubuntu-latest
-		permissions:
-			packages: write
-			contents: read
-
-  steps:
-
-  - name: Push image
-    uses: trentjones21/github-docker@master
-    with:
-      accessToken: ${{ secrets.GITHUB_TOKEN }}
-      context: ./Backend API/ICT302-BackendAPI/
+    Build_Docker:
+        runs-on: ubuntu-latest
+        permissions:
+            packages: write
+            contents: read
+        steps:
+            - name: Push image
+              uses: trentjones21/github-docker@master
+              with:
+                  accessToken: ${{ secrets.GITHUB_TOKEN }}
+                  context: ./Backend API/ICT302-BackendAPI/
