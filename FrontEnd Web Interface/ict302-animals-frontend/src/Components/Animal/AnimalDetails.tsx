@@ -1,24 +1,32 @@
+// AnimalDetails.tsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Box, Typography, CircularProgress, Button } from "@mui/material";
-import API from "../../Internals/API"; 
-import { useNavigate } from 'react-router-dom';
-import GenerateButton from "../Generation/GenerateButton";
+import API from "../../Internals/API";
+
+interface GraphicData {
+  gpcID: string;
+  gpcName: string;
+  gpcDateUpload: string;
+  filePath: string;
+  animalID: string;
+  gpcSize: number;
+}
 
 interface Animal {
   animalID: string;
   animalName: string;
   animalType: string;
   animalDOB: string;
-  videoFileName?: string;
+  graphics: GraphicData[];
 }
 
 const AnimalDetails: React.FC = () => {
-  const { animalId } = useParams<{ animalId: string }>(); // Extract animalId from the URL
+  const { animalId } = useParams<{ animalId: string }>();
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
-  // Ensure animalId is available before making a request
+
   useEffect(() => {
     if (!animalId) return;
 
@@ -28,12 +36,17 @@ const AnimalDetails: React.FC = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch animal data");
         }
-        const data = await response.json();
-        setAnimalData(data);
+        const data: Animal = await response.json();
+
+        // Handle $id and $ref if ReferenceHandler.Preserve is used
+        // Remove $id and $ref properties from the data
+        const cleanedData = JSON.parse(JSON.stringify(data));
+
+        setAnimalData(cleanedData);
       } catch (error) {
         console.error("Error fetching animal data:", error);
       } finally {
-        setLoading(false); // Set loading to false after API call
+        setLoading(false);
       }
     };
 
@@ -43,7 +56,7 @@ const AnimalDetails: React.FC = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress /> {/* Better loading feedback */}
+        <CircularProgress />
       </Box>
     );
   }
@@ -52,41 +65,34 @@ const AnimalDetails: React.FC = () => {
     return <div>No animal data available.</div>;
   }
 
-  const videoUrl = animalData.videoFileName
-    ? API.Download() + `/animals/videos/${animalData.videoFileName}`
-    : null;
-
   return (
     <Box textAlign="center" sx={{ mt: 5 }}>
       <Typography variant="h4">{animalData.animalName}</Typography>
       <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
       <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
-      
-      {/* Display video */}
-      <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        {videoUrl ? (
-          <>
-          <video controls width="600">
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          <GenerateButton/>
-          </>
-        ) : (
-          <Typography>No video available.</Typography>
-        )}
 
+      {/* Display videos */}
+      <Box mt={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {animalData.graphics && animalData.graphics.length > 0 ? (
+          animalData.graphics.map((graphic) => (
+            <div key={graphic.gpcID} style={{ marginBottom: '20px' }}>
+              <h4>{graphic.gpcName}</h4>
+              <video controls width="600">
+                <source src={`${API.Graphic()}/graphics/videos/${graphic.gpcID}`} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          ))
+        ) : (
+          <Typography>No videos available.</Typography>
+        )}
       </Box>
+
       <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <Button component="label" variant="contained"
-          onClick={() => {
-            navigate('/dashboard/animals/');
-          }}
-          >
-            Back
-          </Button>
-        </Box>
-        
+        <Button variant="contained" onClick={() => navigate('/dashboard/animals/')}>
+          Back
+        </Button>
+      </Box>
     </Box>
   );
 };

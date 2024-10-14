@@ -1,5 +1,6 @@
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
+using System.Text.Json.Serialization;
 
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -27,7 +28,11 @@ builder.Services.AddCors(options =>
         .AllowCredentials();
     });
 });
-
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

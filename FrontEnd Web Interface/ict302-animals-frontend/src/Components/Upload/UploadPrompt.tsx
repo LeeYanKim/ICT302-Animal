@@ -1,30 +1,22 @@
 // UploadPrompt.tsx
-import React, { ChangeEvent, useState, useEffect, useContext } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import {
   Box,
   Typography,
   Button,
   Snackbar,
   Alert,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogActions,
   Chip,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import NewAnimal from './NewAnimal';
 import NewUpload from './NewUpload';
 import { UploadProps } from './UploadProps';
-        
-import { FrontendContext } from "../../Internals/ContextStore";
-import API from '../../Internals/API';
-
 
 const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUploadSuccess }) => {
   const [isAnimalFormOpen, setIsAnimalFormOpen] = useState(false);
   const [isUploadFormOpen, setIsUploadFormOpen] = useState(false);
-  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
+  const [filesToUpload, setFilesToUpload] = useState<File[]>([]); // Changed to an array of Files
   const [animalDetails, setAnimalDetails] = useState({
     animalName: '',
     animalType: '',
@@ -33,16 +25,14 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-    const frontendContext = useContext(FrontendContext);
-    
   // Handle file selection and open the animal form
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFileToUpload(e.target.files[0]);
+      const selectedFiles = Array.from(e.target.files);
+      setFilesToUpload(selectedFiles);
       setIsAnimalFormOpen(true);
     }
   };
-    
 
   // Handle submission of the animal form
   const handleAnimalFormSubmit = (animalData: {
@@ -56,9 +46,6 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
       animalType: animalData.animalType,
       dateOfBirth: animalData.dateOfBirth,
     });
-    if (animalData.file) {
-      setFileToUpload(animalData.file);
-    }
     setIsAnimalFormOpen(false);
     setIsUploadFormOpen(true);
   };
@@ -66,6 +53,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
   const handleUploadFormClose = (canceled: boolean) => {
     if (!canceled) {
       // Optionally refresh the list of uploaded animals
+      onUploadSuccess && onUploadSuccess();
     }
     setIsUploadFormOpen(false);
   };
@@ -75,7 +63,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
   };
 
   return (
-    <div style ={{width: `85vw`, margin:10 , padding : 0 }}>
+    <div style={{ width: `85vw`, margin: 10, padding: 0 }}>
       <Box
         component="form"
         noValidate
@@ -95,19 +83,20 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         <Typography variant="body1" sx={{ alignSelf: 'center' }}>
           Accepted file types
         </Typography>
-        <Box sx={{display: 'flex', justifyContent: 'center'}}>
-          <Chip label='mp4' />
-          <Chip label='mkv' />
-          <Chip label='mov' />
-          <Chip label='webm' />
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Chip label="mp4" />
+          <Chip label="mkv" />
+          <Chip label="mov" />
+          <Chip label="webm" />
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
-            Select File
+            Select Files
             <input
               type="file"
               accept=".mp4, .mkv, .mov, .webm"
               hidden
+              multiple // Allow multiple file selection
               onChange={handleFileSelection}
             />
           </Button>
@@ -127,7 +116,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         open={isUploadFormOpen}
         handleClose={handleUploadFormClose}
         animalDetails={animalDetails}
-        fileToUpload={fileToUpload}
+        filesToUpload={filesToUpload} // Pass the array of files
       />
 
       {/* Snackbar for error messages */}

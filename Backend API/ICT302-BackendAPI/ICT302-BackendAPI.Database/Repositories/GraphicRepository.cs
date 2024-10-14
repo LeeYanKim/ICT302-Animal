@@ -1,3 +1,4 @@
+// GraphicRepository.cs
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,14 +18,12 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<IEnumerable<Graphic>> GetGraphicsAsync()
         {
-            var graphics = await _ctx.Graphics.ToListAsync();
-            return graphics;
+            return await _ctx.Graphics.ToListAsync();
         }
 
         public async Task<Graphic> GetGraphicByIDAsync(Guid id)
         {
-            var graphic = await _ctx.Graphics.FindAsync(id);
-            return graphic;
+            return await _ctx.Graphics.FindAsync(id);
         }
 
         public async Task<Graphic> CreateGraphicAsync(Graphic graphic)
@@ -46,5 +45,6 @@ namespace ICT302_BackendAPI.Database.Repositories
             _ctx.Graphics.Remove(graphic);
             return await _ctx.SaveChangesAsync();
         }
+        
     }
 }

@@ -1,3 +1,4 @@
+// SchemaRepository.cs
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,15 +19,26 @@ namespace ICT302_BackendAPI.Database.Repositories
         // Get all animals
         public async Task<IEnumerable<Animal>> GetAnimalsAsync()
         {
-            var animals = await _ctx.Animals.ToListAsync();
-            return animals;
+            return await _ctx.Animals.ToListAsync();
         }
 
-        // Get animal by ID
-        public async Task<Animal> GetAnimalByIDAsync(Guid id)
+       public async Task<Animal> GetAnimalByIDAsync(Guid id)
+{
+    var animal = await _ctx.Animals
+        .Include(a => a.Graphics)  // Eager load graphics
+        .FirstOrDefaultAsync(a => a.AnimalID == id);
+
+    // Ensure Graphics is never null
+    animal.Graphics ??= new List<Graphic>();
+    return animal;
+}
+
+
+
+        // Get animal by name and date of birth
+        public async Task<Animal> GetAnimalByNameAndDOBAsync(string name, DateTime dob)
         {
-            var animal = await _ctx.Animals.FindAsync(id);
-            return animal;
+            return await _ctx.Animals.FirstOrDefaultAsync(a => a.AnimalName == name && a.AnimalDOB == dob);
         }
 
         // Create a new animal
@@ -50,24 +62,6 @@ namespace ICT302_BackendAPI.Database.Repositories
         {
             _ctx.Animals.Remove(animal);
             return await _ctx.SaveChangesAsync();
-        }
-
-        // Update animal video data
-        public async Task<Animal> UpdateAnimalVideoDataAsync(Guid animalId, string videoFileName, DateTime uploadDate)
-        {
-            var animal = await _ctx.Animals.FindAsync(animalId);
-            if (animal == null)
-            {
-                return null; // Animal not found
-            }
-
-            animal.VideoFileName = videoFileName;
-            animal.VideoUploadDate = uploadDate;
-
-            _ctx.Animals.Update(animal);
-            await _ctx.SaveChangesAsync();
-
-            return animal;
         }
     }
 }

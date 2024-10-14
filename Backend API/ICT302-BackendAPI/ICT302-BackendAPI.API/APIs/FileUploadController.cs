@@ -1,4 +1,4 @@
-// API/Controllers/FileUploadController.cs
+// FileUploadController.cs
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -23,118 +23,84 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<FileUploadController> _logger;
         private readonly ISchemaRepository _schemaRepository;
+        private readonly IGraphicRepository _graphicRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, ISchemaRepository schemaRepository, IWebHostEnvironment webHostEnvironment)
+        public FileUploadController(
+            IConfiguration configuration,
+            ILogger<FileUploadController> logger,
+            ISchemaRepository schemaRepository,
+            IGraphicRepository graphicRepository,
+            IWebHostEnvironment webHostEnvironment)
         {
             _configuration = configuration;
             _logger = logger;
             _schemaRepository = schemaRepository;
+            _graphicRepository = graphicRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> UploadFileAsync(IFormFile file, [FromForm] string animalName, [FromForm] string animalType, [FromForm] string dateOfBirth)
+       [HttpPost]
+public async Task<IActionResult> UploadFilesAsync(
+    [FromForm] IFormFileCollection files,
+    [FromForm] string animalName,
+    [FromForm] string animalType,
+    [FromForm] string dateOfBirth)
+{
+    try
+    {
+        // Validation logic...
+
+        string storedFilesPath = _webHostEnvironment.IsDevelopment()
+            ? _configuration["dev_StoredFilesPath"]
+            : _configuration["StoredFilesPath"];
+
+        // Ensure directory exists
+        if (!Directory.Exists(storedFilesPath))
         {
-            try
-            {
-                _logger.LogInformation("Received file upload request: AnimalName = {AnimalName}, AnimalType = {AnimalType}, DateOfBirth = {DateOfBirth}", animalName, animalType, dateOfBirth);
-
-                // Validate input fields
-                if (file == null || file.Length == 0)
-                {
-                    string msg = String.Format("Invalid request: No file provided {0} is empty", file.FileName);
-                    _logger.LogWarning(msg);
-                    return BadRequest(new { message = msg});
-                }
-
-                if (string.IsNullOrEmpty(animalName) || string.IsNullOrEmpty(animalType) || string.IsNullOrEmpty(dateOfBirth))
-                {
-                    string msg = String.Format("Invalid request: Missing animal details. AnimalName: {AnimalName}, AnimalType: {AnimalType}, DateOfBirth: {DateOfBirth}", animalName, animalType , dateOfBirth);
-                    _logger.LogWarning(msg);
-                    return BadRequest(new { message = msg });
-                }
-
-                if (!DateTime.TryParseExact(dateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedAnimalDOB))
-                {
-                    string msg = String.Format("Invalid date of birth format: {0}, Required format: yyyy-MM-dd", dateOfBirth);
-                    _logger.LogWarning(msg, dateOfBirth);
-                    return BadRequest(new { message = msg });
-                }
-
-                // Determine stored file path
-                string storedFilesPath = "";
-                if (_webHostEnvironment.IsDevelopment())
-                {
-                    // Dev environment
-                    var path = RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                        ? _configuration["dev_StoredFilesPath_Linux"]
-                        : _configuration["dev_StoredFilesPath"];
-                    storedFilesPath = path ?? "";
-                }
-                else
-                {
-                    // Prod environment
-                    storedFilesPath = _configuration["StoredFilesPath"] ?? "";
-                }
-                
-                if (string.IsNullOrEmpty(storedFilesPath))
-                {
-                    _logger.LogError("StoredFilesPath is not configured.");
-                    return StatusCode(500, new { message = "Configuration error: StoredFilesPath is not defined." });
-                }
-
-                // Ensure directory exists
-                if (!Directory.Exists(storedFilesPath))
-                {
-                    _logger.LogInformation("Stored files directory does not exist. Creating directory: {StoredFilesPath}", storedFilesPath);
-                    Directory.CreateDirectory(storedFilesPath);
-                }
-
-                // Validate file type
-                string fileExtension = Path.GetExtension(file.FileName);
-                if (!IsFileTypeAllowed(fileExtension))
-                {
-                    string msg = String.Format("Uploaded file: {FileName} is of a file type that is not supported", file.FileName);
-                    _logger.LogWarning(msg);
-                    return BadRequest(new { message = msg });
-                }
-
-                // Sanitize and generate a unique file name
-                string sanitizedFileName = SanitizeFileName(Path.GetFileNameWithoutExtension(file.FileName));
-                string uniqueFileName = $"{sanitizedFileName}_{Guid.NewGuid()}{fileExtension}";
-                string filePath = Path.Combine(storedFilesPath, uniqueFileName);
-
-                // Save the file to disk
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-                _logger.LogInformation("File successfully saved at: {FilePath}", filePath);
-
-                // Add entry to the database
-                var animal = new Animal
-                {
-                    AnimalID = Guid.NewGuid(),
-                    AnimalName = animalName,
-                    AnimalType = animalType,
-                    AnimalDOB = parsedAnimalDOB,
-                    VideoUploadDate = DateTime.Now,
-                    VideoFileName = uniqueFileName
-                };
-
-                _logger.LogInformation("Creating animal entry in the database: AnimalName = {AnimalName}", animal.AnimalName);
-                await _schemaRepository.CreateAnimalAsync(animal);
-                _logger.LogInformation("Animal entry created in the database with ID: {AnimalID}", animal.AnimalID);
-
-                return Ok(new { message = "File uploaded and animal data saved successfully." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An unexpected error occurred during file upload.");
-                return StatusCode(500, new { message = "Internal server error during file upload." });
-            }
+            Directory.CreateDirectory(storedFilesPath);
         }
+
+        var animal = await _schemaRepository.GetAnimalByNameAndDOBAsync(animalName, DateTime.Parse(dateOfBirth))
+            ?? await _schemaRepository.CreateAnimalAsync(new Animal
+            {
+                AnimalID = Guid.NewGuid(),
+                AnimalName = animalName,
+                AnimalType = animalType,
+                AnimalDOB = DateTime.Parse(dateOfBirth)
+            });
+
+        foreach (var file in files)
+        {
+            string fileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            string filePath = Path.Combine(storedFilesPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var graphic = new Graphic
+            {
+                GPCID = Guid.NewGuid(),
+                GPCName = Path.GetFileNameWithoutExtension(file.FileName),
+                FilePath = fileName,  // Only store the filename, not the full path
+                AnimalID = animal.AnimalID,
+                GPCDateUpload = DateTime.Now,
+                GPCSize = (int)file.Length
+            };
+
+            await _graphicRepository.CreateGraphicAsync(graphic);
+        }
+
+        return Ok(new { message = "Files uploaded and data saved successfully." });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error during file upload.");
+        return StatusCode(500, new { message = "Internal server error during file upload." });
+    }
+}
 
         private bool IsFileTypeAllowed(string fileExtension)
         {
