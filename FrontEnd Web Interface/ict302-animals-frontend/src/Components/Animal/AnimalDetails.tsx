@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography, CircularProgress, Button, Divider } from "@mui/material";
-import API from "../../Internals/API"; 
+import API from "../../Internals/API";
 import { useNavigate } from 'react-router-dom';
+import DeleteGraphicButton from './DeleteGraphicButton';
 import NewGeneration from "../Generation/NewGeneration"; 
 import ViewGenerateButton from "../Generation/ViewGenerationButton";  
 
@@ -53,6 +54,10 @@ const AnimalDetails: React.FC = () => {
       </Box>
     );
   }
+  const handleDeleteSuccess = () => {
+    // Implement your logic to refresh the graphics list or handle UI changes
+    console.log('Graphic deleted successfully');
+  };
 
   if (!animalData) {
     return <Typography variant="h6" color="error">No animal data available.</Typography>;
@@ -87,11 +92,21 @@ const AnimalDetails: React.FC = () => {
   };
 
   return (
-    <>
-      <Box textAlign="center" sx={{ mt: 5 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{animalData.animalName}</Typography>
-        <Typography variant="subtitle1" color="text.secondary">Type: {animalData.animalType}</Typography>
-        <Typography variant="subtitle2" color="text.secondary">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
+    <Box textAlign="center" sx={{ mt: 5 }}>
+      <Typography variant="h4">{animalData.animalName}</Typography>
+      <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
+      <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
+
+      {/* Display video */}
+      <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        {videoUrl ? (
+          <video controls width="600">
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <Typography>No video available.</Typography>
+        )}
 
         <Box 
           sx={{ 
@@ -102,13 +117,29 @@ const AnimalDetails: React.FC = () => {
             border: '1px solid #ccc', 
             borderRadius: '8px', 
             padding: 3 
-          }}
-        >
+          }}>
+        
+        {animalId ? (
+          videoUrl ? (
+            <DeleteGraphicButton
+              animaltoDelId={animalId}
+              graphictoDelId={videoUrl}
+              onDeleteSuccess={handleDeleteSuccess}
+            />
+          ) : (
+            <Typography>No video available.</Typography>
+          )
+        ) : (
+          <Typography>No animal selected.</Typography>
+        )}
+      </Box>
+    </Box>
+
           {/* Video Player */}
           <Box sx={{ flex: 1, maxWidth: '1000px' }}>  {/* Set maxWidth here */}
             {videoUrl && PlayerOpen ? (
               <>
-               <Button 
+              <Button 
                   component="label" 
                   variant="contained" 
                   sx={{  marginBottom: 2 }}
@@ -120,8 +151,6 @@ const AnimalDetails: React.FC = () => {
                   <source src={videoUrl} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
-               
-                
               </>
             ) : (
               <Button 
@@ -157,7 +186,7 @@ const AnimalDetails: React.FC = () => {
               )
             )}
           </Box>
-        </Box>
+        
 
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="subtitle1" color="text.secondary">Generated Video:</Typography>
@@ -177,8 +206,7 @@ const AnimalDetails: React.FC = () => {
             Back to Dashboard
           </Button>
         </Box>
-      </Box>
-
+      
       {/* New Generation Dialog */}
       {newGenOpen && (
         <NewGeneration 
@@ -188,7 +216,7 @@ const AnimalDetails: React.FC = () => {
           graphicID={"Test"} 
         />
       )}
-    </>
+    </Box>
   );
 };
 

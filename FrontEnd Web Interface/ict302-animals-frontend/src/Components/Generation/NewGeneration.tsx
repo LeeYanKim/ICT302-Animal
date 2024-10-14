@@ -47,6 +47,7 @@ export default function NewGeneration({ open, handleClose, onGenerate, graphicID
             <InputLabel>Generator Type</InputLabel>
             <Select value={selectedOption} onChange={handleSelectChange}>
               <MenuItem value="GART">GART</MenuItem>
+              <MenuItem value="BITE">BITE</MenuItem>
             </Select>
           </FormControl>
         </Box>
