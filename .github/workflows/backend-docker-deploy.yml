@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: $(echo github.repository_owner | tr '[A-Z]' '[a-z]')/ict302-backend
-
+  IMAGE_NAME: brycestandley/ict302-backend
+  
 jobs:
   Build_Docker:
     runs-on: ubuntu-latest
