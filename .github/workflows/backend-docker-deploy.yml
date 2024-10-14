@@ -20,16 +20,9 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Build image
-        working-directory : ./Backend API/ICT302-BackendAPI/
-        run: docker build . -t $IMAGE_NAME:latest
-
-      - name: List Images
-        run: docker images
 
       - name: Push image
-        run: |
-          echo IMAGE_NAME=$IMAGE_NAME
-          docker push ghcr.io/$IMAGE_NAME
+        uses: trentjones21/github-docker@master
+        with:
+				  accessToken: ${{ secrets.GITHUB_TOKEN }}
+          context: ./Backend API/ICT302-BackendAPI
