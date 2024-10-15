@@ -95,19 +95,27 @@ const handleBackBtnClick = () => {
       </Box>
 
       {/* Tabs for different sections */}
-      <AppBar position="static">
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="animal details tabs">
+      <React.Fragment>
+
+        <Tabs 
+          value={tabValue} centered 
+          onChange={handleTabChange} 
+          variant='fullWidth'
+          indicatorColor='secondary' 
+          aria-label="animal details tabs">
+
           <Tab label="Information" />
           <Tab label="Media Uploaded" />
           <Tab label="Version" />
           <Tab label="Access Granted" />
         </Tabs>
-      </AppBar>
+      
 
       {/* Tab Content */}
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 10 }}>
         {tabValue === 0 && (
-          <Typography variant="body1">Details about {animalData.animalName} can go here.</Typography>
+          <Typography variant="body1">Animal information {animalData.animalName} can go here.</Typography>
+
         )}
         
         {tabValue === 1 && (
@@ -133,6 +141,7 @@ const handleBackBtnClick = () => {
           <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
         )}
       </Box>
+      </React.Fragment>
 
       {/* Back Button */}
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
