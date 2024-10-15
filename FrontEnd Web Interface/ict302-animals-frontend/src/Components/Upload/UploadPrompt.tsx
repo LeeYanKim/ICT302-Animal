@@ -1,4 +1,3 @@
-// UploadPrompt.tsx
 import React, { ChangeEvent, useState } from 'react';
 import {
   Box,
@@ -11,12 +10,16 @@ import {
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import NewAnimal from './NewAnimal';
 import NewUpload from './NewUpload';
-import { UploadProps } from './UploadProps';
+import { UploadProps } from './UploadProps'; 
 
-const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUploadSuccess }) => {
+const UploadPrompt: React.FC<UploadProps> = ({
+  alertQueue,
+  setAlertQueue,
+  onUploadSuccess,
+}) => {
   const [isAnimalFormOpen, setIsAnimalFormOpen] = useState(false);
   const [isUploadFormOpen, setIsUploadFormOpen] = useState(false);
-  const [filesToUpload, setFilesToUpload] = useState<File[]>([]); // Changed to an array of Files
+  const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
   const [animalDetails, setAnimalDetails] = useState({
     animalName: '',
     animalType: '',
@@ -39,21 +42,15 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
     animalName: string;
     animalType: string;
     dateOfBirth: string;
-    file?: File;
   }) => {
-    setAnimalDetails({
-      animalName: animalData.animalName,
-      animalType: animalData.animalType,
-      dateOfBirth: animalData.dateOfBirth,
-    });
+    setAnimalDetails(animalData);
     setIsAnimalFormOpen(false);
     setIsUploadFormOpen(true);
   };
 
   const handleUploadFormClose = (canceled: boolean) => {
     if (!canceled) {
-      // Optionally refresh the list of uploaded animals
-      onUploadSuccess && onUploadSuccess();
+      onUploadSuccess(); // Trigger the success callback
     }
     setIsUploadFormOpen(false);
   };
@@ -63,7 +60,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
   };
 
   return (
-    <div style={{ width: `85vw`, margin: 10, padding: 0 }}>
+    <div style={{ width: '85vw', margin: 10, padding: 0 }}>
       <Box
         component="form"
         noValidate
@@ -80,9 +77,6 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         <Typography variant="body1" sx={{ alignSelf: 'center' }}>
           This application is a work in progress.
         </Typography>
-        <Typography variant="body1" sx={{ alignSelf: 'center' }}>
-          Accepted file types
-        </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Chip label="mp4" />
           <Chip label="mkv" />
@@ -96,7 +90,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
               type="file"
               accept=".mp4, .mkv, .mov, .webm"
               hidden
-              multiple // Allow multiple file selection
+              multiple // Enable multiple file selection
               onChange={handleFileSelection}
             />
           </Button>
@@ -108,7 +102,6 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         open={isAnimalFormOpen}
         handleClose={() => setIsAnimalFormOpen(false)}
         addNewAnimal={handleAnimalFormSubmit}
-        requireFile={false} // No need to require file here as it's already selected
       />
 
       {/* Upload form dialog */}
@@ -116,7 +109,7 @@ const UploadPrompt: React.FC<UploadProps> = ({ alertQueue, setAlertQueue, onUplo
         open={isUploadFormOpen}
         handleClose={handleUploadFormClose}
         animalDetails={animalDetails}
-        filesToUpload={filesToUpload} // Pass the array of files
+        filesToUpload={filesToUpload}
       />
 
       {/* Snackbar for error messages */}
