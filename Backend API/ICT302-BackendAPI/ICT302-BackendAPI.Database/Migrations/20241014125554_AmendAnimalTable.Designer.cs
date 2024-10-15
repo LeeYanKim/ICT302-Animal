@@ -3,6 +3,7 @@ using System;
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    partial class SchemaContextModelSnapshot : ModelSnapshot
+    [Migration("20241014125554_AmendAnimalTable")]
+    partial class AmendAnimalTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,7 +133,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.HasKey("BillingID");
 
-                    b.HasIndex("GPCID");
+                    b.HasIndex("GPCID")
+                        .IsUnique();
 
                     b.HasIndex("JobID");
 
@@ -152,6 +156,11 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .IsRequired()
                         .HasColumnType("binary(16)")
                         .HasColumnName("Animal_ID");
+
+                    b.Property<byte[]>("BillingID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("Billing_ID");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
@@ -176,6 +185,8 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.HasKey("GPCID");
 
                     b.HasIndex("AnimalID");
+
+                    b.HasIndex("BillingID");
 
                     b.ToTable("graphic");
                 });
@@ -584,8 +595,8 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Billing", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Graphic", "Graphic")
-                        .WithMany()
-                        .HasForeignKey("GPCID")
+                        .WithOne()
+                        .HasForeignKey("ICT302_BackendAPI.Database.Models.Billing", "GPCID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -619,12 +630,20 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Graphic", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Animal", "Animal")
-                        .WithMany("Graphics")
+                        .WithMany()
                         .HasForeignKey("AnimalID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ICT302_BackendAPI.Database.Models.Billing", "Billing")
+                        .WithMany()
+                        .HasForeignKey("BillingID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Animal");
+
+                    b.Navigation("Billing");
                 });
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobDetails", b =>
@@ -780,11 +799,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.Navigation("Organisation");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Animal", b =>
-                {
-                    b.Navigation("Graphics");
                 });
 #pragma warning restore 612, 618
         }

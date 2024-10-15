@@ -9,7 +9,7 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<Transaction> CreateTransactionAsync(Transaction transaction);
         Task<int> DeleteTransactionAsync(Transaction transaction);
-        Task<Transaction> GetTransactionByIDAsync(Guid id);
+        Task<Transaction?> GetTransactionByIDAsync(Guid id);
         Task<IEnumerable<Transaction>> GetTransactionsAsync();
         Task<Transaction> UpdateTransactionAsync(Transaction transaction);
     }

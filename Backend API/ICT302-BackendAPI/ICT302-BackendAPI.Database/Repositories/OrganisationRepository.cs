@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return organisations;
         }
 
-        public async Task<Organisation> GetOrganisationByIDAsync(Guid id)
+        public async Task<Organisation?> GetOrganisationByIDAsync(Guid id)
         {
             var organisation = await _ctx.Organisations.FindAsync(id);
             return organisation;

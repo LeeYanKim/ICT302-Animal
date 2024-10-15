@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -35,7 +35,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                     Animal_Name = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
                     Animal_DOB = table.Column<DateTime>(type: "date", nullable: false),
                     Animal_Type = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false),
-                    Video_File_Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true),
+                    Video_File_Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     Video_Upload_Date = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
@@ -201,6 +201,38 @@ namespace ICT302_BackendAPI.Database.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "useraccess",
+                columns: table => new
+                {
+                    Org_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    User_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
+                    AccessType_ID = table.Column<byte[]>(type: "binary(16)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_useraccess", x => new { x.Org_ID, x.User_ID });
+                    table.ForeignKey(
+                        name: "FK_useraccess_accesstype_AccessType_ID",
+                        column: x => x.AccessType_ID,
+                        principalTable: "accesstype",
+                        principalColumn: "AccessType_ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_useraccess_organisation_Org_ID",
+                        column: x => x.Org_ID,
+                        principalTable: "organisation",
+                        principalColumn: "Org_ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_useraccess_user_User_ID",
+                        column: x => x.User_ID,
+                        principalTable: "user",
+                        principalColumn: "User_ID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "organisationaccess",
                 columns: table => new
                 {
@@ -315,7 +347,7 @@ namespace ICT302_BackendAPI.Database.Migrations
                     JD_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     GPC_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
                     Model_ID = table.Column<byte[]>(type: "binary(16)", nullable: false),
-                    Model_Gen_Type = table.Column<string>(type: "varchar(45)", nullable: false)
+                    Model_Gen_Type = table.Column<string>(type: "varchar(45)", maxLength: 45, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -485,6 +517,16 @@ namespace ICT302_BackendAPI.Database.Migrations
                 table: "user",
                 column: "subscription_ID");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_useraccess_AccessType_ID",
+                table: "useraccess",
+                column: "AccessType_ID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_useraccess_User_ID",
+                table: "useraccess",
+                column: "User_ID");
+
             migrationBuilder.AddForeignKey(
                 name: "FK_billing_graphic_GPC_ID",
                 table: "billing",
@@ -526,9 +568,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                 table: "model3d");
 
             migrationBuilder.DropTable(
-                name: "accesstype");
-
-            migrationBuilder.DropTable(
                 name: "jobspending");
 
             migrationBuilder.DropTable(
@@ -541,13 +580,19 @@ namespace ICT302_BackendAPI.Database.Migrations
                 name: "transaction");
 
             migrationBuilder.DropTable(
+                name: "useraccess");
+
+            migrationBuilder.DropTable(
                 name: "animalaccess");
 
             migrationBuilder.DropTable(
-                name: "organisation");
+                name: "transactiontype");
 
             migrationBuilder.DropTable(
-                name: "transactiontype");
+                name: "accesstype");
+
+            migrationBuilder.DropTable(
+                name: "organisation");
 
             migrationBuilder.DropTable(
                 name: "animal");

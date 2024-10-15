@@ -135,7 +135,6 @@ namespace ICT302_BackendAPI.Controllers.Database
                 existingGraphic.GPCDateUpload = graphicToUpdate.GPCDateUpload;
                 existingGraphic.FilePath = graphicToUpdate.FilePath;
                 existingGraphic.AnimalID = graphicToUpdate.AnimalID;
-                existingGraphic.BillingID = graphicToUpdate.BillingID;
                 existingGraphic.GPCSize = graphicToUpdate.GPCSize;
 
                 await _graphicRepo.UpdateGraphicAsync(existingGraphic);

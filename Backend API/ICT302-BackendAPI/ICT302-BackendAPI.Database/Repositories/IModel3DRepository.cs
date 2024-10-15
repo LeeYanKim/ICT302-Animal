@@ -9,7 +9,7 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<Model3D> CreateModel3DAsync(Model3D model3D);
         Task<int> DeleteModel3DAsync(Model3D model3D);
-        Task<Model3D> GetModel3DByIDAsync(Guid id);
+        Task<Model3D?> GetModel3DByIDAsync(Guid id);
         Task<IEnumerable<Model3D>> GetModel3DsAsync();
         Task<Model3D> UpdateModel3DAsync(Model3D model3D);
     }

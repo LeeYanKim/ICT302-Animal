@@ -9,7 +9,7 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<Graphic> CreateGraphicAsync(Graphic graphic);
         Task<int> DeleteGraphicAsync(Graphic graphic);
-        Task<Graphic> GetGraphicByIDAsync(Guid id);
+        Task<Graphic?> GetGraphicByIDAsync(Guid id);
         Task<IEnumerable<Graphic>> GetGraphicsAsync();
         Task<Graphic> UpdateGraphicAsync(Graphic graphic);
     }

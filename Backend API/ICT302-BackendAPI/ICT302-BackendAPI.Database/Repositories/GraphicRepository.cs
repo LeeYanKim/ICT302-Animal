@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return graphics;
         }
 
-        public async Task<Graphic> GetGraphicByIDAsync(Guid id)
+        public async Task<Graphic?> GetGraphicByIDAsync(Guid id)
         {
             var graphic = await _ctx.Graphics.FindAsync(id);
             return graphic;

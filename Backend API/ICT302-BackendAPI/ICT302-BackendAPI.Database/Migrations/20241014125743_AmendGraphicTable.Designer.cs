@@ -3,6 +3,7 @@ using System;
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    partial class SchemaContextModelSnapshot : ModelSnapshot
+    [Migration("20241014125743_AmendGraphicTable")]
+    partial class AmendGraphicTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -619,7 +622,7 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Graphic", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Animal", "Animal")
-                        .WithMany("Graphics")
+                        .WithMany()
                         .HasForeignKey("AnimalID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -780,11 +783,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.Navigation("Organisation");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Animal", b =>
-                {
-                    b.Navigation("Graphics");
                 });
 #pragma warning restore 612, 618
         }

@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return transactions;
         }
 
-        public async Task<Transaction> GetTransactionByIDAsync(Guid id)
+        public async Task<Transaction?> GetTransactionByIDAsync(Guid id)
         {
             var transaction = await _ctx.Transaction.FindAsync(id);
             return transaction;

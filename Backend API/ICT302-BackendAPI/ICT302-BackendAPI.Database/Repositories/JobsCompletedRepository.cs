@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return jobs;
         }
 
-        public async Task<JobsCompleted> GetJobsCompletedByIDAsync(Guid id)
+        public async Task<JobsCompleted?> GetJobsCompletedByIDAsync(Guid id)
         {
             var job = await _ctx.JobsCompleted.FindAsync(id);
             return job;

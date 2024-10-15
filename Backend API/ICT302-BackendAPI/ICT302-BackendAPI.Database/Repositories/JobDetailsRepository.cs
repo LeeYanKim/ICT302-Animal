@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return jobDetails;
         }
 
-        public async Task<JobDetails> GetJobDetailsByIDAsync(Guid id)
+        public async Task<JobDetails?> GetJobDetailsByIDAsync(Guid id)
         {
             var jobDetails = await _ctx.JobDetails.FindAsync(id);
             return jobDetails;

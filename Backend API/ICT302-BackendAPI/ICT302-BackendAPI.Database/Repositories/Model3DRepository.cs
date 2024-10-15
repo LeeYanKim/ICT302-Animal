@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return models;
         }
 
-        public async Task<Model3D> GetModel3DByIDAsync(Guid id)
+        public async Task<Model3D?> GetModel3DByIDAsync(Guid id)
         {
             var model = await _ctx.Model3D.FindAsync(id);
             return model;

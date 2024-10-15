@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return animalAccesses;
         }
 
-        public async Task<AnimalAccess> GetAnimalAccessByIDAsync(Guid id)
+        public async Task<AnimalAccess?> GetAnimalAccessByIDAsync(Guid id)
         {
             var animalAccess = await _ctx.AnimalAccesses.FindAsync(id);
             return animalAccess;

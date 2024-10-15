@@ -20,7 +20,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return await _ctx.AccessTypes.ToListAsync();
         }
 
-        public async Task<AccessType> GetAccessTypeByIDAsync(Guid id)
+        public async Task<AccessType?> GetAccessTypeByIDAsync(Guid id)
         {
             return await _ctx.AccessTypes.FindAsync(id);
         }

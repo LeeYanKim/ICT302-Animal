@@ -9,12 +9,12 @@ namespace ICT302_BackendAPI.Controllers.Database;
 [ApiController]
 public class SchemaController : ControllerBase
 {
-    private readonly ISchemaRepository _schemaRepo;
+    private readonly IAnimalRepository _animalRepo;
     private readonly ILogger<SchemaController> _logger;
     
-    public SchemaController(ISchemaRepository schemaRepo, ILogger<SchemaController> logger)
+    public SchemaController(IAnimalRepository animalRepo, ILogger<SchemaController> logger)
     {
-        _schemaRepo = schemaRepo;
+        _animalRepo = animalRepo;
         _logger = logger;
     }
     
@@ -28,7 +28,7 @@ public class SchemaController : ControllerBase
             animal.AnimalName = animalName;
             animal.AnimalType = animalType;
             animal.AnimalDOB = animalDOB;
-            return Ok(await _schemaRepo.CreateAnimalAsync(animal));
+            return Ok(await _animalRepo.CreateAnimalAsync(animal));
         }
         catch (Exception ex)
         {
@@ -47,7 +47,7 @@ public class SchemaController : ControllerBase
     {
         try
         {
-            var animals = await _schemaRepo.GetAnimalsAsync();
+            var animals = await _animalRepo.GetAnimalsAsync();
             return Ok(animals);
         }
         catch (Exception ex)
@@ -67,7 +67,7 @@ public class SchemaController : ControllerBase
     {
         try
         {
-            var animal = await _schemaRepo.GetAnimalByIDAsync(id);
+            var animal = await _animalRepo.GetAnimalByIDAsync(id);
             if (animal == null)
             {
                 return NotFound(new
@@ -94,7 +94,7 @@ public class SchemaController : ControllerBase
     {
         try
         {
-            var existingAnimal = await _schemaRepo.GetAnimalByIDAsync(id);
+            var existingAnimal = await _animalRepo.GetAnimalByIDAsync(id);
             if (existingAnimal == null)
             {
                 return NotFound(new
@@ -104,7 +104,7 @@ public class SchemaController : ControllerBase
                 });
             }
 
-            await _schemaRepo.DeleteAnimalAsync(existingAnimal);
+            await _animalRepo.DeleteAnimalAsync(existingAnimal);
             return NoContent();
         }
         catch (Exception ex)
@@ -123,7 +123,7 @@ public class SchemaController : ControllerBase
     {
         try
         {
-            var existingAnimal= await _schemaRepo.GetAnimalByIDAsync(animalToUpdate.AnimalID);
+            var existingAnimal= await _animalRepo.GetAnimalByIDAsync(animalToUpdate.AnimalID);
             if (existingAnimal == null)
             {
                 return NotFound(new
@@ -136,7 +136,7 @@ public class SchemaController : ControllerBase
             existingAnimal.AnimalName = animalToUpdate.AnimalName;
             existingAnimal.AnimalDOB = animalToUpdate.AnimalDOB;
             existingAnimal.AnimalType = animalToUpdate.AnimalType;
-            await _schemaRepo.UpdateAnimalAsync(existingAnimal);
+            await _animalRepo.UpdateAnimalAsync(existingAnimal);
             return NoContent();
         }
         catch (Exception ex)

@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return jobsPending;
         }
 
-        public async Task<JobsPending> GetJobsPendingByIDAsync(Guid id)
+        public async Task<JobsPending?> GetJobsPendingByIDAsync(Guid id)
         {
             var job = await _ctx.JobsPending.FindAsync(id);
             return job;

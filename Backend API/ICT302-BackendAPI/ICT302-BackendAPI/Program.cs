@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<SchemaContext>();
 
 // Register repositories for Animal, Model3D, and AccessType
-builder.Services.AddTransient<ISchemaRepository, SchemaRepository>(); // Animal Repository
+builder.Services.AddTransient<IAnimalRepository, AnimalRepository>(); // Animal Repository
 builder.Services.AddTransient<IModel3DRepository, Model3DRepository>();
 builder.Services.AddTransient<IAccessTypeRepository, AccessTypeRepository>(); // AccessType Repository
 builder.Services.AddTransient<IAnimalAccessRepository, AnimalAccessRepository>();
