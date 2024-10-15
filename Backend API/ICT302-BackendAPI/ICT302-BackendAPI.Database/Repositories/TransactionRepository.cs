@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<Transaction> CreateTransactionAsync(Transaction transaction)
         {
+            _ctx.Transaction.Attach(transaction);
             _ctx.Transaction.Add(transaction);
             await _ctx.SaveChangesAsync();
             return transaction;

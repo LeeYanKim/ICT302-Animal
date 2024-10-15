@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<User> CreateUserAsync(User user)
         {
+            _ctx.Users.Attach(user);
             _ctx.Users.Add(user);
             await _ctx.SaveChangesAsync();
             return user;

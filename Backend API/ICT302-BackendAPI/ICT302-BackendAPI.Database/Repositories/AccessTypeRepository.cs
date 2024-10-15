@@ -27,6 +27,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<AccessType> CreateAccessTypeAsync(AccessType accessType)
         {
+            _ctx.AccessTypes.Attach(accessType);
             _ctx.AccessTypes.Add(accessType);
             await _ctx.SaveChangesAsync();
             return accessType;
@@ -34,6 +35,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<AccessType> UpdateAccessTypeAsync(AccessType accessType)
         {
+            _ctx.AccessTypes.Attach(accessType);
             _ctx.AccessTypes.Update(accessType);
             await _ctx.SaveChangesAsync();
             return accessType;

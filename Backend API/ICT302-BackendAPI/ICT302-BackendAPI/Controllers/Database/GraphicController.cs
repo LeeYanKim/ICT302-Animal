@@ -13,11 +13,13 @@ namespace ICT302_BackendAPI.Controllers.Database
     {
         private readonly IGraphicRepository _graphicRepo;
         private readonly ILogger<GraphicController> _logger;
+        private readonly IAnimalRepository _animalRepo;
 
-        public GraphicController(IGraphicRepository graphicRepo, ILogger<GraphicController> logger)
+        public GraphicController(IGraphicRepository graphicRepo, ILogger<GraphicController> logger, IAnimalRepository animalRepo)
         {
             _graphicRepo = graphicRepo;
             _logger = logger;
+            _animalRepo = animalRepo;
         }
 
         [HttpPost("graphic")]
@@ -26,7 +28,9 @@ namespace ICT302_BackendAPI.Controllers.Database
             try
             {
                 graphic.GPCID = Guid.NewGuid();
-                return Ok(await _graphicRepo.CreateGraphicAsync(graphic));
+                graphic.Animal = await _animalRepo.GetAnimalByIDAsync(graphic.GPCID) ?? new Animal();
+                var g = await _graphicRepo.CreateGraphicAsync(graphic);
+                return Ok(g);
             }
             catch (Exception ex)
             {

@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<Billing> CreateBillingAsync(Billing billing)
         {
+            _ctx.Billings.Attach(billing);
             _ctx.Billings.Add(billing);
             await _ctx.SaveChangesAsync();
             return billing;

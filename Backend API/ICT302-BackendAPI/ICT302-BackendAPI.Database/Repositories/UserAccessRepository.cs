@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<UserAccess> CreateUserAccessAsync(UserAccess userAccess)
         {
+            _ctx.UserAccess.Attach(userAccess);
             _ctx.UserAccess.Add(userAccess);
             await _ctx.SaveChangesAsync();
             return userAccess;

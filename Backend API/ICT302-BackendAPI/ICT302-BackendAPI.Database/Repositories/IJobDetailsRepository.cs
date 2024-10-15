@@ -10,6 +10,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         Task<JobDetails> CreateJobDetailsAsync(JobDetails jobDetails);
         Task<int> DeleteJobDetailsAsync(JobDetails jobDetails);
         Task<JobDetails?> GetJobDetailsByIDAsync(Guid id);
+        Task<JobDetails?> GetJobDetailsByGraphicIdAsync(Guid? graphicId);
         Task<IEnumerable<JobDetails>> GetJobDetailsAsync();
         Task<JobDetails> UpdateJobDetailsAsync(JobDetails jobDetails);
     }

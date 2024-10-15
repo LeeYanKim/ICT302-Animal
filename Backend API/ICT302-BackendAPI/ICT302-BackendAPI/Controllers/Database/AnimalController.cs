@@ -7,12 +7,12 @@ namespace ICT302_BackendAPI.Controllers.Database;
 
 [Route("api/db")]
 [ApiController]
-public class SchemaController : ControllerBase
+public class AnimalController : ControllerBase
 {
     private readonly IAnimalRepository _animalRepo;
-    private readonly ILogger<SchemaController> _logger;
+    private readonly ILogger<AnimalController> _logger;
     
-    public SchemaController(IAnimalRepository animalRepo, ILogger<SchemaController> logger)
+    public AnimalController(IAnimalRepository animalRepo, ILogger<AnimalController> logger)
     {
         _animalRepo = animalRepo;
         _logger = logger;

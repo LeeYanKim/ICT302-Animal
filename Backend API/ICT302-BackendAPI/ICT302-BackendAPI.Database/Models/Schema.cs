@@ -18,8 +18,8 @@ public class AccessType
     public string AccessTypeDetails { get; set; }
 }
 
- [Table("animal")]
-    public class Animal
+[Table("animal")]
+public class Animal
     {
         [Key]
         [Column("Animal_ID", TypeName = "binary(16)")]
@@ -43,6 +43,7 @@ public class AccessType
         public virtual ICollection<Graphic> Graphics { get; set; } = new List<Graphic>();
 
     }
+
 [Table("animalaccess")]
 public class AnimalAccess
 {
@@ -74,7 +75,6 @@ public class AnimalAccess
     [ForeignKey("UserID")]
     public virtual User User { get; set; }
 }
-
 
 [Table("billing")]
 public class Billing
@@ -209,15 +209,12 @@ public class JobsCompleted
     public virtual JobDetails JobDetails { get; set; }
 }
 
-
-
-
 [Table("jobspending")]
 public class JobsPending
 {
     [Key]
-    [Column("Queue_Number", TypeName = "binary(16)")]
-    public Guid QueueNumber { get; set; }
+    [Column("Queue_Number", TypeName = "int")]
+    public int QueueNumber { get; set; } = -1;
 
     [Required]
     [Column("Job_Added", TypeName = "date")]
@@ -231,7 +228,7 @@ public class JobsPending
 
     [Required]
     [Column("JD_ID", TypeName = "binary(16)")]
-    public Guid JDID { get; set; }
+    public Guid JobDetailsId { get; set; }
 
     [ForeignKey("JDID")]
     public virtual JobDetails JobDetails { get; set; }
@@ -266,7 +263,6 @@ public class Model3D
     [ForeignKey("GPCID")]
     public virtual Graphic Graphic { get; set; }
 }
-
 
 [Table("org_requests")]
 public class OrgRequests
@@ -351,7 +347,6 @@ public class OrganisationAccess
     [ForeignKey("AccessID")]
     public virtual AnimalAccess AnimalAccess { get; set; }
 }
-
 
 [Table("subscription")]
 public class Subscription

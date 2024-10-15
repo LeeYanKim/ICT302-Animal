@@ -23,15 +23,20 @@ namespace ICT302_BackendAPI.Database.Repositories
         }
 
         // Get animal by ID
-        public async Task<Animal?> GetAnimalByIDAsync(Guid id)
+        public async Task<Animal?> GetAnimalByIDAsync(Guid? id)
         {
+            if(id == null) return null;
+            
             var animal = await _ctx.Animals.FindAsync(id);
+            if(animal != null)
+                _ctx.Animals.Attach(animal);
             return animal;
         }
 
         // Create a new animal
         public async Task<Animal> CreateAnimalAsync(Animal animal)
         {
+            _ctx.Animals.Attach(animal);
             _ctx.Animals.Add(animal);
             await _ctx.SaveChangesAsync();
             return animal;
@@ -40,6 +45,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         // Update an existing animal
         public async Task<Animal> UpdateAnimalAsync(Animal animal)
         {
+            _ctx.Animals.Attach(animal);
             _ctx.Animals.Update(animal);
             await _ctx.SaveChangesAsync();
             return animal;

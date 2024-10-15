@@ -9,8 +9,10 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<JobsPending> CreateJobsPendingAsync(JobsPending jobsPending);
         Task<int> DeleteJobsPendingAsync(JobsPending jobsPending);
-        Task<JobsPending?> GetJobsPendingByIDAsync(Guid id);
-        Task<IEnumerable<JobsPending>> GetJobsPendingAsync();
+        Task<JobsPending?> GetJobsPendingByIDAsync(int id);
+        Task<List<JobsPending>> GetJobsPendingAsync();
+        
+        Task<JobsPending?> GetPendingJobByQueuePosition(int queuePosition);
         Task<JobsPending> UpdateJobsPendingAsync(JobsPending jobsPending);
     }
 }

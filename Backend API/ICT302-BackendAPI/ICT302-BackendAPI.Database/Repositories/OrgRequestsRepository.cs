@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<OrgRequests> CreateOrgRequestsAsync(OrgRequests orgRequests)
         {
+            _ctx.OrgRequests.Attach(orgRequests);
             _ctx.OrgRequests.Add(orgRequests);
             await _ctx.SaveChangesAsync();
             return orgRequests;

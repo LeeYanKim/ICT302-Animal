@@ -14,31 +14,33 @@ public class Utility
         _logger = logger;
         _environment = environment;
     }
-
+    
     public void PrintStartingConfig()
     {
         _logger.LogInformation("Starting with configuration:");
-        _logger.LogInformation("App Environment: " + _environment.EnvironmentName);
+        string config = "App Environment: " + _environment.EnvironmentName +"\n";
 
         if (_environment.IsDevelopment())
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                _logger.LogInformation("User Storage Path: " + _configuration["dev_StoredFilesPath_Linux"]);
-                _logger.LogInformation("User Thumbnail Path: " + _configuration["dev_StoredThumbs_Linux"]);
+                config += "User Storage Path: " + _configuration["dev_StoredFilesPath_Linux"] +"\n";
+                config += "User Thumbnail Path: " + _configuration["dev_StoredThumbs_Linux"] +"\n";
             }
             else
             {
-                _logger.LogInformation("User Storage Path: " + _configuration["dev_StoredFilesPath"]);
-                _logger.LogInformation("User Thumbnail Path: " + _configuration["dev_StoredThumbs"]);
+                config += "User Storage Path: " + _configuration["dev_StoredFilesPath"] +"\n";
+                config += "User Thumbnail Path: " + _configuration["dev_StoredThumbs"] +"\n";
             }
             
         }
         else
         {
-            _logger.LogInformation("User Storage Path: " + _configuration["StoredFilesPath"]);
-            _logger.LogInformation("User Thumbnail Path: " + _configuration["StoredThumbs"]);
+            config += "User Storage Path: " + _configuration["StoredFilesPath"] +"\n";
+            config += "User Thumbnail Path: " + _configuration["StoredThumbs"] +"\n";
         }
+        
+        _logger.LogInformation(config);
         
     }
 }

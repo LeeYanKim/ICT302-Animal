@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<OrganisationAccess> CreateOrganisationAccessAsync(OrganisationAccess organisationAccess)
         {
+            _ctx.OrganisationAccesses.Attach(organisationAccess);
             _ctx.OrganisationAccesses.Add(organisationAccess);
             await _ctx.SaveChangesAsync();
             return organisationAccess;

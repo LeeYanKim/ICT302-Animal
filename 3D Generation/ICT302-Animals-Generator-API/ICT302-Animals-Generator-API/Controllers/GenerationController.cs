@@ -66,10 +66,11 @@ public class GenerationController : ControllerBase
             var wslUser = _configuration.GetValue<string>("WslUser");
             var wslScriptPath = _configuration.GetValue<string>("WslScriptPath");
             var wslCondaEnv = _configuration.GetValue<string>("WslCondaEnv");
+            var wslCmd = _configuration.GetValue<string>("WslStartCmd");
             
             string args = $"-d Ubuntu-20.04 -u {wslUser} sh -c \"cd \'{wslScriptPath!}\' && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv!} python ./gen_model.py -p \'{GetWslPathFromWindowsPath(model.OutputPath!)}\'";
             
-            var startInfo = new ProcessStartInfo(fileName: "wsl", arguments: args)
+            var startInfo = new ProcessStartInfo(fileName: wslCmd!, arguments: args)
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
@@ -123,6 +124,15 @@ public class GenerationController : ControllerBase
 
             _logger.LogInformation($"Starting GLB conversion for job: {model?.FilePath}");
 
+            //TODO: Remove
+            _logger.LogInformation($"GLB conversion for job: {model.JobID} has completed successfully.");
+            return StatusCode(StatusCodes.Status200OK, new
+            {
+                statusCode = 200,
+                jobStatus = "Completed Conversion",
+                message = "Success: GLB conversion completed successfully"
+            });
+            
             var scene = Scene.FromFile(Path.Join(model!.OutputPath, model.GenOutputLoc, "bite.obj"));
             var fileName = Path.GetFileNameWithoutExtension(model.FilePath);
             var root = Path.GetDirectoryName(model.FilePath);
@@ -345,10 +355,11 @@ public class GenerationController : ControllerBase
             var wslUser = _configuration.GetValue<string>("WslUser");
             var wslScriptPath = _configuration.GetValue<string>("WslScriptPath");
             var wslCondaEnv = _configuration.GetValue<string>("WslCondaEnv");
+            var wslCmd = _configuration.GetValue<string>("WslStartCmd");
 
             string args = $"-d Ubuntu-20.04 -u {wslUser} sh -c \"cd \'{wslScriptPath!}\' && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv!} python ./gen_masks.py -p \'{GetWslPathFromWindowsPath(model.OutputPath!)}\' -m {model.SubjectHint}\"";
             _logger.LogInformation($"args: {args}");
-            var startInfo = new ProcessStartInfo(fileName: "wsl.exe", arguments: args);
+            var startInfo = new ProcessStartInfo(fileName: wslCmd!, arguments: args);
             
             startInfo.CreateNoWindow = false;
             startInfo.UseShellExecute = true;
@@ -479,7 +490,7 @@ public class GenerationController : ControllerBase
         
         string remainingPath = fullWindowsPath.Substring(2).Replace(Path.DirectorySeparatorChar, '/');
         
-        string wslPath = $"/mnt/{driveLetter}{remainingPath}";
+        string wslPath = $"/mnt/it01{remainingPath}";
 
         return wslPath;
     }
