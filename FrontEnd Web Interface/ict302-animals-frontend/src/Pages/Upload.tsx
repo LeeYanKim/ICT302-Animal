@@ -13,7 +13,7 @@ const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
 
   // Function to trigger a refresh of the thumbnails
   const triggerThumbnailRefresh = () => {
-    setRefreshThumbnails(prev => !prev);  // Toggle state to trigger re-fetch
+    setRefreshThumbnails(!refreshThumbnails);  // Toggle state to trigger re-fetch
   };
 
   return (

@@ -47,7 +47,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             _ctx.Users.Remove(user);
             return await _ctx.SaveChangesAsync();
         }
-
+        
         public async Task<Subscription?> GetSubscriptionByIDAsync(Guid id)
         {
             var subscription = await _ctx.Subscriptions.FindAsync(id);

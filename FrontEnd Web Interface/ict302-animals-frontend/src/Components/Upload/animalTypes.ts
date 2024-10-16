@@ -5,5 +5,6 @@ export interface AnimalData {
     animalName: string;
     animalType: string;
     videoUploadDate: string;
+    videoFileName: string;
   }
   

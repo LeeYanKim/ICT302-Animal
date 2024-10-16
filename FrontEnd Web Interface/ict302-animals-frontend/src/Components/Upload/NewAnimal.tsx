@@ -1,4 +1,4 @@
-// NewAnimal.tsx
+
 import {
   Button,
   Dialog,
