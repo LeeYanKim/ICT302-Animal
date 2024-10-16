@@ -15,20 +15,40 @@ namespace ICT302_BackendAPI.Database.Repositories
             _ctx = ctx;
         }
 
+        public async Task<JobsCompleted?> GetCompletedJobsFromJobDetailsIdAsync(Guid? jobDetailsId)
+        {
+            if(jobDetailsId == null || jobDetailsId == Guid.Empty) return null;
+            
+            var jobs = await _ctx.JobsCompleted.ToListAsync();
+            var job = jobs.Find(jd => jd.JDID == jobDetailsId);
+
+            if (job != null)
+            {
+                _ctx.JobsCompleted.Attach(job);
+            }
+            
+            return job;
+        }
+
         public async Task<IEnumerable<JobsCompleted>> GetJobsCompletedAsync()
         {
             var jobs = await _ctx.JobsCompleted.ToListAsync();
             return jobs;
         }
 
-        public async Task<JobsCompleted> GetJobsCompletedByIDAsync(Guid id)
+        public async Task<JobsCompleted?> GetCompletedJobsByIdAsync(Guid id)
         {
             var job = await _ctx.JobsCompleted.FindAsync(id);
+            if (job != null)
+            {
+                _ctx.JobsCompleted.Attach(job);
+            }
             return job;
         }
 
         public async Task<JobsCompleted> CreateJobsCompletedAsync(JobsCompleted job)
         {
+            _ctx.JobsCompleted.Attach(job);
             _ctx.JobsCompleted.Add(job);
             await _ctx.SaveChangesAsync();
             return job;

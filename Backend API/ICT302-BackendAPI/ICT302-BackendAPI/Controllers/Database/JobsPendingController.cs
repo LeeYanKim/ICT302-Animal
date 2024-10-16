@@ -25,7 +25,16 @@ namespace ICT302_BackendAPI.Controllers.Database
         {
             try
             {
-                jobsPending.QueueNumber = Guid.NewGuid();
+                var currentPendingJobs = await _jobsPendingRepo.GetJobsPendingAsync();
+                if (currentPendingJobs.Any())
+                {
+                    jobsPending.QueueNumber = currentPendingJobs.Count + 1;
+                }
+                else
+                {
+                    jobsPending.QueueNumber = 1;
+                }
+                
                 return Ok(await _jobsPendingRepo.CreateJobsPendingAsync(jobsPending));
             }
             catch (Exception ex)
@@ -61,7 +70,7 @@ namespace ICT302_BackendAPI.Controllers.Database
         }
 
         [HttpGet("jobspending/{id}")]
-        public async Task<IActionResult> GetJobsPendingByID(Guid id)
+        public async Task<IActionResult> GetJobsPendingByID(int id)
         {
             try
             {
@@ -88,7 +97,7 @@ namespace ICT302_BackendAPI.Controllers.Database
         }
 
         [HttpDelete("jobspending/{id}")]
-        public async Task<IActionResult> DeleteJobsPending(Guid id)
+        public async Task<IActionResult> DeleteJobsPending(int id)
         {
             try
             {

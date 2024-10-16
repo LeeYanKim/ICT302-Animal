@@ -9,7 +9,7 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<AnimalAccess> CreateAnimalAccessAsync(AnimalAccess animalAccess);
         Task<int> DeleteAnimalAccessAsync(AnimalAccess animalAccess);
-        Task<AnimalAccess> GetAnimalAccessByIDAsync(Guid id);
+        Task<AnimalAccess?> GetAnimalAccessByIDAsync(Guid id);
         Task<IEnumerable<AnimalAccess>> GetAnimalAccessesAsync();
         Task<AnimalAccess> UpdateAnimalAccessAsync(AnimalAccess animalAccess);
     }

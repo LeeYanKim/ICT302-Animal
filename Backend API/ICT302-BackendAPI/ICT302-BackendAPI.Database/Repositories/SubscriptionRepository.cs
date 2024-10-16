@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return subscriptions;
         }
 
-        public async Task<Subscription> GetSubscriptionByIDAsync(Guid id)
+        public async Task<Subscription?> GetSubscriptionByIDAsync(Guid id)
         {
             var subscription = await _ctx.Subscriptions.FindAsync(id);
             return subscription;
@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<Subscription> CreateSubscriptionAsync(Subscription subscription)
         {
+            _ctx.Subscriptions.Attach(subscription);
             _ctx.Subscriptions.Add(subscription);
             await _ctx.SaveChangesAsync();
             return subscription;

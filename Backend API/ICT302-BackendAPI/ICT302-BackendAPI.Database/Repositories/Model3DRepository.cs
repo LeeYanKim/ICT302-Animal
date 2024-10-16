@@ -21,14 +21,17 @@ namespace ICT302_BackendAPI.Database.Repositories
             return models;
         }
 
-        public async Task<Model3D> GetModel3DByIDAsync(Guid id)
+        public async Task<Model3D?> GetModel3DByIDAsync(Guid id)
         {
             var model = await _ctx.Model3D.FindAsync(id);
+            if(model != null)
+                _ctx.Model3D.Attach(model);
             return model;
         }
 
         public async Task<Model3D> CreateModel3DAsync(Model3D model3D)
         {
+            _ctx.Model3D.Attach(model3D);
             _ctx.Model3D.Add(model3D);
             await _ctx.SaveChangesAsync();
             return model3D;

@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return animalAccesses;
         }
 
-        public async Task<AnimalAccess> GetAnimalAccessByIDAsync(Guid id)
+        public async Task<AnimalAccess?> GetAnimalAccessByIDAsync(Guid id)
         {
             var animalAccess = await _ctx.AnimalAccesses.FindAsync(id);
             return animalAccess;
@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<AnimalAccess> CreateAnimalAccessAsync(AnimalAccess animalAccess)
         {
+            _ctx.AnimalAccesses.Attach(animalAccess);
             _ctx.AnimalAccesses.Add(animalAccess);
             await _ctx.SaveChangesAsync();
             return animalAccess;
@@ -36,6 +37,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<AnimalAccess> UpdateAnimalAccessAsync(AnimalAccess animalAccess)
         {
+            _ctx.AnimalAccesses.Attach(animalAccess);
             _ctx.AnimalAccesses.Update(animalAccess);
             await _ctx.SaveChangesAsync();
             return animalAccess;

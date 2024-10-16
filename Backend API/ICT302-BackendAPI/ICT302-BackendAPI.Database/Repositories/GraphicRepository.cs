@@ -21,14 +21,9 @@ namespace ICT302_BackendAPI.Database.Repositories
             return graphics;
         }
 
-        public async Task<Graphic> GetGraphicByIDAsync(Guid id)
-        {
-            var graphic = await _ctx.Graphics.FindAsync(id);
-            return graphic;
-        }
-
         public async Task<Graphic> CreateGraphicAsync(Graphic graphic)
         {
+            _ctx.Graphics.Attach(graphic);
             _ctx.Graphics.Add(graphic);
             await _ctx.SaveChangesAsync();
             return graphic;
@@ -38,6 +33,26 @@ namespace ICT302_BackendAPI.Database.Repositories
         {
             _ctx.Graphics.Update(graphic);
             await _ctx.SaveChangesAsync();
+            return graphic;
+        }
+
+        public async Task<Graphic?> GetGraphicByIDAsync(Guid? id)
+        {
+            if(id == null) return null;
+            
+            var graphic = await _ctx.Graphics.FindAsync(id);
+            if(graphic != null)
+                _ctx.Graphics.Attach(graphic);
+            return graphic;
+        }
+
+        public async Task<Graphic?> GetGraphicByFileNameAsync(string fileName)
+        {
+            var graphics = await _ctx.Graphics.ToListAsync();
+            var graphic = graphics.Find(fn => fn.FilePath == fileName);
+            
+            if(graphic != null)
+                _ctx.Graphics.Attach(graphic);
             return graphic;
         }
 

@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return users;
         }
 
-        public async Task<User> GetUserByIDAsync(Guid id)
+        public async Task<User?> GetUserByIDAsync(Guid id)
         {
             var user = await _ctx.Users.FindAsync(id);
             return user;
@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<User> CreateUserAsync(User user)
         {
+            _ctx.Users.Attach(user);
             _ctx.Users.Add(user);
             await _ctx.SaveChangesAsync();
             return user;
@@ -46,8 +47,8 @@ namespace ICT302_BackendAPI.Database.Repositories
             _ctx.Users.Remove(user);
             return await _ctx.SaveChangesAsync();
         }
-
-        public async Task<Subscription> GetSubscriptionByIDAsync(Guid id)
+        
+        public async Task<Subscription?> GetSubscriptionByIDAsync(Guid id)
         {
             var subscription = await _ctx.Subscriptions.FindAsync(id);
             return subscription;

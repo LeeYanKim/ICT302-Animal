@@ -9,7 +9,7 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<UserAccess> CreateUserAccessAsync(UserAccess userAccess);
         Task<int> DeleteUserAccessAsync(UserAccess userAccess);
-        Task<UserAccess> GetUserAccessByKeysAsync(Guid orgId, Guid userId);
+        Task<UserAccess?> GetUserAccessByKeysAsync(Guid orgId, Guid userId);
         Task<IEnumerable<UserAccess>> GetUserAccessesAsync();
         Task<UserAccess> UpdateUserAccessAsync(UserAccess userAccess);
     }

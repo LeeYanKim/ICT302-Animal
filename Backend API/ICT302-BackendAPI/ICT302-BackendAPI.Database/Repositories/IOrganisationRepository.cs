@@ -9,7 +9,7 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<Organisation> CreateOrganisationAsync(Organisation organisation);
         Task<int> DeleteOrganisationAsync(Organisation organisation);
-        Task<Organisation> GetOrganisationByIDAsync(Guid id);
+        Task<Organisation?> GetOrganisationByIDAsync(Guid id);
         Task<IEnumerable<Organisation>> GetOrganisationsAsync();
         Task<Organisation> UpdateOrganisationAsync(Organisation organisation);
     }

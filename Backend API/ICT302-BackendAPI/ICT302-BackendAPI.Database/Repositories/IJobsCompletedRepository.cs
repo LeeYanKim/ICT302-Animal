@@ -9,7 +9,8 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<JobsCompleted> CreateJobsCompletedAsync(JobsCompleted job);
         Task<int> DeleteJobsCompletedAsync(JobsCompleted job);
-        Task<JobsCompleted> GetJobsCompletedByIDAsync(Guid id);
+        Task<JobsCompleted?> GetCompletedJobsByIdAsync(Guid id);
+        Task<JobsCompleted?> GetCompletedJobsFromJobDetailsIdAsync(Guid? jobDetailsId);
         Task<IEnumerable<JobsCompleted>> GetJobsCompletedAsync();
         Task<JobsCompleted> UpdateJobsCompletedAsync(JobsCompleted job);
     }

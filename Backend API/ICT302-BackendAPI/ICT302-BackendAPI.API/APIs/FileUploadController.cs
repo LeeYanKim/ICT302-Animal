@@ -22,14 +22,14 @@ namespace ICT302_BackendAPI.API.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<FileUploadController> _logger;
-        private readonly ISchemaRepository _schemaRepository;
+        private readonly IAnimalRepository _animalRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, ISchemaRepository schemaRepository, IWebHostEnvironment webHostEnvironment)
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment)
         {
             _configuration = configuration;
             _logger = logger;
-            _schemaRepository = schemaRepository;
+            _animalRepository = animalRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
@@ -118,13 +118,11 @@ namespace ICT302_BackendAPI.API.Controllers
                     AnimalID = Guid.NewGuid(),
                     AnimalName = animalName,
                     AnimalType = animalType,
-                    AnimalDOB = parsedAnimalDOB,
-                    VideoUploadDate = DateTime.Now,
-                    VideoFileName = uniqueFileName
+                    AnimalDOB = parsedAnimalDOB
                 };
 
                 _logger.LogInformation("Creating animal entry in the database: AnimalName = {AnimalName}", animal.AnimalName);
-                await _schemaRepository.CreateAnimalAsync(animal);
+                await _animalRepository.CreateAnimalAsync(animal);
                 _logger.LogInformation("Animal entry created in the database with ID: {AnimalID}", animal.AnimalID);
 
                 return Ok(new { message = "File uploaded and animal data saved successfully." });

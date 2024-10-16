@@ -1,3 +1,4 @@
+using ICT302_BackendAPI.API.Generation;
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 
@@ -39,7 +40,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<SchemaContext>();
 
 // Register repositories for Animal, Model3D, and AccessType
-builder.Services.AddTransient<ISchemaRepository, SchemaRepository>(); // Animal Repository
+builder.Services.AddTransient<IAnimalRepository, AnimalRepository>(); // Animal Repository
 builder.Services.AddTransient<IModel3DRepository, Model3DRepository>();
 builder.Services.AddTransient<IAccessTypeRepository, AccessTypeRepository>(); // AccessType Repository
 builder.Services.AddTransient<IAnimalAccessRepository, AnimalAccessRepository>();
@@ -59,10 +60,23 @@ builder.Services.AddTransient<IUserAccessRepository, UserAccessRepository>();
 
 builder.Services.AddControllers();
 
+builder.Services.AddSingleton<MonitorJobLoop>();
+builder.Services.AddHostedService<QueuedJobService>();
+builder.Services.AddSingleton<IBackgroundJobQueue>(_ => 
+{
+    if (!int.TryParse(builder.Configuration["JobQueueCapacity"], out var queueCapacity))
+    {
+        queueCapacity = 10;
+    }
+
+    return new BackgroundJobQueue(queueCapacity);
+});
+
 var app = builder.Build();
 
+bool.TryParse(builder.Configuration["EnableSwagger"], out var enable);
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || enable)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -82,6 +96,11 @@ app.UseEndpoints(endpoints =>
 var util = new Utility(app.Configuration, app.Logger, app.Environment);
 
 util.PrintStartingConfig();
+
+
+MonitorJobLoop monitorJobLoop = app.Services.GetRequiredService<MonitorJobLoop>()!;
+monitorJobLoop.StartMonitorLoop();
+
 
 
 app.Run();
