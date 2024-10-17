@@ -3,6 +3,7 @@ using System;
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    partial class SchemaContextModelSnapshot : ModelSnapshot
+    [Migration("20241014143733_RemoveGPCIDFromBilling")]
+    partial class RemoveGPCIDFromBilling
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,16 +62,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
                         .HasColumnName("Animal_Type");
-
-                    b.Property<string>("VideoFileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("Video_File_Name");
-
-                    b.Property<DateTime?>("VideoUploadDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Video_Upload_Date");
 
                     b.HasKey("AnimalID");
 
@@ -796,7 +789,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                 {
                     b.Navigation("Graphics");
                 });
-
 #pragma warning restore 612, 618
         }
     }

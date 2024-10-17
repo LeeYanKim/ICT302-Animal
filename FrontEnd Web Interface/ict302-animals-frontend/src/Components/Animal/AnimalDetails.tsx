@@ -1,8 +1,19 @@
+// AnimalDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
 import API from "../../Internals/API"; 
 import { useNavigate } from 'react-router-dom';
+
+interface GraphicData {
+  gpcID: string;
+  gpcName: string;
+  gpcDateUpload: string;
+  filePath: string;
+  animalID: string;
+  gpcSize: number;
+}
+
 
 interface Animal {
   animalID: string;
@@ -11,6 +22,7 @@ interface Animal {
   animalDOB: string;
   videoFileName?: string;
   photoFileName?: string; // Assume you have a field for the animal's photo
+  graphics: GraphicData[];
 }
 
 // Define the props interface
@@ -23,8 +35,7 @@ interface AnimalDetailsProps {
 
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
-//const AnimalDetails: React.FC = () => {
-  //const { animalId } = useParams<{ animalId: string }>();
+  const { animalId } = useParams<{ animalId: string }>();
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [tabValue, setTabValue] = useState(0);
@@ -40,12 +51,17 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         if (!response.ok) {
           throw new Error("Failed to fetch animal data");
         }
-        const data = await response.json();
-        setAnimalData(data);
+        const data: Animal = await response.json();
+
+        // Handle $id and $ref if ReferenceHandler.Preserve is used
+        // Remove $id and $ref properties from the data
+        const cleanedData = JSON.parse(JSON.stringify(data));
+
+        setAnimalData(cleanedData);
       } catch (error) {
         console.error("Error fetching animal data:", error);
       } finally {
-        setLoading(false); // Set loading to false after API call
+        setLoading(false);
       }
     };
 
@@ -61,7 +77,7 @@ const handleBackBtnClick = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress /> {/* Better loading feedback */}
+        <CircularProgress />
       </Box>
     );
   }
@@ -119,15 +135,20 @@ const handleBackBtnClick = () => {
         )}
         
         {tabValue === 1 && (
-          <Box>
-          <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
-          {videoUrl ? (
-            <Box sx={{ marginTop: '20px' }}>
+          {/* Display videos */}
+      <Box mt={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {animalData.graphics && animalData.graphics.length > 0 ? (
+          animalData.graphics.map((graphic) => (
+            <div key={graphic.gpcID} style={{ marginBottom: '20px' }}>
+              <h4>{graphic.gpcName}</h4>
               <video controls width="600">
-                <source src={videoUrl} type="video/mp4" />
+                <source src={`${API.Graphic()}/graphics/videos/${graphic.gpcID}`} />
                 Your browser does not support the video tag.
               </video>
-            </Box>
+            </div>
+          ))
+        )
+      </Box>
           ) : (
             <Typography>No video available.</Typography>
           )}

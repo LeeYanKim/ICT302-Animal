@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Button, Menu, MenuItem } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
-import AnimalCard from '../Animal/AnimalCard';
 
-// Props for RecentlyUploaded
-interface RecentlyUploadedProps {
-  triggerRefresh: boolean;
+interface GraphicData {
+  gpcID: string;
+  gpcName: string;
+  gpcDateUpload: string;
+  filePath: string;
+  animalID: string;
+  gpcSize: number;
 }
 
 interface AnimalData {
   animalID: string;
   animalName: string;
   animalType: string;
+  animalDOB: string;
+  graphics: GraphicData[];
+}
 
-  videoUploadDate: string;
-  videoFileName: string; // Include video file name
+interface RecentlyUploadedProps {
+  triggerRefresh: boolean;
 }
 
 const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) => {
@@ -25,11 +30,8 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  //const navigate = useNavigate();
-  const [selectedAnimal, setSelectedAnimal] = useState<AnimalData | null>(null); // State to hold the selected animal
-  const [animalData, setAnimalData] = useState<AnimalData | null>(null);
+  const [selectedAnimal, setSelectedAnimal] = useState<AnimalData | null>(null);
 
-  // Fetch uploaded animals
   const fetchUploadedAnimals = async () => {
     setLoading(true);
     try {
@@ -37,16 +39,30 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
       if (!response.ok) {
         throw new Error('Failed to fetch uploaded animals');
       }
-      const data = await response.json();
+      const data: AnimalData[] = await response.json();
       setAnimals(data);
       setFilteredAnimals(data);
-      const types: string[] = Array.from(new Set(data.map((animal: AnimalData) => animal.animalType)));
+      const types = Array.from(new Set(data.map((animal) => animal.animalType)));
       setAnimalTypes(types);
     } catch (error) {
       console.error(error);
-      setError('An error occurred while fetching animal data. Please try again.');
+      setError('An error occurred while fetching animal data.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAnimalDetails = async (animalID: string) => {
+    try {
+      const response = await fetch(API.Download() + `/animals/details/${animalID}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch animal details');
+      }
+      const animal = await response.json();
+      console.log('Animal Details:', animal); // Debug log to inspect response
+      setSelectedAnimal(animal);
+    } catch (error) {
+      console.error('Error fetching animal details:', error);
     }
   };
 
@@ -54,68 +70,56 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     fetchUploadedAnimals();
   }, [triggerRefresh]);
 
-
   const handleAnimalClick = (animal: AnimalData) => {
-    setSelectedAnimal(animal); // Set the selected animal
+    fetchAnimalDetails(animal.animalID);
   };
-
 
   const handleFilterButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  // Close menu
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
   const handleFilterSelect = (type: string) => {
-    if (type === 'All') {
-      setFilteredAnimals(animals);
-    } else {
-      setFilteredAnimals(animals.filter((animal) => animal.animalType === type));
-    }
+    setFilteredAnimals(type === 'All' ? animals : animals.filter((a) => a.animalType === type));
     setAnchorEl(null);
   };
 
- 
-  if (loading) {
-    return <Typography>Loading...</Typography>;
-  }
+  if (loading) return <Typography>Loading...</Typography>;
 
   return (
-      <div>
+    <div>
       {error && <Typography color="error">{error}</Typography>}
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Recently uploaded:</Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginTop: '20px' }}>
-          <Button variant="outlined" onClick={handleFilterButtonClick} sx={{ marginRight: '10px' }}>
-            Filter by Animal Type
-          </Button>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            <MenuItem onClick={() => setFilteredAnimals(animals)}>All</MenuItem>
-            {animalTypes.map((type) => (
-              <MenuItem key={type} onClick={() => setFilteredAnimals(animals.filter((animal) => animal.animalType === type))}>
-                {type}
-              </MenuItem>
-            ))}
-          </Menu>
-        </Box>
+        <Button variant="outlined" onClick={handleFilterButtonClick}>Filter by Animal Type</Button>
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+          <MenuItem onClick={() => handleFilterSelect('All')}>All</MenuItem>
+          {animalTypes.map((type) => (
+            <MenuItem key={type} onClick={() => handleFilterSelect(type)}>{type}</MenuItem>
+          ))}
+        </Menu>
       </Box>
 
-      {/* Video Player */}
       {selectedAnimal && (
-        <Box sx={{ marginTop: '20px' }}>
-          <h2>{selectedAnimal.animalName}</h2>
-          <p>Type: {selectedAnimal.animalType}</p>
-          <p>Date of Birth: {new Date(selectedAnimal.videoUploadDate!).toLocaleDateString()}</p>
-          {selectedAnimal.videoFileName ? (
-            <video controls width="600">
-              <source src={API.Download() +`/animals/videos/${selectedAnimal.videoFileName}`}/>
-              Your browser does not support the video tag.
-            </video>
+        <Box>
+          <Typography variant="h4">{selectedAnimal.animalName}</Typography>
+          <Typography variant="subtitle1">Type: {selectedAnimal.animalType}</Typography>
+          <Typography variant="subtitle2">DOB: {new Date(selectedAnimal.animalDOB).toLocaleDateString()}</Typography>
+          {selectedAnimal.graphics && selectedAnimal.graphics.length > 0 ? (
+            selectedAnimal.graphics.map((graphic) => (
+              <div key={graphic.gpcID} style={{ marginBottom: '20px' }}>
+                <h4>{graphic.gpcName}</h4>
+                <video controls width="600">
+                  <source src={graphic.filePath} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            ))
           ) : (
-            <p>No video available.</p>
+            <Typography>No videos available.</Typography>
           )}
         </Box>
       )}
@@ -124,29 +128,18 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         {filteredAnimals.map((animal) => (
           <Grid item xs={12} sm={6} md={4} key={animal.animalID}>
             <Box
-              sx={{
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                height: '150px',
-                cursor: 'pointer',
-              }}
-              onClick={() => handleAnimalClick(animal)} // Pass the entire animal object
+              sx={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }}
+              onClick={() => handleAnimalClick(animal)}
             >
-              {animal.animalName && (
-                <>
-                  <Typography variant="subtitle1">{animal.animalName}</Typography>
-                  <Typography variant="body2">{`Type: ${animal.animalType}`}</Typography>
-                  <Typography variant="subtitle2">
-                    {`Uploaded on: ${animal.videoUploadDate ? new Date(animal.videoUploadDate).toLocaleDateString() : 'N/A'}`}
-                  </Typography>
-                </>
-              )}
+              <Typography variant="subtitle1">{animal.animalName}</Typography>
+              <Typography variant="body2">{animal.animalType}</Typography>
+              <Typography variant="subtitle2">
+                {new Date(animal.animalDOB).toLocaleDateString()}
+              </Typography>
             </Box>
           </Grid>
         ))}
       </Grid>
-
     </div>
   );
 };

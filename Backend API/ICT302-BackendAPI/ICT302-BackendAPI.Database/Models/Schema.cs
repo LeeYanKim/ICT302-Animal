@@ -39,13 +39,8 @@ public class AccessType
         [Column("Animal_Type", TypeName = "varchar(45)")]
         [StringLength(45)]
         public string AnimalType { get; set; }
-
-        [Column("Video_File_Name", TypeName = "varchar(255)")]
-        [StringLength(255)]
-        public string VideoFileName { get; set; }
-
-        [Column("Video_Upload_Date", TypeName = "datetime")]
-        public DateTime? VideoUploadDate { get; set; }
+       // Navigation property
+        public virtual ICollection<Graphic> Graphics { get; set; } = new List<Graphic>();
     }
 [Table("animalaccess")]
 public class AnimalAccess
@@ -146,15 +141,8 @@ public class Graphic
     [Column("GPC_Size", TypeName = "int")]
     public int GPCSize { get; set; }
 
-    [Required]
-    [Column("Billing_ID", TypeName = "binary(16)")]
-    public Guid BillingID { get; set; }
-
     [ForeignKey("AnimalID")]
     public virtual Animal Animal { get; set; }
-
-    [ForeignKey("BillingID")]
-    public virtual Billing Billing { get; set; }
 }
 
 [Table("jobdetails")]
