@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    [Migration("20240930104519_InitCreate")]
-    partial class InitCreate
+    [Migration("20241014130845_AmendSchemaTables")]
+    partial class AmendSchemaTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,8 +133,7 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.HasKey("BillingID");
 
-                    b.HasIndex("GPCID")
-                        .IsUnique();
+                    b.HasIndex("GPCID");
 
                     b.HasIndex("JobID");
 
@@ -156,11 +155,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .IsRequired()
                         .HasColumnType("binary(16)")
                         .HasColumnName("Animal_ID");
-
-                    b.Property<byte[]>("BillingID")
-                        .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("Billing_ID");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
@@ -186,8 +180,6 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.HasIndex("AnimalID");
 
-                    b.HasIndex("BillingID");
-
                     b.ToTable("graphic");
                 });
 
@@ -205,6 +197,7 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("ModelGenType")
                         .IsRequired()
+                        .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
                         .HasColumnName("Model_Gen_Type");
 
@@ -546,6 +539,32 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.ToTable("user");
                 });
 
+            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.UserAccess", b =>
+                {
+                    b.Property<byte[]>("OrgID")
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("Org_ID")
+                        .HasColumnOrder(0);
+
+                    b.Property<byte[]>("UserID")
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("User_ID")
+                        .HasColumnOrder(1);
+
+                    b.Property<byte[]>("AccessTypeID")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("AccessType_ID");
+
+                    b.HasKey("OrgID", "UserID");
+
+                    b.HasIndex("AccessTypeID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("useraccess");
+                });
+
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.AnimalAccess", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Animal", "Animal")
@@ -568,8 +587,8 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Billing", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Graphic", "Graphic")
-                        .WithOne()
-                        .HasForeignKey("ICT302_BackendAPI.Database.Models.Billing", "GPCID")
+                        .WithMany()
+                        .HasForeignKey("GPCID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -603,20 +622,12 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Graphic", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Animal", "Animal")
-                        .WithMany()
+                        .WithMany("Graphics")
                         .HasForeignKey("AnimalID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ICT302_BackendAPI.Database.Models.Billing", "Billing")
-                        .WithMany()
-                        .HasForeignKey("BillingID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Animal");
-
-                    b.Navigation("Billing");
                 });
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobDetails", b =>
@@ -745,6 +756,38 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Subscription");
+                });
+
+            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.UserAccess", b =>
+                {
+                    b.HasOne("ICT302_BackendAPI.Database.Models.AccessType", "AccessType")
+                        .WithMany()
+                        .HasForeignKey("AccessTypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ICT302_BackendAPI.Database.Models.Organisation", "Organisation")
+                        .WithMany()
+                        .HasForeignKey("OrgID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ICT302_BackendAPI.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccessType");
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Animal", b =>
+                {
+                    b.Navigation("Graphics");
                 });
 #pragma warning restore 612, 618
         }

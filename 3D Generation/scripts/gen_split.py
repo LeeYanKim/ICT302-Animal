@@ -31,8 +31,9 @@ except FileExistsError:
     pass # directory already exists
 
 
-video = ffmpeg.input(inputVideoPath)
-video = ffmpeg.output(video ,outputPath + outputFormat, loglevel="quiet")
+video = ffmpeg.input(inputVideoPath).filter(filter_name="fps", fps=30/4).output(outputPath + outputFormat, loglevel="quiet")
+#video = ffmpeg.output(video ,outputPath + outputFormat, loglevel="quiet")
+#video = ffmpeg.filter(filter_name="fps", fps=30/4)
 
 trap = io.StringIO()
 with redirect_stdout(trap):

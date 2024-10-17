@@ -1,19 +1,12 @@
 // AnimalDetails.tsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
-import API from "../../Internals/API"; 
+import { Box, Typography, CircularProgress, Button, Divider, AppBar, Tabs, Tab } from "@mui/material";
+import API from "../../Internals/API";
 import { useNavigate } from 'react-router-dom';
-
-interface GraphicData {
-  gpcID: string;
-  gpcName: string;
-  gpcDateUpload: string;
-  filePath: string;
-  animalID: string;
-  gpcSize: number;
-}
-
+import DeleteGraphicButton from './DeleteGraphicButton';
+import NewGeneration from "../Generation/NewGeneration"; 
+import ViewGenerateButton from "../Generation/ViewGenerationButton";  
 
 interface Animal {
   animalID: string;
@@ -42,7 +35,12 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   const navigate = useNavigate();
   const [backBtnClicked, setBackBtnClicked] = useState(false);
 
-  // Ensure animalId is available before making a request
+  const [PlayerOpen, setPlayerOpen] = useState(false);
+  const [ModelExist, setModelExist] = useState<boolean>(false);  
+  const [newGenOpen, setNewGenOpen] = useState<boolean>(false);  
+  const [generating, setGenerating] = useState<boolean>(false); 
+  const [progressLabel, setProgressLabel] = useState<string>("Pending"); // Label for progress steps
+
   useEffect(() => {
     const fetchAnimalData = async () => {
       if (!animalId) return;
@@ -81,9 +79,13 @@ const handleBackBtnClick = () => {
       </Box>
     );
   }
+  const handleDeleteSuccess = () => {
+    // Implement your logic to refresh the graphics list or handle UI changes
+    console.log('Graphic deleted successfully');
+  };
 
   if (!animalData) {
-    return <div>No animal data available.</div>;
+    return <Typography variant="h6" color="error">No animal data available.</Typography>;
   }
 
   const photoUrl = animalData.photoFileName
@@ -94,8 +96,28 @@ const handleBackBtnClick = () => {
     ? API.Download() + `/animals/videos/${animalData.videoFileName}`
     : null;
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+  const togglePlayerClose = () => {
+    setPlayerOpen(!PlayerOpen); 
+  };
+
+  const handleModelGeneration = () => {
+    setGenerating(true);
+
+    // Simulate the different stages of progress
+    setProgressLabel("Pending");
+    setTimeout(() => setProgressLabel("PreProcessing"), 1000);
+    setTimeout(() => setProgressLabel("Generating"), 3000);
+    setTimeout(() => setProgressLabel("Converting"), 5000);
+    setTimeout(() => setProgressLabel("Cleaning-Up"), 7000);
+    setTimeout(() => {
+      setProgressLabel("Finished"); // Clear progress label when finished
+      setGenerating(false); 
+      setModelExist(true); 
+    }, 3000);
+  };
+
+  const handleViewGeneration = () => {
+    console.log("Viewing the generated model...");
   };
 
   return (
@@ -162,14 +184,89 @@ const handleBackBtnClick = () => {
           <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
         )}
       </Box>
-      </React.Fragment>
+    </Box>
 
-      {/* Back Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-        <Button variant="contained" onClick={handleBackBtnClick}>
-          Back to Animals
-        </Button>
-      </Box>
+          {/* Video Player */}
+          <Box sx={{ flex: 1, maxWidth: '1000px' }}>  {/* Set maxWidth here */}
+            {videoUrl && PlayerOpen ? (
+              <>
+              <Button 
+                  component="label" 
+                  variant="contained" 
+                  sx={{  marginBottom: 2 }}
+                  onClick={togglePlayerClose}
+                >
+                  Close {animalData.videoFileName}
+                  </Button>
+                <video controls width="100%" style={{ borderRadius: '8px', maxWidth: '800px' }}>  {/* maxWidth for the video */}
+                  <source src={videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </>
+            ) : (
+              <Button 
+                component="label" 
+                variant="contained" 
+                sx={{ mt: 2, width: '100%', backgroundColor: '#1976d2', color: '#fff' }} 
+                onClick={togglePlayerClose}
+              >
+                View {animalData.videoFileName}
+              </Button>
+            )}
+          </Box>
+
+          {/* Generated Model Viewer */}
+          <Box sx={{ flex: 1 }}>
+            {generating ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress />
+                <Typography variant="body1" sx={{ mt: 2 }}>{progressLabel}</Typography> {/* Show progress label */}
+              </Box>
+            ) : (
+              ModelExist ? (
+                <ViewGenerateButton />
+              ) : (
+                <Button 
+                  component="label" 
+                  variant="contained" 
+                  sx={{ width: '100%' }} 
+                  onClick={() => setNewGenOpen(true)}
+                >
+                  Generate New Model
+                </Button>
+              )
+            )}
+          </Box>
+        
+
+        <Box sx={{ mt: 3, textAlign: 'center' }}>
+          <Typography variant="subtitle1" color="text.secondary">Generated Video:</Typography>
+          <Box component="ol" sx={{ listStylePosition: 'inside', paddingLeft: 0, textAlign: 'center' }}>
+            <li>Video ID: </li>
+            <li>Date Uploaded: </li> 
+            <li>Size: </li>
+          </Box>
+        </Box>
+
+        <Box mt={3} sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Button 
+            component="label" 
+            variant="contained"
+            onClick={() => navigate('/dashboard/animals/')}
+          >
+            Back to Dashboard
+          </Button>
+        </Box>
+      
+      {/* New Generation Dialog */}
+      {newGenOpen && (
+        <NewGeneration 
+          open={newGenOpen} 
+          handleClose={() => setNewGenOpen(false)} 
+          onGenerate={handleModelGeneration} 
+          graphicID={"Test"} 
+        />
+      )}
     </Box>
   );
 

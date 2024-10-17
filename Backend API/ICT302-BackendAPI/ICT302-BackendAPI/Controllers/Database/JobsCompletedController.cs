@@ -65,7 +65,7 @@ namespace ICT302_BackendAPI.Controllers.Database
         {
             try
             {
-                var job = await _jobsCompletedRepo.GetJobsCompletedByIDAsync(id);
+                var job = await _jobsCompletedRepo.GetCompletedJobsByIdAsync(id);
                 if (job == null)
                 {
                     return NotFound(new
@@ -92,7 +92,7 @@ namespace ICT302_BackendAPI.Controllers.Database
         {
             try
             {
-                var existingJob = await _jobsCompletedRepo.GetJobsCompletedByIDAsync(id);
+                var existingJob = await _jobsCompletedRepo.GetCompletedJobsByIdAsync(id);
                 if (existingJob == null)
                 {
                     return NotFound(new
@@ -121,7 +121,7 @@ namespace ICT302_BackendAPI.Controllers.Database
         {
             try
             {
-                var existingJob = await _jobsCompletedRepo.GetJobsCompletedByIDAsync(jobToUpdate.JobID);
+                var existingJob = await _jobsCompletedRepo.GetCompletedJobsByIdAsync(jobToUpdate.JobID);
                 if (existingJob == null)
                 {
                     return NotFound(new

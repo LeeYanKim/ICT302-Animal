@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, Chip, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
+import DeleteAnimalButton from './DeleteAnimalButton';
 
 // Define AnimalCardProps for the component
 export type AnimalCardProps = {
@@ -33,13 +34,20 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
 
   const formattedDOB = new Date(animalDOB).toLocaleDateString();
 
+  const handleDeleteSuccess = () => {
+    // Refresh the page or go backwards
+    console.log('Animal deleted successfully');
+  };
+
+
   return (
     <Card
       variant="outlined"
       sx={{ height: '100%', minWidth: 450, flexGrow: 1, cursor: 'pointer' }}
-      onClick={onClick} // Use the onClick prop here
+      onClick={onClick} 
     >
       <CardContent>
+        <DeleteAnimalButton animalToDeleteId = {animalID}  onDeleteSuccess={handleDeleteSuccess}/>
         <Typography component="h2" variant="subtitle2" gutterBottom>
           Name: {animalName}
         </Typography>

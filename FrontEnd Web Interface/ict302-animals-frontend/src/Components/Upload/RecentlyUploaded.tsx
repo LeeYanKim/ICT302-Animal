@@ -91,6 +91,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
 
   return (
     <div>
+    <div>
       {error && <Typography color="error">{error}</Typography>}
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Recently uploaded:</Typography>
@@ -124,8 +125,9 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         </Box>
       )}
 
+      {/* Display only the 6 most recent uploads */}
       <Grid container spacing={3}>
-        {filteredAnimals.map((animal) => (
+        {filteredAnimals.slice(0, 9).map((animal) => (  // Limit to 6 most recent animals
           <Grid item xs={12} sm={6} md={4} key={animal.animalID}>
             <Box
               sx={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }}

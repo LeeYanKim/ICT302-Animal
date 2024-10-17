@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return orgRequests;
         }
 
-        public async Task<OrgRequests> GetOrgRequestsByIDAsync(Guid id)
+        public async Task<OrgRequests?> GetOrgRequestsByIDAsync(Guid id)
         {
             var orgRequest = await _ctx.OrgRequests.FindAsync(id);
             return orgRequest;
@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<OrgRequests> CreateOrgRequestsAsync(OrgRequests orgRequests)
         {
+            _ctx.OrgRequests.Attach(orgRequests);
             _ctx.OrgRequests.Add(orgRequests);
             await _ctx.SaveChangesAsync();
             return orgRequests;

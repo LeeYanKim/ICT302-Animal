@@ -1,8 +1,8 @@
-import React, {ReactNode, createContext, useContext, createRef, useRef, useState, useEffect} from 'react';
+import React, { ReactNode, createContext, useContext, createRef, useRef, useState, useEffect } from 'react';
 
-    /**
-     * Internal class to define API endpoints
-     */
+/**
+ * Internal class to define API endpoints
+ */
 class APIEndpoints {
 
     isDev: boolean;
@@ -53,20 +53,18 @@ class API {
      * Initialize the API endpoints based on the environment
      */
     public static init() {
-        if(!process.env.NODE_ENV || process.env.NODE_ENV === 'development')
-        {
+        if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
             console.log('Development Mode');
             this.endpoint = new APIEndpoints(true, this.devEndpointAddress);
         }
-        else
-        {
+        else {
             console.log('Production Mode');
             this.endpoint = new APIEndpoints(false, this.prodEndpointAddress);
         }
     }
 
     private static ensureInitialized() {
-        if(!this.endpoint) {
+        if (!this.endpoint) {
             this.init();
         }
     }
@@ -308,7 +306,7 @@ class API {
         const endpoint = this.endpoint?.userAccess;
         return base + db + endpoint;
     }
-    
+
 
     /**
      * 
@@ -335,6 +333,33 @@ class API {
         const endpoint = this.endpoint?.download;
         return base + endpoint;
     }
+    /**
+     * 
+     * @returns The base URL path for the API File Upload controller endpoint/s
+     * This can be used to delete animals in the FileUploadController
+     * 
+     * Example: http://localhost:5173/api/upload/animal/{animalId}
+     */
+    public static DeleteAnimal(animalId: string) {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const endpoint = this.endpoint?.fileUpload;
+        return `${base}${endpoint}/animal/${animalId}`;
+    }
+
+    /**
+     * 
+     * @returns The base URL path for deleting a specific graphic (video) associated with an animal
+     * 
+     * Example: http://localhost:5173/api/upload/animal/{animalId}/graphic/{graphicId}
+     */
+    public static DeleteGraphic(animalId: string, graphicId: string) {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const endpoint = this.endpoint?.fileUpload;
+        return `${base}${endpoint}/animal/${animalId}/graphic/${graphicId}`;
+    }
+
 
 }
 

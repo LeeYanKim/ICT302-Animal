@@ -21,13 +21,13 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<FilesController> _logger;
-        private readonly ISchemaRepository _schemaRepository;
+        private readonly IAnimalRepository _animalRepository;
 
-        public FilesController(IConfiguration configuration, ILogger<FilesController> logger, ISchemaRepository schemaRepository, IWebHostEnvironment webHostEnvironment)
+        public FilesController(IConfiguration configuration, ILogger<FilesController> logger, IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment)
         {
             _configuration = configuration;
             _logger = logger;
-            _schemaRepository = schemaRepository;
+            _animalRepository = animalRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
@@ -93,7 +93,7 @@ public IActionResult GetAnimalVideo(string fileName)
         {
             try
             {
-                var animals = await _schemaRepository.GetAnimalsAsync();
+                var animals = await _animalRepository.GetAnimalsAsync();
 
                 if (animals == null || !animals.Any())
                 {
@@ -106,6 +106,28 @@ public IActionResult GetAnimalVideo(string fileName)
             {
                 _logger.LogError(ex, "Error occurred while fetching the list of animals");
                 return StatusCode(500, new { message = "Internal server error while fetching animals list." });
+            }
+        }
+
+        // Updated endpoint to get animal details by ID
+        [HttpGet("animals/details/{animalID}")]
+        public async Task<IActionResult> GetAnimalByIdAsync(Guid animalID)
+        {
+            try
+            {
+                var animal = await _animalRepository.GetAnimalByIDAsync(animalID);
+
+                if (animal == null)
+                {
+                    return NotFound(new { message = "Animal not found" });
+                }
+
+                return Ok(animal);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching animal data: {AnimalID}", animalID);
+                return StatusCode(500, new { message = "Internal server error while fetching animal data." });
             }
         }
 

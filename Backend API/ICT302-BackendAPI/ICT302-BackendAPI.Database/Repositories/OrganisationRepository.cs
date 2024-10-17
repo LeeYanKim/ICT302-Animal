@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return organisations;
         }
 
-        public async Task<Organisation> GetOrganisationByIDAsync(Guid id)
+        public async Task<Organisation?> GetOrganisationByIDAsync(Guid id)
         {
             var organisation = await _ctx.Organisations.FindAsync(id);
             return organisation;
@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<Organisation> CreateOrganisationAsync(Organisation organisation)
         {
+            _ctx.Organisations.Attach(organisation);
             _ctx.Organisations.Add(organisation);
             await _ctx.SaveChangesAsync();
             return organisation;

@@ -64,7 +64,7 @@ if args.gart != "" and args.input != "":
         #viz_dog_all(solver, optimized_seq)
 
 #start_solver()
-    img_array = np.load(os.path.join(gart_dir, "data/dog_data_official/alaskan/images/0000.npy"), allow_pickle=True)
+    img_array = np.load(os.path.join(gart_dir, "data/dog_data_official/alaskan/pred/0000.npz"), allow_pickle=True)
     print(img_array)
 #
 #test(

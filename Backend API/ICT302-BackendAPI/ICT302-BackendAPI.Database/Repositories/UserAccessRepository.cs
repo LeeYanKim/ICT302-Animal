@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return userAccesses;
         }
 
-        public async Task<UserAccess> GetUserAccessByKeysAsync(Guid orgId, Guid userId)
+        public async Task<UserAccess?> GetUserAccessByKeysAsync(Guid orgId, Guid userId)
         {
             var userAccess = await _ctx.UserAccess.FindAsync(orgId, userId);
             return userAccess;
@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<UserAccess> CreateUserAccessAsync(UserAccess userAccess)
         {
+            _ctx.UserAccess.Attach(userAccess);
             _ctx.UserAccess.Add(userAccess);
             await _ctx.SaveChangesAsync();
             return userAccess;

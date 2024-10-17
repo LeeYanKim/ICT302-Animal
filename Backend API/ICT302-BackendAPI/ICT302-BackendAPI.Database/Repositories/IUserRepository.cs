@@ -9,10 +9,10 @@ namespace ICT302_BackendAPI.Database.Repositories
     {
         Task<User> CreateUserAsync(User user);
         Task<int> DeleteUserAsync(User user);
-        Task<User> GetUserByIDAsync(Guid id);
+        Task<User?> GetUserByIDAsync(Guid id);
         Task<IEnumerable<User>> GetUsersAsync();
         Task<User> UpdateUserAsync(User user);
 
-        Task<Subscription> GetSubscriptionByIDAsync(Guid id);
+        Task<Subscription?> GetSubscriptionByIDAsync(Guid id);
     }
 }

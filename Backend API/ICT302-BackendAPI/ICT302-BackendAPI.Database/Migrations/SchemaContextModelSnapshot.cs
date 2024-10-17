@@ -261,19 +261,23 @@ namespace ICT302_BackendAPI.Database.Migrations
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobsPending", b =>
                 {
-                    b.Property<byte[]>("QueueNumber")
+                    b.Property<int>("QueueNumber")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("binary(16)")
+                        .HasColumnType("int")
                         .HasColumnName("Queue_Number");
 
                     b.Property<byte[]>("JDID")
                         .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("JD_ID");
+                        .HasColumnType("binary(16)");
 
                     b.Property<DateTime>("JobAdded")
                         .HasColumnType("date")
                         .HasColumnName("Job_Added");
+
+                    b.Property<byte[]>("JobDetailsId")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("JD_ID");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -796,7 +800,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                 {
                     b.Navigation("Graphics");
                 });
-
 #pragma warning restore 612, 618
         }
     }

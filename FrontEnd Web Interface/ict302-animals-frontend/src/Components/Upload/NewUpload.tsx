@@ -9,6 +9,8 @@ import {
   Snackbar,
   Alert,
   Typography,
+  CircularProgress,
+  Box
 } from '@mui/material';
 
 import API from '../../Internals/API';
@@ -21,13 +23,16 @@ interface NewUploadProps {
     animalType: string;
     dateOfBirth: string;
   };
-  filesToUpload: File[]; // Changed from single File to an array of Files
+  fileToUpload: File | null;
+  onUploadSuccess?: () => void;
 }
 
-export default function NewUpload({ open, handleClose, animalDetails, filesToUpload }: NewUploadProps) {
+export default function NewUpload({ open, handleClose, animalDetails, fileToUpload, onUploadSuccess  }: NewUploadProps) {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null); // To track upload status
+
 
   // Handle File Upload
   const handleFileUpload = async () => {
@@ -61,7 +66,7 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
     });
 
     try {
-      const response = await fetch(API.Upload(), {
+      const response = await fetch(API.Upload(), { 
         method: 'POST',
         body: formData,
       });
@@ -73,7 +78,20 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
       } else {
         const data = await response.json();
         console.log('Upload success:', data);
-        handleClose(false); // Close the dialog after successful upload
+
+
+        if (onUploadSuccess) {
+          onUploadSuccess();
+        }
+        
+        // Stall for a few moments and show a progress circle
+        setUploadSuccess(true); // Set success state
+        setTimeout(() => {
+          handleClose(false); // Close the dialog after a brief delay
+          setIsUploading(false); // Stop progress circle after closing
+        }, 1000); // 1 seconds delay
+
+
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -102,9 +120,17 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
         <DialogTitle>{isUploading ? 'Uploading...' : 'Upload Videos'}</DialogTitle>
         <DialogContent>
           {isUploading ? (
-            <Typography variant="body1">
-              Uploading your videos for the animal: {animalDetails.animalName}
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <CircularProgress />
+            <Typography variant="body1" mt={2}>
+              Uploading your video for the animal: {animalDetails.animalName}
             </Typography>
+            {uploadSuccess && (
+              <Typography variant="body1" mt={2} color="success.main">
+                Upload Successful!
+              </Typography>
+            )}
+          </Box>
           ) : (
             <Typography variant="body1">Preparing to upload your videos...</Typography>
           )}

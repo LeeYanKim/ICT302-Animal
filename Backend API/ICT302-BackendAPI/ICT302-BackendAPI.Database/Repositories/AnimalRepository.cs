@@ -1,4 +1,3 @@
-// SchemaRepository.cs
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class SchemaRepository : ISchemaRepository
+    public class AnimalRepository : IAnimalRepository
     {
         private readonly SchemaContext _ctx;
 
-        public SchemaRepository(SchemaContext ctx)
+        public AnimalRepository(SchemaContext ctx)
         {
             _ctx = ctx;
         }
@@ -19,31 +18,25 @@ namespace ICT302_BackendAPI.Database.Repositories
         // Get all animals
         public async Task<IEnumerable<Animal>> GetAnimalsAsync()
         {
-            return await _ctx.Animals.ToListAsync();
+            var animals = await _ctx.Animals.ToListAsync();
+            return animals;
         }
 
-       public async Task<Animal> GetAnimalByIDAsync(Guid id)
-{
-    var animal = await _ctx.Animals
-        .Include(a => a.Graphics)  // Eager load graphics
-        .FirstOrDefaultAsync(a => a.AnimalID == id);
-
-    // Ensure Graphics is never null
-    animal.Graphics ??= new List<Graphic>();
-    return animal;
-}
-
-
-
-        // Get animal by name and date of birth
-        public async Task<Animal> GetAnimalByNameAndDOBAsync(string name, DateTime dob)
+        // Get animal by ID
+        public async Task<Animal?> GetAnimalByIDAsync(Guid? id)
         {
-            return await _ctx.Animals.FirstOrDefaultAsync(a => a.AnimalName == name && a.AnimalDOB == dob);
+            if(id == null) return null;
+            
+            var animal = await _ctx.Animals.FindAsync(id);
+            if(animal != null)
+                _ctx.Animals.Attach(animal);
+            return animal;
         }
 
         // Create a new animal
         public async Task<Animal> CreateAnimalAsync(Animal animal)
         {
+            _ctx.Animals.Attach(animal);
             _ctx.Animals.Add(animal);
             await _ctx.SaveChangesAsync();
             return animal;
@@ -52,6 +45,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         // Update an existing animal
         public async Task<Animal> UpdateAnimalAsync(Animal animal)
         {
+            _ctx.Animals.Attach(animal);
             _ctx.Animals.Update(animal);
             await _ctx.SaveChangesAsync();
             return animal;
@@ -62,6 +56,22 @@ namespace ICT302_BackendAPI.Database.Repositories
         {
             _ctx.Animals.Remove(animal);
             return await _ctx.SaveChangesAsync();
+        }
+
+        // Update animal video data
+        public async Task<Animal?> UpdateAnimalVideoDataAsync(Guid animalId, string videoFileName, DateTime uploadDate)
+        {
+            var animal = await _ctx.Animals.FindAsync(animalId);
+            if (animal == null)
+            {
+                return null; // Animal not found
+            }
+            
+
+            _ctx.Animals.Update(animal);
+            await _ctx.SaveChangesAsync();
+
+            return animal;
         }
     }
 }

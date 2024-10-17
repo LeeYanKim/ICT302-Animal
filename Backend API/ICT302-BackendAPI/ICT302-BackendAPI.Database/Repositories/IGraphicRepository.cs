@@ -11,7 +11,11 @@ namespace ICT302_BackendAPI.Database.Repositories
         Task<IEnumerable<Graphic>> GetGraphicsAsync();
         Task<Graphic> GetGraphicByIDAsync(Guid id);
         Task<Graphic> CreateGraphicAsync(Graphic graphic);
-        Task<Graphic> UpdateGraphicAsync(Graphic graphic);
         Task<int> DeleteGraphicAsync(Graphic graphic);
+        Task<IEnumerable<Graphic>> GetGraphicsAsync();
+        Task<Graphic> UpdateGraphicAsync(Graphic graphic);
+        Task<Graphic?> GetGraphicByIDAsync(Guid? id);
+        
+        Task<Graphic?> GetGraphicByFileNameAsync(string fileName);
     }
 }

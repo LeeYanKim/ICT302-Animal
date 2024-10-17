@@ -21,7 +21,7 @@ namespace ICT302_BackendAPI.Database.Repositories
             return billings;
         }
 
-        public async Task<Billing> GetBillingByIDAsync(Guid id)
+        public async Task<Billing?> GetBillingByIDAsync(Guid id)
         {
             var billing = await _ctx.Billings.FindAsync(id);
             return billing;
@@ -29,6 +29,7 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<Billing> CreateBillingAsync(Billing billing)
         {
+            _ctx.Billings.Attach(billing);
             _ctx.Billings.Add(billing);
             await _ctx.SaveChangesAsync();
             return billing;
