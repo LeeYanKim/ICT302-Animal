@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, CircularProgress, Button, Divider } from "@mui/material";
+import { Box, Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
 import API from "../../Internals/API";
 import { useNavigate } from 'react-router-dom';
 import DeleteGraphicButton from './DeleteGraphicButton';
@@ -15,10 +15,19 @@ interface Animal {
   videoFileName?: string;
 }
 
-const AnimalDetails: React.FC = () => {
+// Define the props interface
+interface AnimalDetailsProps {
+  animalId: string; // Expecting animalId as a prop
+  activeTab: number; // Tab index
+  setActiveTab: React.Dispatch<React.SetStateAction<number>>; // Function to change the active tab
+  setSelectedAnimalId: React.Dispatch<React.SetStateAction<string | null>>; // Function to change the active tab
+}
+
+const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const { animalId } = useParams<{ animalId: string }>(); 
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
   const [PlayerOpen, setPlayerOpen] = useState(false);
   const [ModelExist, setModelExist] = useState<boolean>(false);  
@@ -47,6 +56,14 @@ const AnimalDetails: React.FC = () => {
     fetchAnimalData();
   }, [animalId]);
 
+
+
+  const handleBackBtnClick = () => {
+    navigate('/dashboard/animals');
+    setActiveTab(0);
+    setSelectedAnimalId(null);
+  }
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -66,6 +83,10 @@ const AnimalDetails: React.FC = () => {
   const videoUrl = animalData.videoFileName
     ? API.Download() + `/animals/videos/${animalData.videoFileName}`
     : null;
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   const togglePlayerClose = () => {
     setPlayerOpen(!PlayerOpen); 
@@ -92,6 +113,70 @@ const AnimalDetails: React.FC = () => {
   };
 
   return (
+    <Box>
+      {/* Fixed banner with animal photo and name */}
+      <Box textAlign="center" sx={{ mt: 5 }}>
+        <Typography variant="h4">{animalData.animalName}</Typography>
+        <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
+        <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
+      </Box>
+
+      {/* Tabs for different sections */}
+      <AppBar position="static">
+        <Tabs value={tabValue} onChange={handleTabChange} aria-label="animal details tabs">
+          <Tab label="Information" />
+          <Tab label="Media Uploaded" />
+          <Tab label="Version" />
+          <Tab label="Access Granted" />
+        </Tabs>
+      </AppBar>
+    
+          {/* Tab Content */}
+          <Box sx={{ p: 2 }}>
+        {tabValue === 0 && (
+          <Typography variant="body1">Details about {animalData.animalName} can go here.</Typography>
+        )}
+        
+        {tabValue === 1 && (
+          <Box>
+          <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
+          {videoUrl ? (
+            <Box sx={{ marginTop: '20px' }}>
+              <video controls width="600">
+                <source src={videoUrl} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </Box>
+          ) : (
+            <Typography>No video available.</Typography>
+          )}
+        </Box>
+      )}
+
+        {tabValue === 2 && (
+          <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
+        )}
+        {tabValue === 3 && (
+          <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
+        )}
+      </Box>
+
+      {/* Back Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+        <Button variant="contained" onClick={handleBackBtnClick}>
+          Back to Animals
+        </Button>
+      </Box>
+    </Box>
+  );
+    
+    
+    
+    
+    
+    
+    
+    
     <Box textAlign="center" sx={{ mt: 5 }}>
       <Typography variant="h4">{animalData.animalName}</Typography>
       <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>

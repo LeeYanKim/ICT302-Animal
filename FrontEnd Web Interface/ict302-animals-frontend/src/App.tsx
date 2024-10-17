@@ -91,7 +91,8 @@ const App: React.FC = () => {
         "/dashboard/feedback",
         "/dashboard/help",
         "/dashboard/account",
-        "/dashboard/animals"
+        "/dashboard/animals",
+        "/dashboard/animals/:animalId"
     ];
 
 // Returns the main component of the app with the navigation bar and the routes
@@ -116,7 +117,6 @@ const App: React.FC = () => {
                                 <Route key={index} path={dashboardPath} element={frontendContext.user.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
 
-                            <Route path="/dashboard/animals/:animalId" element={<AnimalDetails />} /> {/* Animal details page */}
 
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
 
