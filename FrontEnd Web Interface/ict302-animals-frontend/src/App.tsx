@@ -1,4 +1,4 @@
-import React, {useEffect, useContext} from 'react';
+import React, {useEffect, useContext, useState} from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 
@@ -17,6 +17,7 @@ import SignUp from './Pages/SignUp';
 import SignOut from './Pages/SignOut';
 import Dashboard from './Pages/Dashboard';
 import AnimalDetails from './Components/Animal/AnimalDetails';  // Import the AnimalDetails component for animal page
+import AnimalDetailsWrapper from './Components/Animal/AnimalDetailsWrapper'; 
 
 import UserProfile from './Internals/UserProfile';
 import {FrontendContext} from './Internals/ContextStore';
@@ -27,7 +28,7 @@ import AppTheme from "./Components/UI/Theme";
 import {createTheme, PaletteMode, ThemeProvider, Button, CssBaseline} from "@mui/material";
 
 import getDashboardTheme from './Theme/getDashboardTheme';
-
+import Animals from './Pages/Animals'; // Import Animals page here
 import DashboardPage from './Components/Dashboard/DashboardHelpers';
 import DashboardPageDisplay from './Components/Dashboard/DashboardPageDisplay';
 
@@ -42,6 +43,8 @@ const App: React.FC = () => {
 
     const [mode, setMode] = React.useState<PaletteMode>('light');
     const dashboardTheme = createTheme(getDashboardTheme(mode));
+
+    const [activeTab, setActiveTab] = useState(0);
 
 
     let currentLocation = useLocation();
@@ -80,7 +83,7 @@ const App: React.FC = () => {
     const frontendContext = useContext(FrontendContext);
 
 
-    const dashboardPaghPaths = [
+    const dashboardPagePaths = [
         "/dashboard",
         "/dashboard/home",
         "/dashboard/upload",
@@ -91,7 +94,8 @@ const App: React.FC = () => {
         "/dashboard/feedback",
         "/dashboard/help",
         "/dashboard/account",
-        "/dashboard/animals"
+        "/dashboard/animals",
+        "/dashboard/animals/:animalId"
     ];
 
 // Returns the main component of the app with the navigation bar and the routes
@@ -112,12 +116,11 @@ const App: React.FC = () => {
                             <Route path="/signin" element={<SignIn />} /> {/* This is the sign in page */}
                             <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
                             <Route path="/signout" element={<SignOut />} /> {/* This is the sign in page */}
-                            {dashboardPaghPaths.map((dashboardPath, index) => (
+                            {dashboardPagePaths.map((dashboardPath, index) => (
                                 <Route key={index} path={dashboardPath} element={frontendContext.user.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
 
-                            <Route path="/dashboard/animals/:animalId" element={<AnimalDetails />} /> {/* Animal details page */}
-
+                            
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
 
                         </Routes>

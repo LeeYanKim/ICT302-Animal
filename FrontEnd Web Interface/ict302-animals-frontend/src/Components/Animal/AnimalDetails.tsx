@@ -1,8 +1,9 @@
 // AnimalDetails.tsx
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Box, Typography, CircularProgress, Button } from "@mui/material";
-import API from "../../Internals/API";
+import { useParams } from "react-router-dom";
+import { Box, Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
+import API from "../../Internals/API"; 
+import { useNavigate } from 'react-router-dom';
 
 interface GraphicData {
   gpcID: string;
@@ -13,24 +14,38 @@ interface GraphicData {
   gpcSize: number;
 }
 
+
 interface Animal {
   animalID: string;
   animalName: string;
   animalType: string;
   animalDOB: string;
+  videoFileName?: string;
+  photoFileName?: string; // Assume you have a field for the animal's photo
   graphics: GraphicData[];
 }
 
-const AnimalDetails: React.FC = () => {
+// Define the props interface
+interface AnimalDetailsProps {
+  animalId: string; // Expecting animalId as a prop
+  activeTab: number; // Tab index
+  setActiveTab: React.Dispatch<React.SetStateAction<number>>; // Function to change the active tab
+  setSelectedAnimalId: React.Dispatch<React.SetStateAction<string | null>>; // Function to change the active tab
+}
+
+
+const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const { animalId } = useParams<{ animalId: string }>();
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
+  const [backBtnClicked, setBackBtnClicked] = useState(false);
 
+  // Ensure animalId is available before making a request
   useEffect(() => {
-    if (!animalId) return;
-
     const fetchAnimalData = async () => {
+      if (!animalId) return;
       try {
         const response = await fetch(API.Download() + `/animals/details/${animalId}`);
         if (!response.ok) {
@@ -53,6 +68,12 @@ const AnimalDetails: React.FC = () => {
     fetchAnimalData();
   }, [animalId]);
 
+const handleBackBtnClick = () => {
+  navigate('/dashboard/animals');
+  setActiveTab(0);
+  setSelectedAnimalId(null);
+}
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -65,13 +86,56 @@ const AnimalDetails: React.FC = () => {
     return <div>No animal data available.</div>;
   }
 
-  return (
-    <Box textAlign="center" sx={{ mt: 5 }}>
-      <Typography variant="h4">{animalData.animalName}</Typography>
-      <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
-      <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
+  const photoUrl = animalData.photoFileName
+  ? API.Download() + `/animals/photos/${animalData.photoFileName}`
+  : null;
 
-      {/* Display videos */}
+  const videoUrl = animalData.videoFileName
+    ? API.Download() + `/animals/videos/${animalData.videoFileName}`
+    : null;
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  return (
+    <Box>
+      {/* Fixed banner with animal photo and name */}
+      <Box sx={{ position: 'relative', overflow: 'hidden', mb: 2 }}>
+        {photoUrl && (
+          <img src={photoUrl} alt={animalData.animalName} style={{ width: '100%', height: 'auto' }} />
+        )}
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'blue', p: 2 }}>
+          <Typography variant="h4">{animalData.animalName}</Typography>
+        </Box>
+      </Box>
+
+      {/* Tabs for different sections */}
+      <React.Fragment>
+
+        <Tabs 
+          value={tabValue} centered 
+          onChange={handleTabChange} 
+          variant='fullWidth'
+          indicatorColor='secondary' 
+          aria-label="animal details tabs">
+
+          <Tab label="Information" />
+          <Tab label="Media Uploaded" />
+          <Tab label="Version" />
+          <Tab label="Access Granted" />
+        </Tabs>
+      
+
+      {/* Tab Content */}
+      <Box sx={{ p: 10 }}>
+        {tabValue === 0 && (
+          <Typography variant="body1">Animal information {animalData.animalName} can go here.</Typography>
+
+        )}
+        
+        {tabValue === 1 && (
+          {/* Display videos */}
       <Box mt={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {animalData.graphics && animalData.graphics.length > 0 ? (
           animalData.graphics.map((graphic) => (
@@ -83,18 +147,32 @@ const AnimalDetails: React.FC = () => {
               </video>
             </div>
           ))
-        ) : (
-          <Typography>No videos available.</Typography>
+        )
+      </Box>
+          ) : (
+            <Typography>No video available.</Typography>
+          )}
+        </Box>
+      )}
+
+        {tabValue === 2 && (
+          <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
+        )}
+        {tabValue === 3 && (
+          <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
         )}
       </Box>
+      </React.Fragment>
 
-      <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <Button variant="contained" onClick={() => navigate('/dashboard/animals/')}>
-          Back
+      {/* Back Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+        <Button variant="contained" onClick={handleBackBtnClick}>
+          Back to Animals
         </Button>
       </Box>
     </Box>
   );
+
 };
 
 export default AnimalDetails;
