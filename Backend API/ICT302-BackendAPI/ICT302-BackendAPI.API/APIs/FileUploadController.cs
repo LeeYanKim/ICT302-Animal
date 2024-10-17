@@ -26,12 +26,12 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly IGraphicRepository _graphicRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment)
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository,  IWebHostEnvironment webHostEnvironment)
         {
             _configuration = configuration;
             _logger = logger;
             _animalRepository = animalRepository;
-            _graphicRepository = graphicRepository;
+            //_graphicRepository = graphicRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
@@ -177,7 +177,7 @@ namespace ICT302_BackendAPI.API.Controllers
         }
         private async Task<bool> DeleteAnimal(Guid animalId)
         {
-            var animal = await _schemaRepository.GetAnimalByIDAsync(animalId);
+            var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
             if (animal == null)
             {
                 return false; // Animal not found
@@ -185,10 +185,10 @@ namespace ICT302_BackendAPI.API.Controllers
 
             // Delete all associated video files
             string storedFilesPath = GetStoredFilesPath();
-            DeleteFile(storedFilesPath, animal.VideoFileName);
+            //DeleteFile(storedFilesPath, animal.VideoFileName); This needs to be looked at
 
             // Delete the animal record from the database
-            await _schemaRepository.DeleteAnimalAsync(animal);
+            await _animalRepository.DeleteAnimalAsync(animal);
             _logger.LogInformation("Animal and associated videos deleted successfully: {AnimalID}", animalId);
 
             return true;
@@ -229,7 +229,7 @@ public async Task<IActionResult> DeleteGraphicAsync(Guid animalId, string graphi
     try
     {
         // Fetch the animal from the database using the animalId
-        var animal = await _schemaRepository.GetAnimalByIDAsync(animalId);
+        var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
         if (animal == null)
         {
             return NotFound(new { message = "Animal not found." });

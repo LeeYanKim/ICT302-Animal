@@ -23,11 +23,11 @@ interface NewUploadProps {
     animalType: string;
     dateOfBirth: string;
   };
-  fileToUpload: File | null;
+  filesToUpload: File[] | null;
   onUploadSuccess?: () => void;
 }
 
-export default function NewUpload({ open, handleClose, animalDetails, fileToUpload, onUploadSuccess  }: NewUploadProps) {
+export default function NewUpload({ open, handleClose, animalDetails, filesToUpload, onUploadSuccess  }: NewUploadProps) {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);

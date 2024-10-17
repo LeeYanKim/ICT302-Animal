@@ -143,7 +143,9 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         ))}
       </Grid>
     </div>
+    </div>
   );
 };
+
 
 export default RecentlyUploaded;

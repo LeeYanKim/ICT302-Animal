@@ -36,7 +36,7 @@ public async Task<IActionResult> GetAnimalDetails(Guid id)
 {
     try
     {
-        var animal = await _schemaRepository.GetAnimalByIDAsync(id);
+        var animal = await _animalRepository.GetAnimalByIDAsync(id);
         if (animal == null)
         {
             return NotFound(new { message = "Animal not found" });
