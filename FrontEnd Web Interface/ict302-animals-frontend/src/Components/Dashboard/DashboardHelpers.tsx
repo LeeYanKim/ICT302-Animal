@@ -13,7 +13,7 @@ import Animals from '../../Pages/Animals';
 
 
 enum DashboardPages {
-    Home, Upload, About, Settings, Help, Account, Animals
+    Home, Upload, About, Settings, Help, Account, Animals, AnimalDetails
 }
 
 export function getDashboardPageFromName(page: string): DashboardPages {
@@ -66,6 +66,8 @@ export function getPrettyNameFromDashboardPage(page: DashboardPages) {
             return 'Account';
         case DashboardPages.Animals:
             return 'Animals';
+        case DashboardPages.AnimalDetails:
+            return "Animals";
     }
 }
 
@@ -91,7 +93,7 @@ export function getDashboardPageRenderFromDashboardPage(page: DashboardPages, al
         case DashboardPages.Account:
             return <Account />;
         case DashboardPages.Animals:
-            return <Animals />;
+            return <Animals actTab={0}/>;
         default:
             return <MainGrid />;
     }

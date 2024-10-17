@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Box, Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
 import API from "../../Internals/API";
-import { useNavigate } from 'react-router-dom';
 import DeleteGraphicButton from './DeleteGraphicButton';
 import NewGeneration from "../Generation/NewGeneration"; 
 import ViewGenerateButton from "../Generation/ViewGenerationButton";  
@@ -15,7 +14,7 @@ interface Animal {
   videoFileName?: string;
 }
 
-// Define the props interface
+// Type Definitions
 interface AnimalDetailsProps {
   animalId: string; // Expecting animalId as a prop
   activeTab: number; // Tab index
@@ -23,12 +22,15 @@ interface AnimalDetailsProps {
   setSelectedAnimalId: React.Dispatch<React.SetStateAction<string | null>>; // Function to change the active tab
 }
 
+// Functional Component Definition
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
-  const { animalId } = useParams<{ animalId: string }>(); 
+  
+  //const { animalId: paramAnimalId } = useParams<{ animalId: string }>();  // this is using url approach
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
+  const [backBtnClicked, setBackBtnClicked] = useState(false);
   const [PlayerOpen, setPlayerOpen] = useState(false);
   const [ModelExist, setModelExist] = useState<boolean>(false);  
   const [newGenOpen, setNewGenOpen] = useState<boolean>(false);  
@@ -138,89 +140,36 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         )}
         
         {tabValue === 1 && (
+        <Box>
           <Box>
-          <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
-          {videoUrl ? (
-            <Box sx={{ marginTop: '20px' }}>
-              <video controls width="600">
-                <source src={videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </Box>
-          ) : (
-            <Typography>No video available.</Typography>
-          )}
-        </Box>
-      )}
+            <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
+            {videoUrl ? (
+              <Box sx={{ marginTop: '20px' }}>
+                <video controls width="600">
+                  <source src={videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </Box>
+            ) : (
+              <Typography>No video available.</Typography>
+            )}
+          </Box>
 
-        {tabValue === 2 && (
-          <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
-        )}
-        {tabValue === 3 && (
-          <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
-        )}
-      </Box>
+          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', gap: 4, border: '1px solid #ccc', borderRadius: '8px', padding: 3 }}>
+            {animalId ? (videoUrl ? (
+              <DeleteGraphicButton
+                animaltoDelId={animalId}
+                graphictoDelId={videoUrl}
+                onDeleteSuccess={handleDeleteSuccess}/>
+            ) : (
+              <Typography>No video available.</Typography>
+            )
+            ) : (
+            <Typography>No animal selected.</Typography>
+            )}
+          </Box>
 
-      {/* Back Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-        <Button variant="contained" onClick={handleBackBtnClick}>
-          Back to Animals
-        </Button>
-      </Box>
-    </Box>
-  );
-    
-    
-    
-    
-    
-    
-    
-    
-    <Box textAlign="center" sx={{ mt: 5 }}>
-      <Typography variant="h4">{animalData.animalName}</Typography>
-      <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
-      <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
-
-      {/* Display video */}
-      <Box mt={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        {videoUrl ? (
-          <video controls width="600">
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        ) : (
-          <Typography>No video available.</Typography>
-        )}
-
-        <Box 
-          sx={{ 
-            mt: 4, 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: 4, 
-            border: '1px solid #ccc', 
-            borderRadius: '8px', 
-            padding: 3 
-          }}>
-        
-        {animalId ? (
-          videoUrl ? (
-            <DeleteGraphicButton
-              animaltoDelId={animalId}
-              graphictoDelId={videoUrl}
-              onDeleteSuccess={handleDeleteSuccess}
-            />
-          ) : (
-            <Typography>No video available.</Typography>
-          )
-        ) : (
-          <Typography>No animal selected.</Typography>
-        )}
-      </Box>
-    </Box>
-
-          {/* Video Player */}
+           {/* Video Player */}
           <Box sx={{ flex: 1, maxWidth: '1000px' }}>  {/* Set maxWidth here */}
             {videoUrl && PlayerOpen ? (
               <>
@@ -272,37 +221,54 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
             )}
           </Box>
         
-
-        <Box sx={{ mt: 3, textAlign: 'center' }}>
-          <Typography variant="subtitle1" color="text.secondary">Generated Video:</Typography>
-          <Box component="ol" sx={{ listStylePosition: 'inside', paddingLeft: 0, textAlign: 'center' }}>
-            <li>Video ID: </li>
-            <li>Date Uploaded: </li> 
-            <li>Size: </li>
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="subtitle1" color="text.secondary">Generated Video:</Typography>
+            <Box component="ol" sx={{ listStylePosition: 'inside', paddingLeft: 0, textAlign: 'center' }}>
+              <li>Video ID: </li>
+              <li>Date Uploaded: </li> 
+              <li>Size: </li>
+            </Box>
           </Box>
-        </Box>
 
-        <Box mt={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Button 
-            component="label" 
-            variant="contained"
-            onClick={() => navigate('/dashboard/animals/')}
-          >
-            Back to Dashboard
-          </Button>
-        </Box>
-      
-      {/* New Generation Dialog */}
-      {newGenOpen && (
-        <NewGeneration 
-          open={newGenOpen} 
-          handleClose={() => setNewGenOpen(false)} 
-          onGenerate={handleModelGeneration} 
-          graphicID={"Test"} 
-        />
-      )}
+          {/* New Generation Dialog */}
+            {newGenOpen && (
+              <NewGeneration 
+                open={newGenOpen} 
+                handleClose={() => setNewGenOpen(false)} 
+                onGenerate={handleModelGeneration} 
+                graphicID={"Test"} 
+              />
+            )}
+            
+        </Box>)}
+
+        {tabValue === 2 && (
+          <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
+        )}
+
+        {tabValue === 3 && (
+          <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
+        )}
+      </Box>
+
+      {/* Back Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+        <Button variant="contained" onClick={handleBackBtnClick}>
+          Back to Animals
+        </Button>
+      </Box>
+
     </Box>
   );
+    
+    
+    
+    
+    
+    
+    
+    
+  
 };
 
 export default AnimalDetails;
