@@ -296,6 +296,21 @@ class API {
 
     /**
      * 
+     * @param userId The unique identifier for the user
+     * @returns The URL for fetching a user by ID
+     * 
+     * Example: http://localhost:5173/api/db/user/{userId}
+     */
+    public static GetUserByID(userId: string) {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const db = this.endpoint?.dbEndpoint ?? '';
+        const endpoint = this.endpoint?.user;
+        return `${base}${db}${endpoint}/${userId}`;
+    }
+
+    /**
+     * 
      * @returns The base URL path for the API UserAccess controller endpoint/s
      * 
      * Example: http://localhost:5173/api/db/userAccess
