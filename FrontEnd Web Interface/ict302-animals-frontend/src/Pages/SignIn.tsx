@@ -130,6 +130,7 @@ const SignIn: React.FC = () => {
   };
 
 
+
   const handleGoogleSignIn = async () => {
     const googleProvider = new GoogleAuthProvider();
   
@@ -138,7 +139,7 @@ const SignIn: React.FC = () => {
       const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
       const user = result.user; // This is the authenticated user
   
-      console.log('Google sign-in successful:', user);
+      //console.log('Google sign-in successful:', user);
   
       // Retrieve the ID token
       const idToken = await user.getIdToken();
@@ -152,9 +153,9 @@ const SignIn: React.FC = () => {
     }
   };
 
-  console.log(process.env);
+  //console.log(process.env);
   const analytics = getAnalytics(frontendContext.firebaseRef.current);
-  console.log(analytics);
+  //console.log(analytics);
 
   return (
         <SignInContainer direction="column" justifyContent="space-between">

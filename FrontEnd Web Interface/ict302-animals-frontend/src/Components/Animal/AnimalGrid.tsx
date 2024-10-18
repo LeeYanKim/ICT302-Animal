@@ -51,7 +51,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
       <Grid container spacing={2} columns={12} sx={{ mb: (theme: Theme) => theme.spacing(2) }}>
-        {animals.map((animal) => (
+        {animals.length > 0 && animals.map((animal) => (
           <Grid sx={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
             <AnimalCard
               animalID={animal.animalID}
@@ -62,6 +62,11 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
             />
           </Grid>
         ))}
+        {animals.length === 0 && (
+          <Grid sx={{xs: 12, sm: 6, md: 4}}>
+            <Typography variant="h6">No animals found.</Typography>
+          </Grid>
+        )}
       </Grid>
     </Box>
   );

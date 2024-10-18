@@ -6,7 +6,7 @@ import API from "../Internals/API";
 
 import AnimalCard from "../Components/Animal/AnimalCard";
 import CompletedCard from "../Components/Completed/CompletedCard";
-import {Grid2 as Grid, Box} from "@mui/material";
+import {Grid2 as Grid, Box, Typography, Button} from "@mui/material";
 import AnimalsGrid from '../Components/Animal/AnimalGrid';
 import AnimalDetails from "../Components/Animal/AnimalDetails"; // Adjust import based on your structure
 
@@ -18,17 +18,15 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   const frontendContext = useContext(FrontendContext);
   const navigate = useNavigate();
   const [animals, setAnimals] = useState<[]>([]);
-  //below two lines are newly added
   const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(actTab); // 0 for AnimalGrid, 1 for AnimalDetails
 
-  const handelDBConnectionTest = async () => {
+  const fetchAnimalsData = async () => {
     try {
       const response = await fetch(API.Animals());
       if (response.ok) {
         const data = await response.json();
         setAnimals(data);
-        console.log(animals);
       } else {
         console.error('Failed to fetch animals data');
       }
@@ -38,7 +36,7 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   }
 
   useEffect(() => {
-    handelDBConnectionTest();
+    fetchAnimalsData();
   }, [activeTab]);
 
   // Define the handleAnimalClick function here
@@ -50,18 +48,24 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   };
 
   return (
-   <Box>
-        <h1>Animals test here</h1>
-        {/* Sidebar component can be added here */}
+    <Box>
+        <h1>Animals</h1>
         
-        {activeTab === 0 && (
+        {animals.length > 0 && activeTab === 0 && (
         <AnimalsGrid triggerRefresh={true} onAnimalClick={handleAnimalClick} />
       )}
 
-      {activeTab === 1 && selectedAnimalId && (
+      {animals.length > 0 && activeTab === 1 && selectedAnimalId && (
         <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
       )}
-      </Box>
+      
+      {animals.length === 0 && (
+        <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+          <Typography variant="h6">No animals found</Typography>
+          <Button variant="contained" color="secondary" onClick={fetchAnimalsData}>Reload</Button>
+        </Box>
+        )}
+    </Box>
   );
 }
 

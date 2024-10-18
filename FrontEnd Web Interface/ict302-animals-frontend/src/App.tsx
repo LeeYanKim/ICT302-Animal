@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState} from 'react';
+import React, {useEffect, useContext, useState, useRef} from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 
@@ -34,23 +34,17 @@ import DashboardPageDisplay from './Components/Dashboard/DashboardPageDisplay';
 
 const App: React.FC = () => {
 
-    // These are the media queries that will be used to determine the screen size
-    const isDesktopOrLaptop = useMediaQuery({query: '(min-width: 1224px)'})
-    const isBigScreen = useMediaQuery({ query: '(min-width: 1824px)' })
-    const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' })
-    const isPortrait = useMediaQuery({ query: '(orientation: portrait)' })
-    const isRetina = useMediaQuery({ query: '(min-resolution: 2dppx)' })
-
     const [mode, setMode] = React.useState<PaletteMode>('light');
     const dashboardTheme = createTheme(getDashboardTheme(mode));
 
     const [activeTab, setActiveTab] = useState(0);
 
 
-    let currentLocation = useLocation();
-    let currentPath = currentLocation.pathname;
-    let currentSearch = currentLocation.search;
-    let currentHash = currentLocation.hash;
+    var currentLocation = useLocation();
+    var currentPath = currentLocation.pathname;
+    var currentSearch = currentLocation.search;
+    var currentHash = currentLocation.hash;
+
     useEffect(() => {
         currentPath = currentLocation.pathname;
         currentSearch = currentLocation.search;
@@ -82,16 +76,13 @@ const App: React.FC = () => {
 
     const frontendContext = useContext(FrontendContext);
 
-
     const dashboardPagePaths = [
         "/dashboard",
         "/dashboard/home",
         "/dashboard/upload",
-        "/dashboard/queue",
         "/dashboard/completed",
         "/dashboard/settings",
         "/dashboard/about",
-        "/dashboard/feedback",
         "/dashboard/help",
         "/dashboard/account",
         "/dashboard/animals",
@@ -104,8 +95,7 @@ const App: React.FC = () => {
         <CssBaseline enableColorScheme />
             <main>
                 <div className="d-flex flex-row">
-                    {!currentPath.includes("dashboard") && isTabletOrMobile && <LandingNav />} {/* TODO Add a mobile/tabled variation of the nav bar*/}
-                    {!currentPath.includes("dashboard") && isDesktopOrLaptop && <LandingNav />}
+                    {!currentPath.includes("dashboard") && <LandingNav />}
                     <Button onClick={toggleColorMode}>Toggle Color Mode</Button>
                     <div className="d-flex flex-column content" id="page-wrap">
                         <Routes> {/* This is where the routes are defined */}
