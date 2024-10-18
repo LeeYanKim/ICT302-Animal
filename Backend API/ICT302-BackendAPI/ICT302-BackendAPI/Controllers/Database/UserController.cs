@@ -108,7 +108,7 @@ namespace ICT302_BackendAPI.Controllers.Database
                     {
                         statusCode = 200,
                         message = "User updated successfully",
-                        userId = existingUser.UserID
+                        userId = existingUser.UserID.ToString()
                     });
                     
                 }
