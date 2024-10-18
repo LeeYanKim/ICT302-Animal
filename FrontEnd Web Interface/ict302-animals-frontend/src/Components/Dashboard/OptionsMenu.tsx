@@ -7,13 +7,15 @@ import MenuButton from './MenuButton';
 
 import DashboardPages, {DashboardMenuProps} from './DashboardHelpers';
 
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 
 const MenuItem = styled(MuiMenuItem)({
   margin: '2px 0',
 });
 
 const OptionsMenu: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCurrentDashboardPage}) => {
+  const nav = useNavigate();
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -22,6 +24,7 @@ const OptionsMenu: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
   const handleClose = () => {
     setAnchorEl(null);
     setCurrentDashboardPage(DashboardPages.Account);
+    nav('/dashboard/account');
   };
   return (
     <React.Fragment>

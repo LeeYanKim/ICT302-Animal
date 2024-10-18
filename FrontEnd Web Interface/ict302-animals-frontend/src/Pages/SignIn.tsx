@@ -161,7 +161,7 @@ const SignIn: React.FC = () => {
             // No need to send userID, userPassword, userDateJoin, or subscription fields
         };
 
-        console.log("Payload being sent:", payload);  // Debugging step
+        //console.log("Payload being sent:", payload);  // Debugging step
 
         const response = await fetch(API.User(), {
             method: "POST",
@@ -180,9 +180,9 @@ const SignIn: React.FC = () => {
 
         // Extract the userId from the response
         const userId = result.userId;
-        console.log("User ID from backend:", userId);
+        //console.log("User ID from backend:", userId);
 
-        console.log("User stored/updated successfully in backend");
+        //console.log("User stored/updated successfully in backend");
     } catch (error) {
         console.error("Error storing user in backend:", error);
     }
@@ -197,7 +197,7 @@ const SignIn: React.FC = () => {
       const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
       const user = result.user; // This is the authenticated user
   
-      console.log('Google sign-in successful:', user);
+      //console.log('Google sign-in successful:', user);
   
       // Retrieve the ID token
       const idToken = await user.getIdToken();
@@ -247,9 +247,9 @@ const SignIn: React.FC = () => {
     }
   };
 
-  console.log(process.env);
+  //console.log(process.env);
   const analytics = getAnalytics(frontendContext.firebaseRef.current);
-  console.log(analytics);
+  //console.log(analytics);
 
   return (
         <SignInContainer direction="column" justifyContent="space-between">

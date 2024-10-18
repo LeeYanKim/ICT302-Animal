@@ -55,11 +55,11 @@ class API {
      */
     public static init() {
         if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-            console.log('Development Mode');
+            console.log('API calls are in: Development Mode');
             this.endpoint = new APIEndpoints(true, this.devEndpointAddress);
         }
         else {
-            console.log('Production Mode');
+            console.log('API calls are in: Production Mode');
             this.endpoint = new APIEndpoints(false, this.prodEndpointAddress);
         }
     }
