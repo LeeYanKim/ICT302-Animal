@@ -104,6 +104,7 @@ const SignIn: React.FC = () => {
 
   const CreatefrontendContext = () => {
     // TODO: Add authentication logic here, This just uses a dummy user object for now to show logging in and user state change
+    //frontendContext.user.contextRef.current.userId = 'No Id';
     frontendContext.user.contextRef.current.username = 'No Username';
     frontendContext.user.contextRef.current.email = 'Null Email';
     frontendContext.user.contextRef.current.initials = 'Null';
@@ -160,6 +161,8 @@ const SignIn: React.FC = () => {
             // No need to send userID, userPassword, userDateJoin, or subscription fields
         };
 
+        console.log("Payload being sent:", payload);  // Debugging step
+
         const response = await fetch(API.User(), {
             method: "POST",
             headers: {
@@ -172,6 +175,12 @@ const SignIn: React.FC = () => {
         if (!response.ok) {
             throw new Error("Failed to store user in the backend");
         }
+
+        const result = await response.json();
+
+        // Extract the userId from the response
+        const userId = result.userId;
+        console.log("User ID from backend:", userId);
 
         console.log("User stored/updated successfully in backend");
     } catch (error) {

@@ -1,5 +1,6 @@
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -50,8 +51,29 @@ namespace ICT302_BackendAPI.Database.Repositories
         
         public async Task<Subscription?> GetSubscriptionByIDAsync(Guid id)
         {
+            Console.WriteLine($"Fetching subscription with ID: {id}");
+
             var subscription = await _ctx.Subscriptions.FindAsync(id);
+
+            if (subscription == null)
+            {
+                Console.WriteLine($"No subscription found with ID {id}");
+            }
+            else
+            {
+                Console.WriteLine($"Found subscription: {subscription.SubscriptionTitle}");
+            }
+
             return subscription;
+        }
+
+        public async Task<Subscription?> GetDefaultSubscriptionAsync()
+        {
+            var subs = await _ctx.Subscriptions.ToListAsync();
+            if (subs.Count == 0)
+                return null;
+            
+            return subs.FirstOrDefault();
         }
     }
 }
