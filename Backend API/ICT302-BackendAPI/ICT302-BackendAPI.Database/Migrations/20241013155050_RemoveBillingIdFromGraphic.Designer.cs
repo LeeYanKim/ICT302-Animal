@@ -3,6 +3,7 @@ using System;
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    partial class SchemaContextModelSnapshot : ModelSnapshot
+    [Migration("20241013155050_RemoveBillingIdFromGraphic")]
+    partial class RemoveBillingIdFromGraphic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,23 +264,19 @@ namespace ICT302_BackendAPI.Database.Migrations
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobsPending", b =>
                 {
-                    b.Property<int>("QueueNumber")
+                    b.Property<byte[]>("QueueNumber")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("binary(16)")
                         .HasColumnName("Queue_Number");
 
                     b.Property<byte[]>("JDID")
                         .IsRequired()
-                        .HasColumnType("binary(16)");
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("JD_ID");
 
                     b.Property<DateTime>("JobAdded")
                         .HasColumnType("date")
                         .HasColumnName("Job_Added");
-
-                    b.Property<byte[]>("JobDetailsId")
-                        .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("JD_ID");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -633,7 +632,7 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Graphic", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Animal", "Animal")
-                        .WithMany("Graphics")
+                        .WithMany()
                         .HasForeignKey("AnimalID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -794,11 +793,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.Navigation("Organisation");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Animal", b =>
-                {
-                    b.Navigation("Graphics");
                 });
 #pragma warning restore 612, 618
         }

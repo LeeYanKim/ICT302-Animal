@@ -1,4 +1,4 @@
-// API/Controllers/FileUploadController.cs
+// FileUploadController.cs
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -23,13 +23,15 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<FileUploadController> _logger;
         private readonly IAnimalRepository _animalRepository;
+        private readonly IGraphicRepository _graphicRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment)
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository,  IWebHostEnvironment webHostEnvironment)
         {
             _configuration = configuration;
             _logger = logger;
             _animalRepository = animalRepository;
+            //_graphicRepository = graphicRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
@@ -84,12 +86,11 @@ namespace ICT302_BackendAPI.API.Controllers
                     return StatusCode(500, new { message = "Configuration error: StoredFilesPath is not defined." });
                 }
 
-                // Ensure directory exists
-                if (!Directory.Exists(storedFilesPath))
-                {
-                    _logger.LogInformation("Stored files directory does not exist. Creating directory: {StoredFilesPath}", storedFilesPath);
-                    Directory.CreateDirectory(storedFilesPath);
-                }
+        // Ensure directory exists
+        if (!Directory.Exists(storedFilesPath))
+        {
+            Directory.CreateDirectory(storedFilesPath);
+        }
 
                 // Validate file type
                 string fileExtension = Path.GetExtension(file.FileName);
@@ -184,7 +185,8 @@ namespace ICT302_BackendAPI.API.Controllers
 
             // Delete all associated video files
             string storedFilesPath = GetStoredFilesPath();
-            //DeleteFile(storedFilesPath, animal.VideoFileName);
+
+            //DeleteFile(storedFilesPath, animal.VideoFileName); This needs to be looked at
 
             // Delete the animal record from the database
             await _animalRepository.DeleteAnimalAsync(animal);
