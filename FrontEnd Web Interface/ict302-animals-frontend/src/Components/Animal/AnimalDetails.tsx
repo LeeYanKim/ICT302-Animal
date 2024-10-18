@@ -23,13 +23,16 @@ interface AnimalDetailsProps {
 
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
-//const AnimalDetails: React.FC = () => {
-  //const { animalId } = useParams<{ animalId: string }>();
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
   const [backBtnClicked, setBackBtnClicked] = useState(false);
+  const [PlayerOpen, setPlayerOpen] = useState(false);
+  const [ModelExist, setModelExist] = useState<boolean>(false);  
+  const [newGenOpen, setNewGenOpen] = useState<boolean>(false);  
+  const [generating, setGenerating] = useState<boolean>(false); 
+  const [progressLabel, setProgressLabel] = useState<string>("Pending"); // Label for progress steps
 
   // Ensure animalId is available before making a request
   useEffect(() => {
