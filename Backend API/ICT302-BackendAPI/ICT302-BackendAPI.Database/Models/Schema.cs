@@ -39,6 +39,7 @@ public class Animal
         [Column("Animal_Type", TypeName = "varchar(45)")]
         [StringLength(45)]
         public string AnimalType { get; set; }
+        
        // Navigation property
         public virtual ICollection<Graphic> Graphics { get; set; } = new List<Graphic>();
 

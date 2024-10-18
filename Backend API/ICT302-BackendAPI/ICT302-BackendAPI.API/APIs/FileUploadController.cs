@@ -185,6 +185,7 @@ namespace ICT302_BackendAPI.API.Controllers
 
             // Delete all associated video files
             string storedFilesPath = GetStoredFilesPath();
+
             //DeleteFile(storedFilesPath, animal.VideoFileName); This needs to be looked at
 
             // Delete the animal record from the database
