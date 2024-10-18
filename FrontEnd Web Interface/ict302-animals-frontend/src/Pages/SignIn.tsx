@@ -161,6 +161,8 @@ const SignIn: React.FC = () => {
             // No need to send userID, userPassword, userDateJoin, or subscription fields
         };
 
+        console.log("Payload being sent:", payload);  // Debugging step
+
         const response = await fetch(API.User(), {
             method: "POST",
             headers: {
