@@ -27,6 +27,7 @@ class APIEndpoints {
     transactionType: string = '/transactionType';
     user: string = '/user';
     userAccess: string = '/userAccess';
+    generate: string = '/generate';
 
     constructor(isDev: boolean, baseUrl: string) {
         this.isDev = isDev;
@@ -333,6 +334,7 @@ class API {
         const endpoint = this.endpoint?.download;
         return base + endpoint;
     }
+
     /**
      * 
      * @returns The base URL path for the API File Upload controller endpoint/s
@@ -360,6 +362,18 @@ class API {
         return `${base}${endpoint}/animal/${animalId}/graphic/${graphicId}`;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API File controller endpoint/s
+     * 
+     * Example: http://localhost:5173/api/files
+     */
+    public static Generate() {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const endpoint = this.endpoint?.generate;
+        return base + endpoint;
+    }
 
 }
 

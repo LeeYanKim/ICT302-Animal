@@ -71,16 +71,23 @@ const AnimalDetails: React.FC = () => {
     setPlayerOpen(!PlayerOpen); 
   };
 
-  const handleModelGeneration = () => {
+  const handleModelGeneration = async () => {
     setGenerating(true);
+    const res = await fetch(API.Generate(), {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ AnimalId: animalId, AnimalGraphicFileName: animalData.videoFileName, GenType: "BITE"}),
+    });
 
     // Simulate the different stages of progress
     setProgressLabel("Pending");
-    setTimeout(() => setProgressLabel("PreProcessing"), 1000);
-    setTimeout(() => setProgressLabel("Generating"), 3000);
-    setTimeout(() => setProgressLabel("Converting"), 5000);
-    setTimeout(() => setProgressLabel("Cleaning-Up"), 7000);
-    setTimeout(() => {
+    await setTimeout(() => setProgressLabel("PreProcessing"), 1000);
+    await setTimeout(() => setProgressLabel("Generating"), 3000);
+    await setTimeout(() => setProgressLabel("Converting"), 5000);
+    await setTimeout(() => setProgressLabel("Cleaning-Up"), 7000);
+    await setTimeout(() => {
       setProgressLabel("Finished"); // Clear progress label when finished
       setGenerating(false); 
       setModelExist(true); 
