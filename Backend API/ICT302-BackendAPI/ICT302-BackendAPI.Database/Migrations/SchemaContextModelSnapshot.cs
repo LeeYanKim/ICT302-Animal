@@ -60,16 +60,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("varchar(45)")
                         .HasColumnName("Animal_Type");
 
-                    b.Property<string>("VideoFileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("Video_File_Name");
-
-                    b.Property<DateTime?>("VideoUploadDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Video_Upload_Date");
-
                     b.HasKey("AnimalID");
 
                     b.ToTable("animal");

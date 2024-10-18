@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    [Migration("20241014130845_AmendSchemaTables")]
-    partial class AmendSchemaTables
+    [Migration("20241018075055_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -254,19 +254,23 @@ namespace ICT302_BackendAPI.Database.Migrations
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobsPending", b =>
                 {
-                    b.Property<byte[]>("QueueNumber")
+                    b.Property<int>("QueueNumber")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("binary(16)")
+                        .HasColumnType("int")
                         .HasColumnName("Queue_Number");
 
                     b.Property<byte[]>("JDID")
                         .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("JD_ID");
+                        .HasColumnType("binary(16)");
 
                     b.Property<DateTime>("JobAdded")
                         .HasColumnType("date")
                         .HasColumnName("Job_Added");
+
+                    b.Property<byte[]>("JobDetailsId")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("JD_ID");
 
                     b.Property<string>("Status")
                         .IsRequired()
