@@ -79,8 +79,9 @@ namespace ICT302_BackendAPI.Controllers.Database
                         user.PermissionLevel =
                             userRequested.permissionLevel ?? "user"; // Default permission level if not provided
 
-                        user.SubscriptionID = new Guid("645fa83f-1757-6245-b3fc-2c963f66afa6"); // Generate a new subscription ID if not provided
-                        user.Subscription = await _userRepo.GetSubscriptionByIDAsync(user.SubscriptionID);
+                        
+                        user.Subscription = (await _userRepo.GetDefaultSubscriptionAsync())!;
+                        user.SubscriptionID = user.Subscription!.SubscriptionID;
                         
                         user.UserPassword = "";
                         user.UserEmail = userRequested.userEmail;

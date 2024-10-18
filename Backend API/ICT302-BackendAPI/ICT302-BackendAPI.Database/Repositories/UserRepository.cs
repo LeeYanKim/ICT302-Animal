@@ -66,5 +66,14 @@ namespace ICT302_BackendAPI.Database.Repositories
 
             return subscription;
         }
+
+        public async Task<Subscription?> GetDefaultSubscriptionAsync()
+        {
+            var subs = await _ctx.Subscriptions.ToListAsync();
+            if (subs.Count == 0)
+                return null;
+            
+            return subs.FirstOrDefault();
+        }
     }
 }
