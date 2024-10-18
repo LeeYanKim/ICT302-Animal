@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Grid as Grid2, Box, Typography } from '@mui/material';
+import { Grid2 as Grid, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
 import { Theme } from '@mui/material/styles'; // Import the Theme type
@@ -8,6 +8,7 @@ import AnimalCard from './AnimalCard';
 // Props interface for AnimalsGrid
 interface AnimalsGridProps {
   triggerRefresh: boolean;
+  onAnimalClick: (animalID: string) => void; // Add this line
 }
 
 interface AnimalData {
@@ -17,7 +18,7 @@ interface AnimalData {
   videoUploadDate: string | null;
 }
 
-const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh }) => {
+const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick }) => {
   const [animals, setAnimals] = useState<AnimalData[]>([]);
   const navigate = useNavigate();
 
@@ -41,26 +42,27 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh }) => {
   }, [triggerRefresh]);
 
   // Handle click to navigate to animal details page
-  const handleAnimalClick = (animalID: string) => {
-    console.log('Navigating to animalID:', animalID);
-    navigate(`/dashboard/animals/${animalID}`);
-  };
+  // *** consider remove this handleAnimalClick as onAnimalClick has same effect
+  //const handleAnimalClick = (animalID: string) => {
+    //console.log('Navigating to animalID:', animalID);
+    //navigate(`/dashboard/animals/${animalID}`);
+  //};
 
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
-      <Grid2 container spacing={2} columns={12} sx={{ mb: (theme: Theme) => theme.spacing(2) }}>
+      <Grid container spacing={2} columns={12} sx={{ mb: (theme: Theme) => theme.spacing(2) }}>
         {animals.map((animal) => (
-          <Grid2 item xs={12} sm={6} md={4} key={animal.animalID}>
+          <Grid sx={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
             <AnimalCard
               animalID={animal.animalID}
               animalName={animal.animalName}
               animalDOB={animal.videoUploadDate || ''}
               animalType={animal.animalType}
-              onClick={() => handleAnimalClick(animal.animalID)}
+              onClick={() => onAnimalClick(animal.animalID)}
             />
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
     </Box>
   );
 };

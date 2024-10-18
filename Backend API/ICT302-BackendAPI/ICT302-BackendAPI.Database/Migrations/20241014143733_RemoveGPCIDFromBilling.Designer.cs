@@ -3,6 +3,7 @@ using System;
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    partial class SchemaContextModelSnapshot : ModelSnapshot
+    [Migration("20241014143733_RemoveGPCIDFromBilling")]
+    partial class RemoveGPCIDFromBilling
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,16 +62,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
                         .HasColumnName("Animal_Type");
-
-                    b.Property<string>("VideoFileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("Video_File_Name");
-
-                    b.Property<DateTime?>("VideoUploadDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Video_Upload_Date");
 
                     b.HasKey("AnimalID");
 
@@ -261,23 +254,19 @@ namespace ICT302_BackendAPI.Database.Migrations
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobsPending", b =>
                 {
-                    b.Property<int>("QueueNumber")
+                    b.Property<byte[]>("QueueNumber")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("binary(16)")
                         .HasColumnName("Queue_Number");
 
                     b.Property<byte[]>("JDID")
                         .IsRequired()
-                        .HasColumnType("binary(16)");
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("JD_ID");
 
                     b.Property<DateTime>("JobAdded")
                         .HasColumnType("date")
                         .HasColumnName("Job_Added");
-
-                    b.Property<byte[]>("JobDetailsId")
-                        .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("JD_ID");
 
                     b.Property<string>("Status")
                         .IsRequired()
