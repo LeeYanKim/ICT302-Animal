@@ -19,6 +19,10 @@ FirebaseApp.Create(new AppOptions()
     Credential = GoogleCredential.FromFile("wildvision-firebase-adminsdk.json") //To check
 });
 
+Console.WriteLine(builder.Configuration["Firebase"]);
+
+builder.WebHost.UseKestrel();
+
 // Allowing Cross-Origin from frontend to API via localhost on different ports
 builder.Services.AddCors(options =>
 {
@@ -77,9 +81,11 @@ builder.Services.AddSingleton<IBackgroundJobQueue>(_ =>
     return new BackgroundJobQueue(queueCapacity);
 });
 
+
 var app = builder.Build();
 
 bool.TryParse(builder.Configuration["EnableSwagger"], out var enable);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || enable)
 {

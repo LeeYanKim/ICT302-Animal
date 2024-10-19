@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<AnimalAccess>> GetAnimalAccessesAsync()
         {
             var animalAccesses = await _ctx.AnimalAccesses.ToListAsync();
+            animalAccesses.ForEach(a => _ctx.AnimalAccesses.Attach(a));
             return animalAccesses;
         }
 

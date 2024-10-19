@@ -17,7 +17,9 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<IEnumerable<AccessType>> GetAccessTypesAsync()
         {
-            return await _ctx.AccessTypes.ToListAsync();
+            var at =  await _ctx.AccessTypes.ToListAsync();
+            at.ForEach(a => _ctx.AccessTypes.Attach(a));
+            return at;
         }
 
         public async Task<AccessType?> GetAccessTypeByIDAsync(Guid id)

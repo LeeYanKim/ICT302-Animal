@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<OrgRequests>> GetOrgRequestsAsync()
         {
             var orgRequests = await _ctx.OrgRequests.ToListAsync();
+            orgRequests.ForEach(a => _ctx.OrgRequests.Attach(a));
             return orgRequests;
         }
 

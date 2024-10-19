@@ -1,3 +1,5 @@
+using ICT302_Animals_Generator_API.Util;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,6 +18,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<SecurityMaster>(); // Security master for auth request checking
+
+builder.WebHost.UseKestrel();
+
 var app = builder.Build();
 
 bool.TryParse(builder.Configuration["EnableSwagger"], out var enable);
@@ -27,8 +33,6 @@ if (app.Environment.IsDevelopment() || enable)
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

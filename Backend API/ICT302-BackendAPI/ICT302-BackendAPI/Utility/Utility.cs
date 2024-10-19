@@ -17,27 +17,27 @@ public class Utility
     
     public void PrintStartingConfig()
     {
-        _logger.LogInformation("Starting with configuration:");
-        string config = "App Environment: " + _environment.EnvironmentName +"\n";
+        _logger.LogInformation("Starting with configuration:\n");
+        string config = "\tApp Environment: " + _environment.EnvironmentName +"\n";
 
         if (_environment.IsDevelopment())
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                config += "User Storage Path: " + _configuration["dev_StoredFilesPath_Linux"] +"\n";
-                config += "User Thumbnail Path: " + _configuration["dev_StoredThumbs_Linux"] +"\n";
+                config += "\tUser Storage Path: " + _configuration["dev_StoredFilesPath_Linux"] +"\n";
+                config += "\tUser Thumbnail Path: " + _configuration["dev_StoredThumbs_Linux"] +"\n";
             }
             else
             {
-                config += "User Storage Path: " + _configuration["dev_StoredFilesPath"] +"\n";
-                config += "User Thumbnail Path: " + _configuration["dev_StoredThumbs"] +"\n";
+                config += "\tUser Storage Path: " + _configuration["dev_StoredFilesPath"] +"\n";
+                config += "\tUser Thumbnail Path: " + _configuration["dev_StoredThumbs"] +"\n";
             }
             
         }
         else
         {
-            config += "User Storage Path: " + _configuration["StoredFilesPath"] +"\n";
-            config += "User Thumbnail Path: " + _configuration["StoredThumbs"] +"\n";
+            config += "\tUser Storage Path: " + _configuration["StoredFilesPath"] +"\n";
+            config += "\tUser Thumbnail Path: " + _configuration["StoredThumbs"] +"\n";
         }
         
         _logger.LogInformation(config);

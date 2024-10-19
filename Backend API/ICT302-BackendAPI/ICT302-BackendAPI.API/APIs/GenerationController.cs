@@ -83,7 +83,7 @@ public class GenerationController : ControllerBase
             
             _logger.LogInformation($"3D model for animal: {graphic.AnimalID} with graphic: {graphic.GPCName} has been requested. Checking job status...");
 
-            graphic.FilePath = Path.Join(_configuration["dev_StoredFilesPath"], Path.GetFileName(graphic.FilePath));
+            graphic.FilePath = Path.GetFileName(graphic.FilePath);
 
             // Checking if the graphic has already processed a job or pending job making it a duplicate request
             JobDetails? jobDetails = await _jobDetailsRepository.GetJobDetailsByGraphicIdAsync(graphic.GPCID);
@@ -129,9 +129,8 @@ public class GenerationController : ControllerBase
             model.Graphic = graphic;
             model.GPCID = graphic.GPCID;
             model.ModelID = Guid.NewGuid();
-            model.ModelTitle = graphic.GPCName;
-            model.FilePath = Path.Join(_configuration["dev_StoredFilesPath"],
-                Path.GetFileName(graphic.FilePath) + ".glb");
+            model.ModelTitle = request.AnimalGraphicFileName;
+            model.FilePath = Path.GetFileName(graphic.FilePath) + ".glb";
             model.ModelDateGen = DateTime.Now;
             await _model3DRepository.CreateModel3DAsync(model);
 

@@ -19,6 +19,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<Animal>> GetAnimalsAsync()
         {
             var animals = await _ctx.Animals.ToListAsync();
+            animals.ForEach(a => _ctx.Animals.Attach(a));
             return animals;
         }
 

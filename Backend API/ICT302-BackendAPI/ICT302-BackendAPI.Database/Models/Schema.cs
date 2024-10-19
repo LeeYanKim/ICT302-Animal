@@ -121,8 +121,8 @@ public class Graphic
     public Guid GPCID { get; set; }
 
     [Required]
-    [Column("GPC_Name", TypeName = "varchar(45)")]
-    [StringLength(45)]
+    [Column("GPC_Name", TypeName = "varchar(255)")]
+    [StringLength(255)]
     public string GPCName { get; set; }
 
     [Required]
@@ -144,7 +144,7 @@ public class Graphic
     public int GPCSize { get; set; }
 
     [ForeignKey("AnimalID")]
-    public virtual Animal Animal { get; set; }
+    public virtual Animal? Animal { get; set; }
     
 }
 
@@ -243,8 +243,8 @@ public class Model3D
     public Guid ModelID { get; set; }
 
     [Required]
-    [Column("Model_Title", TypeName = "varchar(45)")]
-    [StringLength(45)]
+    [Column("Model_Title", TypeName = "varchar(255)")]
+    [StringLength(255)]
     public string ModelTitle { get; set; }
 
     [Required]
