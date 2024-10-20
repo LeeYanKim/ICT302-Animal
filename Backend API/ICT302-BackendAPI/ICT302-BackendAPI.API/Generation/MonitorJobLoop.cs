@@ -19,9 +19,15 @@ public sealed class MonitorJobLoop(
     IHostApplicationLifetime applicationLifetime,
     IJobsPendingRepository jobsPendingRepository,
     IJobsCompletedRepository jobsCompletedRepository,
+    IJobDetailsRepository jobDetailsRepository,
     IWebHostEnvironment webHostEnvironment)
 {
     private HttpClient? _sharedHttpClient;
+
+    private static int totalInQueue = 0;
+    private static int apiAliveDelayS = 10;
+    
+    private static int apiAliveDelayMs = apiAliveDelayS * 1000;
     
     private readonly CancellationToken _cancellationToken = applicationLifetime.ApplicationStopping;
     public void StartMonitorLoop()
@@ -47,7 +53,47 @@ public sealed class MonitorJobLoop(
 
     public async ValueTask AssignJobWorkItem()
     {
-        await taskQueue.QueueBackgroundWorkItemAsync(BuildJobWorkItem);
+        
+        //Check if the Generator API is alive and note how many items are waiting...
+        //if alive continue with work items, if not delay for x seconds and check again until gen api is alive
+        var genApiUrl = new Uri(webHostEnvironment.IsDevelopment() ? "http://localhost:5000/alive" : configuration["GenAPIUrl"] + "/alive");
+        HttpResponseMessage? alive = null;
+        
+        var data = new
+        {
+            Token = configuration["GenAPIAuthToken"]
+        };
+        
+        using var request = new HttpRequestMessage(HttpMethod.Post, genApiUrl);
+        using var content = new MultipartFormDataContent
+        {
+            // Other data
+            {JsonContent.Create(data), "StartGenerationJson"},
+        };
+                    
+        request.Content = content;
+
+        totalInQueue++;
+        
+        while (alive == null || alive.IsSuccessStatusCode)
+        {
+            try
+            {
+                alive = GetHttpClient().Send(request);
+                var response = await alive.Content.ReadAsStringAsync();
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning($"Generation API is down or not responding... retrying in {apiAliveDelayS} seconds...");
+                var delay = Task.Delay(apiAliveDelayMs);
+                await delay;
+            }
+        }
+
+        for (var i = 0; i < totalInQueue; i++)
+        {
+            taskQueue.QueueBackgroundWorkItemAsync(BuildJobWorkItem);
+        }
     }
 
     private async ValueTask BuildJobWorkItem(CancellationToken token)
@@ -75,7 +121,7 @@ public sealed class MonitorJobLoop(
         // Each step of processing. Job is finished when status is Closed
         while (!token.IsCancellationRequested && job.Status != "Closed")
         {
-            string genEndpoint = GetEndpointFromPreviusStep(job.Status);
+            string genEndpoint = GetEndpointFromCurrentStep(job.Status);
             HttpResponseMessage? result = null;
             try
             {
@@ -85,12 +131,10 @@ public sealed class MonitorJobLoop(
                     FilePath = job.JobDetails.Graphic.FilePath
                 };
                 
-                
-                
                 if (job.Status == "Pending")
                 {
                     using var request = new HttpRequestMessage(HttpMethod.Post, genEndpoint);
-                    await using var stream =
+                    using var stream =
                         File.OpenRead(Path.Join(storedFilesPath, job.JobDetails.Graphic.FilePath));
                     using var content = new MultipartFormDataContent
                     {
@@ -103,10 +147,13 @@ public sealed class MonitorJobLoop(
 
                     request.Content = content;
 
-                    result = await GetHttpClient().SendAsync(request);
+                    result = GetHttpClient().Send(request);
                 }
                 else
                 {
+                    if (job.Status == "Closing")
+                        continue;
+                    
                     using var request = new HttpRequestMessage(HttpMethod.Post, genEndpoint);
                     using var content = new MultipartFormDataContent
                     {
@@ -116,27 +163,40 @@ public sealed class MonitorJobLoop(
                     
                     request.Content = content;
 
-                    result = await GetHttpClient().SendAsync(request);
+                    result = GetHttpClient().Send(request);
                 }
 
-                if (result.IsSuccessStatusCode)
+                if (result.IsSuccessStatusCode && (job.Status == "Pending" || job.Status == "PreProcessing" || job.Status == "Generating" || job.Status == "Converting" || job.Status == "Cleaning-Up"))
                 {
-                    job.Status = GetNextJobStepFromPreviusStep(job.Status);
+                    job.Status = GetNextJobStepFromPreviousStep(job.Status);
                     await jobsPendingRepository.UpdateJobsPendingAsync(job);
+                    continue;
                 }
-                else
-                {
-                    //var message = await result.Content.ReadFromJsonAsync<(int, string, string)>();
-                    job.Status = "Failed";
-                    logger.LogError($"Error: job {job.JobDetailsId} failed.");
-                }
-
 
                 if (job.Status == "Finished")
                 {
-                    job.Status = GetNextJobStepFromPreviusStep(job.Status);
+                    job.Status = GetNextJobStepFromPreviousStep(job.Status);
+                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
+                    continue;
+                }
+                
+                if (result.IsSuccessStatusCode && job.Status == "Fetching")
+                {
+                    job.Status = GetNextJobStepFromPreviousStep(job.Status);
                     await jobsPendingRepository.UpdateJobsPendingAsync(job);
 
+                    using (var fs = new FileStream(
+                               Path.Join(storedFilesPath, job.JobDetails.JDID.ToString() + ".glb"),
+                               FileMode.CreateNew))
+                    {
+                        await result.Content.CopyToAsync(fs);
+                    }
+                    logger.LogInformation(
+                        $"File saved...");
+                }
+                
+                if (job.Status == "Closing")
+                {
                     var comp = new JobsCompleted();
                     comp.JobID = job.JobDetailsId;
                     comp.JobDetails = job.JobDetails;
@@ -146,18 +206,27 @@ public sealed class MonitorJobLoop(
                     comp.JobsStart = startTime;
                     await jobsCompletedRepository.CreateJobsCompletedAsync(comp);
                     
-                    
-                    
-                    continue;
+                    await jobsPendingRepository.DeleteJobsPendingAsync(job);
                 }
+                
 
                 if (job.Status == "Error")
                 {
-                    job.Status = "Closed";
-                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
                     logger.LogInformation(
                         $"Queued work item {job.JobDetailsId} occured an error and has been canceled.");
+                    var jd = job.JobDetails;
+                    await jobsPendingRepository.DeleteJobsPendingAsync(job);
+                    await jobDetailsRepository.DeleteJobDetailsAsync(jd);
+                    break;
                 }
+                
+                // If we got to this point, there was an issue...
+                job.Status = "Error";
+                logger.LogError($"Error: job {job.JobDetailsId} failed.");
+                var j = job.JobDetails;
+                await jobsPendingRepository.DeleteJobsPendingAsync(job);
+                await jobDetailsRepository.DeleteJobDetailsAsync(j);
+                
             }
             catch (Exception e)
             {
@@ -165,14 +234,10 @@ public sealed class MonitorJobLoop(
             }
         }
 
-        if (job.Status == "Closed")
-        {
-            // TODO: Add job complete
-            await jobsPendingRepository.DeleteJobsPendingAsync(job);
-        }
+        
     }
     
-    private string GetNextJobStepFromPreviusStep(string currentStep)
+    private string GetNextJobStepFromPreviousStep(string currentStep)
     {
         switch (currentStep)
         {
@@ -187,6 +252,10 @@ public sealed class MonitorJobLoop(
             case "Cleaning-Up":
                 return "Finished";
             case "Finished":
+                return "Fetching";
+            case "Fetching":
+                return "Closing";
+            case "Closing":
                 return "Closed";
             case "Error":
                 return "Closed";
@@ -195,7 +264,7 @@ public sealed class MonitorJobLoop(
         }
     }
 
-    private string GetEndpointFromPreviusStep(string currentStep)
+    private string GetEndpointFromCurrentStep(string currentStep)
     {
         switch (currentStep)
         {
@@ -210,6 +279,10 @@ public sealed class MonitorJobLoop(
             case "Cleaning-Up":
                 return "/api/gen/postprocess/cleanup";
             case "Finished":
+                return "";
+            case "Fetching":
+                return "/api/gen/files";
+            case "Closing":
                 return "";
             case "Error":
                 return "";

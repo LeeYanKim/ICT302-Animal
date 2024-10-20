@@ -156,7 +156,7 @@ public class GenerationController : ControllerBase
             await _jobsPendingRepository.CreateJobsPendingAsync(newPendingJob);
 
             // Telling the job monitor there's a job pending and needs to be added to the job queue
-            await _jobLoop.AssignJobWorkItem();
+            _jobLoop.AssignJobWorkItem();
 
             return Ok(new { message = "Success: Job was successfully lodged and will begin generation shortly!" });
         }

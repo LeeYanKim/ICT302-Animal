@@ -73,7 +73,7 @@ public class GenerationController : ControllerBase
         }
         
         // JobID Check
-        if (model.StartGenerationJson.JobID != Guid.Empty)
+        if (model.StartGenerationJson.JobID == Guid.Empty)
         {
             _logger.LogInformation("Error: No JobID provided");
             return StatusCode(StatusCodes.Status400BadRequest, new

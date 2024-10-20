@@ -123,7 +123,7 @@ namespace ICT302_BackendAPI.API.Controllers
                 if (a.AnimalID != Guid.Empty)
                 {
                     // Save the file to disk
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    using (var fileStream = new FileStream(Path.Join(storedFilesPath, filePath), FileMode.Create))
                     {
                         var graphic = new Graphic
                         {
@@ -148,9 +148,9 @@ namespace ICT302_BackendAPI.API.Controllers
                     }
                 }
                 
-                _logger.LogInformation("File successfully saved at: {FilePath}", filePath);
-                _logger.LogInformation("Creating animal entry in the database: AnimalName = {AnimalName}", animal.AnimalName);
-                _logger.LogInformation("Animal entry created in the database with ID: {AnimalID}", animal.AnimalID);
+                _logger.LogInformation($"File successfully saved at: {Path.Join(storedFilesPath, filePath)}");
+                _logger.LogInformation($"Creating animal entry in the database: AnimalName = {animal.AnimalName}");
+                _logger.LogInformation($"Animal entry created in the database with ID: {animal.AnimalID}");
 
                 return Ok(new { message = "File uploaded and animal data saved successfully." });
             }
