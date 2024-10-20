@@ -145,6 +145,9 @@ const SignIn: React.FC = () => {
       const idToken = await user.getIdToken();
   
       updateFrontendContext(frontendContext, user);
+
+      // Store the user in the backend
+      await storeUserInBackend(frontendContext, user, idToken);
   
       // Navigate to the dashboard
       nav('/dashboard');
