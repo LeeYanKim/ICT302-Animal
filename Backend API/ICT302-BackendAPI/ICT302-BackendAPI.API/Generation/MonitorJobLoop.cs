@@ -22,6 +22,11 @@ public sealed class MonitorJobLoop(
     IWebHostEnvironment webHostEnvironment)
 {
     private HttpClient? _sharedHttpClient;
+
+    private static int totalInQueue = 0;
+    private static int apiAliveDelayS = 10;
+    
+    private static int apiAliveDelayMs = apiAliveDelayS * 1000;
     
     private readonly CancellationToken _cancellationToken = applicationLifetime.ApplicationStopping;
     public void StartMonitorLoop()
@@ -47,7 +52,46 @@ public sealed class MonitorJobLoop(
 
     public async ValueTask AssignJobWorkItem()
     {
-        await taskQueue.QueueBackgroundWorkItemAsync(BuildJobWorkItem);
+        
+        //Check if the Generator API is alive and note how many items are waiting...
+        //if alive continue with work items, if not delay for x seconds and check again until gen api is alive
+        var genApiUrl = new Uri(webHostEnvironment.IsDevelopment() ? "http://localhost:5000/alive" : configuration["GenAPIUrl"] + "/alive");
+        HttpResponseMessage? alive = null;
+        
+        var data = new
+        {
+            Token = configuration["GenAPIAuthToken"]
+        };
+        
+        using var request = new HttpRequestMessage(HttpMethod.Post, genApiUrl);
+        using var content = new MultipartFormDataContent
+        {
+            // Other data
+            {JsonContent.Create(data), "StartGenerationJson"},
+        };
+                    
+        request.Content = content;
+
+        totalInQueue++;
+        
+        while (alive == null || alive.IsSuccessStatusCode)
+        {
+            try
+            {
+                alive = await GetHttpClient().SendAsync(request);
+                var response = await alive.Content.ReadAsStringAsync();
+            }
+            catch (Exception e)
+            {
+                var delay = Task.Delay(apiAliveDelayMs);
+                await delay;
+            }
+        }
+
+        for (var i = 0; i < totalInQueue; i++)
+        {
+            await taskQueue.QueueBackgroundWorkItemAsync(BuildJobWorkItem);
+        }
     }
 
     private async ValueTask BuildJobWorkItem(CancellationToken token)

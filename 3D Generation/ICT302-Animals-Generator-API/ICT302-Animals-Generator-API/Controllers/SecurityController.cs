@@ -1,5 +1,7 @@
-﻿using ICT302_Animals_Generator_API.Util;
+﻿using System.Text.Json.Nodes;
+using ICT302_Animals_Generator_API.Util;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace ICT302_Animals_Generator_API.Controllers;
 
@@ -24,18 +26,57 @@ public class SecurityController : ControllerBase
      *
      * <returns>Http Action Result 200 Ok if token is valid, 418 I'm a TeaPot if not.</returns>
      */
-    [HttpGet("*/*")]
-    [HttpGet("alive")]
-    public ActionResult Alive(StartGenerationModel? model)
+    [HttpPost("*/*")]
+    [HttpPost("alive")]
+    public ActionResult Alive([FromForm] StartGenerationModel? model)
     {
         if (model == null)
             return StatusCode(StatusCodes.Status418ImATeapot); //Connection isnt authorized, Im a Teapot
+
+        model.StartGenerationJson = GetFromJson();
         
-        if(model.StartGenerationJson.Token == null)
+        if(model.StartGenerationJson == null || string.IsNullOrEmpty(model.StartGenerationJson.Token))
             return StatusCode(StatusCodes.Status418ImATeapot); //Connection isnt authorized, Im a Teapot
 
         return StatusCode(_securityMaster.IsRequestAuthorized(model.StartGenerationJson.Token));//Only return the status code
     }
 
+    private StartGenerationJson? GetFromJson()
+    {
+        try
+        {
+            StringValues data;
+            if (HttpContext.Request.Form.TryGetValue("StartGenerationJson", out data))
+            {
+                if (data.Count > 0)
+                {
+                    var j = JsonNode.Parse(data);
+                    var jj = StartGenerationJsonConverter.FromJson(j);
+                    return jj;
+                }
+
+                return null;
+            }
+            
+            if (HttpContext.Request.Form.TryGetValue("StartGenerationJson.Token", out data))
+            {
+                if (data.Count > 0)
+                {
+                    var j = new StartGenerationJson();
+                    j.Token = data[0];
+                    return j;
+                }
+
+                return null;
+            }
+
+            return null;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            return null;
+        }
+    }
 
 }

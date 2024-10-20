@@ -11,6 +11,14 @@ firebase-adminsdk.json
 Backend API/ICT302-BackendAPI/obj/
 
 *.pth
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.flv
+*.wmv
+*.3gp
+*.webm
 
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI/obj/
 Backend API/ICT302-BackendAPI/ICT302-BackendAPI/bin/
