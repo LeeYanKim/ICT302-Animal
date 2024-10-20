@@ -4,6 +4,11 @@ using ICT302_BackendAPI.Database.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.IO;
+using System.Net;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using ZstdSharp.Unsafe;
 
 namespace ICT302_BackendAPI.API.Generation;
 
@@ -12,7 +17,9 @@ public sealed class MonitorJobLoop(
     ILogger<MonitorJobLoop> logger,
     IConfiguration configuration,
     IHostApplicationLifetime applicationLifetime,
-    IJobsPendingRepository jobsPendingRepository)
+    IJobsPendingRepository jobsPendingRepository,
+    IJobsCompletedRepository jobsCompletedRepository,
+    IWebHostEnvironment webHostEnvironment)
 {
     private HttpClient? _sharedHttpClient;
     
@@ -50,19 +57,67 @@ public sealed class MonitorJobLoop(
         if (job is null)
             return;
         
+        string storedFilesPath = "";
+        if (webHostEnvironment.IsDevelopment())
+        {
+            // Dev environment
+            var path = configuration["dev_StoredFilesPath"];
+                storedFilesPath = path ?? "";
+        }
+        else
+        {
+            // Prod environment
+            storedFilesPath = configuration["StoredFilesPath"] ?? "";
+        }
+        
+        DateTime startTime = DateTime.Now;
+        
         // Each step of processing. Job is finished when status is Closed
         while (!token.IsCancellationRequested && job.Status != "Closed")
         {
             string genEndpoint = GetEndpointFromPreviusStep(job.Status);
-
+            HttpResponseMessage? result = null;
             try
             {
                 var data = new
                 {
-                    JobID = job.JobDetailsId, FilePath = Path.Join(configuration["dev_StoredFilesPath"], job.JobDetails.Graphic.FilePath)
+                    Token = configuration["GenAPIAuthToken"], JobID = job.JobDetailsId,
+                    FilePath = job.JobDetails.Graphic.FilePath
                 };
                 
-                var result = await GetHttpClient().PostAsJsonAsync(genEndpoint, data);
+                
+                
+                if (job.Status == "Pending")
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Post, genEndpoint);
+                    await using var stream =
+                        File.OpenRead(Path.Join(storedFilesPath, job.JobDetails.Graphic.FilePath));
+                    using var content = new MultipartFormDataContent
+                    {
+                        // file
+                        { new StreamContent(stream), "InputFile", job.JobDetails.Graphic.FilePath },
+                        
+                        // Other data
+                        {JsonContent.Create(data), "StartGenerationJson"},
+                    };
+
+                    request.Content = content;
+
+                    result = await GetHttpClient().SendAsync(request);
+                }
+                else
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Post, genEndpoint);
+                    using var content = new MultipartFormDataContent
+                    {
+                        // Other data
+                        {JsonContent.Create(data), "StartGenerationJson"},
+                    };
+                    
+                    request.Content = content;
+
+                    result = await GetHttpClient().SendAsync(request);
+                }
 
                 if (result.IsSuccessStatusCode)
                 {
@@ -71,9 +126,9 @@ public sealed class MonitorJobLoop(
                 }
                 else
                 {
-                    var message = await result.Content.ReadFromJsonAsync<(int, string, string)>();
+                    //var message = await result.Content.ReadFromJsonAsync<(int, string, string)>();
                     job.Status = "Failed";
-                    logger.LogError($"Error: job {job.JobDetailsId} failed with error: {message.Item3}.");
+                    logger.LogError($"Error: job {job.JobDetailsId} failed.");
                 }
 
 
@@ -81,6 +136,18 @@ public sealed class MonitorJobLoop(
                 {
                     job.Status = GetNextJobStepFromPreviusStep(job.Status);
                     await jobsPendingRepository.UpdateJobsPendingAsync(job);
+
+                    var comp = new JobsCompleted();
+                    comp.JobID = job.JobDetailsId;
+                    comp.JobDetails = job.JobDetails;
+                    comp.JobsEnd = DateTime.Now;
+                    comp.JobType = "BITE"; // TODO: Update this to grab from the original request
+                    comp.JobSize = job.JobDetails.Graphic.GPCSize;
+                    comp.JobsStart = startTime;
+                    await jobsCompletedRepository.CreateJobsCompletedAsync(comp);
+                    
+                    
+                    
                     continue;
                 }
 
@@ -151,5 +218,18 @@ public sealed class MonitorJobLoop(
             default:
                 return "";
         }
+    }
+    
+    private string GetMimeType(string filePath)
+    {
+        var extension = Path.GetExtension(filePath).ToLowerInvariant();
+        return extension switch
+        {
+            ".mp4" => "video/mp4",
+            ".mov" => "video/quicktime",
+            ".avi" => "video/x-msvideo",
+            ".mkv" => "video/x-matroska",
+            _ => "application/octet-stream",
+        };
     }
 }

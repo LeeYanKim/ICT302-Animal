@@ -18,7 +18,9 @@ namespace ICT302_BackendAPI.Database.Repositories
 
         public async Task<IEnumerable<Graphic>> GetGraphicsAsync()
         {
-            return await _ctx.Graphics.ToListAsync();
+            var graphics = await _ctx.Graphics.ToListAsync();
+            graphics.ForEach(a => _ctx.Graphics.Attach(a));
+            return graphics;
         }
 
         public async Task<Graphic> CreateGraphicAsync(Graphic graphic)

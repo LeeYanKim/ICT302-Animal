@@ -19,6 +19,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<User>> GetUsersAsync()
         {
             var users = await _ctx.Users.ToListAsync();
+            users.ForEach(a => _ctx.Users.Attach(a));
             return users;
         }
 

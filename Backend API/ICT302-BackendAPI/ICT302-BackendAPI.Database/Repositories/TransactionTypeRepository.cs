@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<TransactionType>> GetTransactionTypesAsync()
         {
             var transactionTypes = await _ctx.TransactionType.ToListAsync();
+            transactionTypes.ForEach(a => _ctx.TransactionType.Attach(a));
             return transactionTypes;
         }
 

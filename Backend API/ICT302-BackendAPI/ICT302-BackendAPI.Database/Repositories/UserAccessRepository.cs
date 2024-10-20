@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<UserAccess>> GetUserAccessesAsync()
         {
             var userAccesses = await _ctx.UserAccess.ToListAsync();
+            userAccesses.ForEach(a => _ctx.UserAccess.Attach(a));
             return userAccesses;
         }
 

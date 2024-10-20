@@ -3,6 +3,7 @@ using System;
 using ICT302_BackendAPI.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    partial class SchemaContextModelSnapshot : ModelSnapshot
+    [Migration("20241019110446_AdjustGraphicNameSize")]
+    partial class AdjustGraphicNameSize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -306,8 +309,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("ModelTitle")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(45)
+                        .HasColumnType("varchar(45)")
                         .HasColumnName("Model_Title");
 
                     b.HasKey("ModelID");

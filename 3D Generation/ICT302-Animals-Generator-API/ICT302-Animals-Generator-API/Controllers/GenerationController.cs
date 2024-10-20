@@ -3,8 +3,13 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Aspose.ThreeD;
-
+using ICT302_Animals_Generator_API.Util;
+using Microsoft.Extensions.Primitives;
+using System.Web;
 
 
 namespace ICT302_Animals_Generator_API.Controllers;
@@ -16,34 +21,93 @@ public class GenerationController : ControllerBase
 
     private readonly ILogger<GenerationController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly SecurityMaster _securityMaster;
 
-    public GenerationController(ILogger<GenerationController> logger, IConfiguration configuration)
+    public GenerationController(ILogger<GenerationController> logger, IConfiguration configuration, SecurityMaster securityMaster)
     {
         _logger = logger;
         _configuration = configuration;
+        _securityMaster = securityMaster;
     }
 
+    private ObjectResult CheckForValidRequestData(StartGenerationModel? model)
+    {
+        
+        
+        // Null Check
+        if (model == null)
+        {
+            _logger.LogInformation("Error: Unauthorized token provided.");
+            return StatusCode(StatusCodes.Status418ImATeapot, new
+            {
+                statusCode = 418,
+                jobStatus = "Unauthorized",
+                message = "Error: Unauthorized token provided for request"
+            });
+        }
+        
+        model.StartGenerationJson = GetFromJson();
+        
+        // Auth Check
+        if(string.IsNullOrEmpty(model.StartGenerationJson.Token) || _securityMaster.IsRequestAuthorized(model.StartGenerationJson.Token) == StatusCodes.Status418ImATeapot)
+        {
+            _logger.LogInformation("Error: Unauthorized token provided.");
+            return StatusCode(StatusCodes.Status418ImATeapot, new
+            {
+                statusCode = 418,
+                jobStatus = "Unauthorized",
+                message = "Error: Unauthorized token provided for request"
+            });
+        }
+        
+        //FilePath check
+        if (string.IsNullOrEmpty(model.StartGenerationJson.FileName))
+        {
+            _logger.LogInformation("Error: No details provided for generation.");
+            return StatusCode(StatusCodes.Status400BadRequest, new
+            {
+                statusCode = 400,
+                jobStatus = "Failed",
+                message = "Error: No FilePath provided"
+            });
+        }
+        
+        // JobID Check
+        if (model.StartGenerationJson.JobID != Guid.Empty)
+        {
+            _logger.LogInformation("Error: No JobID provided");
+            return StatusCode(StatusCodes.Status400BadRequest, new
+            {
+                statusCode = 400,
+                jobStatus = "Failed",
+                message = "Error: No JobID provided"
+            });
+        }
+        
+        return StatusCode(StatusCodes.Status200OK, new
+        {
+            statusCode = 200,
+            jobStatus = "Success",
+            message = "Success: All required data is provided"
+        });
+    }
+    
+    
     [HttpPost("start")]
-    public ActionResult StartGenerationAsync(StartGenerationModel? model)
+    public ActionResult StartGenerationAsync([FromForm] StartGenerationModel? model)
     {
         try
         {
-            if (model == null || string.IsNullOrEmpty(model.FilePath))
-            {
-                _logger.LogInformation("Error: No details provided for generation.");
-                return StatusCode(StatusCodes.Status400BadRequest, new
-                {
-                    statusCode = 400,
-                    jobStatus = "Failed Generation",
-                    message = "Error: No details provided for generation."
-                });
-            }
+            var checks = CheckForValidRequestData(model);
+            if(checks.StatusCode == StatusCodes.Status418ImATeapot)
+                return CheckForValidRequestData(model);
             
-            if (Directory.Exists(Path.Join(GetOutputPath(model.FilePath), model.GenOutputLoc)) &&
-                Directory.GetFiles(Path.Join(GetOutputPath(model.FilePath), model.GenOutputLoc)).Length > 0)
+            
+            if (Directory.Exists(Path.Join(GetOutputPath(model!.StartGenerationJson.JobID!), model.GenOutputLoc)) &&
+                Directory.GetFiles(Path.Join(GetOutputPath(model.StartGenerationJson.JobID!), model.GenOutputLoc)).Length > 0)
             {
                 // Output file full, masks already exist
-                _logger.LogInformation($"Generation for job {model.JobID} has completed successfully.");
+                _logger.LogInformation($"Generation for job {model.StartGenerationJson.JobID} has completed successfully.");
                 return StatusCode(StatusCodes.Status200OK, new
                 {
                     statusCode = 200,
@@ -52,23 +116,23 @@ public class GenerationController : ControllerBase
                 });
             }
 
-            if (string.IsNullOrEmpty(model?.OutputPath))
-                model!.OutputPath = GetOutputPath(model.FilePath);
+            if (string.IsNullOrEmpty(model?.StartGenerationJson.OutputPath))
+                model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID!);
             
-            _logger.LogInformation($"Starting frame masking for job: {model!.JobID}");
-            Directory.CreateDirectory(model.OutputPath + model.GenOutputLoc);
+            _logger.LogInformation($"Starting frame masking for job: {model!.StartGenerationJson.JobID}");
+            Directory.CreateDirectory(model.StartGenerationJson.OutputPath + model.GenOutputLoc);
 
             // TODO: Add safety check for directory and input files before launching BITE
 
-            _logger.LogInformation($"Starting 3D generation for job: {model.JobID}");
-            Directory.CreateDirectory(model.OutputPath + model.GenOutputLoc);
+            _logger.LogInformation($"Starting 3D generation for job: {model.StartGenerationJson.JobID}");
+            Directory.CreateDirectory(model.StartGenerationJson.OutputPath + model.GenOutputLoc);
 
             var wslUser = _configuration.GetValue<string>("WslUser");
             var wslScriptPath = _configuration.GetValue<string>("WslScriptPath");
             var wslCondaEnv = _configuration.GetValue<string>("WslCondaEnv");
             var wslCmd = _configuration.GetValue<string>("WslStartCmd");
             
-            string args = $"-d Ubuntu-20.04 -u {wslUser} sh -c \"cd \'{wslScriptPath!}\' && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv!} python ./gen_model.py -p \'{GetWslPathFromWindowsPath(model.OutputPath!)}\'";
+            string args = $"-d Ubuntu-20.04 -u {wslUser} sh -c \"cd \'{wslScriptPath!}\' && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv!} python ./gen_model.StartGenerationJson.py -p \'{GetWslPathFromWindowsPath(model.StartGenerationJson.OutputPath!)}\'";
             
             var startInfo = new ProcessStartInfo(fileName: wslCmd!, arguments: args)
             {
@@ -82,7 +146,7 @@ public class GenerationController : ControllerBase
             
             //TODO: Add exit code checks
 
-            _logger.LogInformation($"3D generation for {model.JobID} has completed successfully.");
+            _logger.LogInformation($"3D generation for {model.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
             {
                 statusCode = 200,
@@ -104,28 +168,22 @@ public class GenerationController : ControllerBase
     }
 
     [HttpPost("postprocess/convert")]
-    public ActionResult StartGlbConversionAsync(StartGenerationModel? model)
+    public ActionResult StartGlbConversionAsync([FromForm] StartGenerationModel? model)
     {
         try
         {
-            if (model == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    statusCode = 500,
-                    jobStatus = "Failed GLB Conversion",
-                    message = "Error: There was no details provided to process."
-                });
-            }
+            var checks = CheckForValidRequestData(model);
+            if(checks.StatusCode == StatusCodes.Status418ImATeapot)
+                return CheckForValidRequestData(model);
 
-            if (string.IsNullOrEmpty(model?.OutputPath))
-                if (model?.FilePath != null)
-                    model!.OutputPath = GetOutputPath(model.FilePath);
+            if (string.IsNullOrEmpty(model?.StartGenerationJson.OutputPath))
+                if (model?.StartGenerationJson.FileName != null)
+                    model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
 
-            _logger.LogInformation($"Starting GLB conversion for job: {model?.FilePath}");
+            _logger.LogInformation($"Starting GLB conversion for job: {model?.StartGenerationJson.FileName}");
 
             //TODO: Remove
-            _logger.LogInformation($"GLB conversion for job: {model.JobID} has completed successfully.");
+            _logger.LogInformation($"GLB conversion for job: {model!.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
             {
                 statusCode = 200,
@@ -133,12 +191,13 @@ public class GenerationController : ControllerBase
                 message = "Success: GLB conversion completed successfully"
             });
             
-            var scene = Scene.FromFile(Path.Join(model!.OutputPath, model.GenOutputLoc, "bite.obj"));
-            var fileName = Path.GetFileNameWithoutExtension(model.FilePath);
-            var root = Path.GetDirectoryName(model.FilePath);
-            scene.Save(Path.Join(root, fileName + $"_v{model.ModelVersion ?? 1}.glb"));
+            model.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
+            var scene = Scene.FromFile(Path.Join(model!.StartGenerationJson.OutputPath, model.GenOutputLoc, "bite.obj"));
+            var fileName = Path.GetFileNameWithoutExtension(model.StartGenerationJson.FileName);
+            var root = model.StartGenerationJson.OutputPath;
+            scene.Save(Path.Join(root, fileName + ".glb"));
 
-            _logger.LogInformation($"GLB conversion for job: {model.JobID} has completed successfully.");
+            _logger.LogInformation($"GLB conversion for job: {model.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
             {
                 statusCode = 200,
@@ -160,32 +219,42 @@ public class GenerationController : ControllerBase
     }
 
     [HttpPost("postprocess/cleanup")]
-    public ActionResult StartCleanUpAsync(StartGenerationModel? model)
+    public ActionResult StartCleanUpAsync([FromForm] StartGenerationModel? model)
     {
         try
         {
-            if (model == null)
+            var checks = CheckForValidRequestData(model);
+            if(checks.StatusCode == StatusCodes.Status418ImATeapot)
+                return CheckForValidRequestData(model);
+
+            if (string.IsNullOrEmpty(model?.StartGenerationJson.OutputPath))
+                if (model?.StartGenerationJson.FileName != null)
+                    model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
+
+            _logger.LogInformation($"Starting file clean up for job: {model?.StartGenerationJson.JobID}");
+
+            //Leave the output folder on the system with just the model file
+            if (Directory.Exists(Path.Join(model!.StartGenerationJson.OutputPath, model.ImageOutputLoc)))
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    statusCode = 500,
-                    jobStatus = "Failed File CleanUp",
-                    message = "Error: There was no details provided to process clean up."
-                });
+                Directory.Delete(Path.Join(model!.StartGenerationJson.OutputPath, model.ImageOutputLoc), true);
+            }
+            
+            if (Directory.Exists(Path.Join(model!.StartGenerationJson.OutputPath, model.MaskOutputLoc)))
+            {
+                Directory.Delete(Path.Join(model!.StartGenerationJson.OutputPath, model.MaskOutputLoc), true);
             }
 
-            if (string.IsNullOrEmpty(model?.OutputPath))
-                if (model?.FilePath != null)
-                    model!.OutputPath = GetOutputPath(model.FilePath);
-
-            _logger.LogInformation($"Starting file clean up for job: {model?.JobID}");
-
-            if (Directory.Exists(model!.OutputPath))
+            if (Directory.Exists(Path.Join(model!.StartGenerationJson.OutputPath, model.GenOutputLoc)))
             {
-                Directory.Delete(model!.OutputPath, true);
+                Directory.Delete(Path.Join(model!.StartGenerationJson.OutputPath, model.GenOutputLoc), true);
             }
 
-            _logger.LogInformation($"File clean up for job: {model.JobID} has completed successfully.");
+            if (Path.Exists(Path.Join(model!.StartGenerationJson.OutputPath, model.StartGenerationJson.FileName)))
+            {
+                System.IO.File.Delete(Path.Join(model!.StartGenerationJson.OutputPath, model.StartGenerationJson.FileName));
+            }
+            
+            _logger.LogInformation($"File clean up for job: {model.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
             {
                 statusCode = 200,
@@ -216,24 +285,18 @@ public class GenerationController : ControllerBase
      * <returns>A StatusResult representing the result of the method</returns>
      */
     [HttpPost("preprocess/split")]
-    public async Task<ActionResult> StartFrameSplittingAsync(StartGenerationModel? model)
+    public async Task<ActionResult> StartFrameSplittingAsync([FromForm] StartGenerationModel? model)
     {
         try
         {
-            if (model == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    statusCode = 500,
-                    jobStatus = "Failed Frame Masking",
-                    message = "Error: There was no details provided to process."
-                });
-            }
+            var checks = CheckForValidRequestData(model);
+            if(checks.StatusCode == StatusCodes.Status418ImATeapot)
+                return CheckForValidRequestData(model);
             
-            if (model.FilePath != null && Directory.Exists(Path.Join(GetOutputPath(model.FilePath), model.ImageOutputLoc)) && Directory.GetFiles(Path.Join(GetOutputPath(model.FilePath), model.ImageOutputLoc)).Length > 0)
+            if (model!.StartGenerationJson.FileName != null && Directory.Exists(Path.Join(GetOutputPath(model.StartGenerationJson.JobID), model.ImageOutputLoc)) && Directory.GetFiles(Path.Join(GetOutputPath(model.StartGenerationJson.JobID), model.ImageOutputLoc)).Length > 0)
             {
                 // Output folder full, images already exist
-                _logger.LogInformation($"Frame splitting for {model.JobID} has completed successfully.");
+                _logger.LogInformation($"Frame splitting for {model.StartGenerationJson.JobID} has completed successfully.");
                 return StatusCode(StatusCodes.Status200OK, new
                 {
                     statusCode = 200,
@@ -242,18 +305,19 @@ public class GenerationController : ControllerBase
                 });
             }
 
-            if (string.IsNullOrEmpty(model?.OutputPath))
-                if (model?.FilePath != null)
-                    model!.OutputPath = GetOutputPath(model.FilePath);
+            if (string.IsNullOrEmpty(model?.StartGenerationJson.OutputPath))
+                if (model?.StartGenerationJson.FileName != null)
+                    model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
 
-            _logger.LogInformation($"Starting frame splitting for {model!.JobID}");
-            Directory.CreateDirectory(model!.OutputPath + model.ImageOutputLoc);
+            _logger.LogInformation($"Starting frame splitting for {model!.StartGenerationJson.JobID}");
+            Directory.CreateDirectory(model!.StartGenerationJson.OutputPath + model.ImageOutputLoc);
 
             var ffmpeg = _configuration.GetValue<string>("Ffmpeg_bin_path");
-
+            var OutputRootFolder = _configuration.GetValue<string>("OutputRootFolder");
+            
             var outFormat = "/%0004d.png";
             var startInfo = new ProcessStartInfo(fileName: ffmpeg!,
-                arguments: $"-i {model.FilePath} -filter:v fps=1 {model!.OutputPath + model.ImageOutputLoc + outFormat}")
+                arguments: $"-i {model!.StartGenerationJson.OutputPath + "/" + model.StartGenerationJson.FileName} -filter:v fps=1 {model!.StartGenerationJson.OutputPath + model.ImageOutputLoc + outFormat}")
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
@@ -263,7 +327,7 @@ public class GenerationController : ControllerBase
             var proc = Process.Start(startInfo);
             if (proc != null) await proc.WaitForExitAsync().ConfigureAwait(false);
 
-            _logger.LogInformation($"Frame splitting for {model.JobID} has completed successfully.");
+            _logger.LogInformation($"Frame splitting for {model.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
             {
                 statusCode = 200,
@@ -291,10 +355,14 @@ public class GenerationController : ControllerBase
      * <returns>A ActionResult with a statusCode, jobStatus, selectedFrames and message within the response</returns>
      */
     [HttpPost("preprocess/evaluate")]
-    private ActionResult StartFrameEvaluationAsync(StartGenerationModel? model)
+    private ActionResult StartFrameEvaluationAsync([FromForm] StartGenerationModel? model)
     {
+        var checks = CheckForValidRequestData(model);
+        if(checks.StatusCode == StatusCodes.Status418ImATeapot)
+            return CheckForValidRequestData(model);
+        
         //TODO: Implement evaluation
-        _logger.LogInformation($"Frame evaluation for {model!.JobID} has completed successfully.");
+        _logger.LogInformation($"Frame evaluation for {model!.StartGenerationJson.JobID} has completed successfully.");
         return StatusCode(StatusCodes.Status200OK, new
         {
             statusCode = 200,
@@ -314,26 +382,20 @@ public class GenerationController : ControllerBase
      * <note>This is a blocking task as we should only be processing one thing at a time</note>
      */
     [HttpPost("preprocess/mask")]
-    public ActionResult StartFrameMasking(StartGenerationModel? model)
+    public ActionResult StartFrameMasking([FromForm] StartGenerationModel? model)
     {
         try
         {
-            if (model == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    statusCode = 500,
-                    jobStatus = "Failed Frame Masking",
-                    message = "Error: There was no details provided to process."
-                });
-            }
+            var checks = CheckForValidRequestData(model);
+            if(checks.StatusCode == StatusCodes.Status418ImATeapot)
+                return CheckForValidRequestData(model);
 
-            if (model.FilePath != null &&
-                Directory.Exists(Path.Join(GetOutputPath(model.FilePath), model.MaskOutputLoc)) &&
-                Directory.GetFiles(Path.Join(GetOutputPath(model.FilePath), model.MaskOutputLoc)).Length > 0)
+            if (model!.StartGenerationJson.FileName != null &&
+                Directory.Exists(Path.Join(GetOutputPath(model.StartGenerationJson.JobID), model.MaskOutputLoc)) &&
+                Directory.GetFiles(Path.Join(GetOutputPath(model.StartGenerationJson.JobID), model.MaskOutputLoc)).Length > 0)
             {
                 // Output file full, masks already exist
-                _logger.LogInformation($"Frame masking for {model.JobID} has completed successfully.");
+                _logger.LogInformation($"Frame masking for {model.StartGenerationJson.JobID} has completed successfully.");
                 return StatusCode(StatusCodes.Status200OK, new
                 {
                     statusCode = 200,
@@ -342,22 +404,22 @@ public class GenerationController : ControllerBase
                 });
             }
 
-            if (string.IsNullOrEmpty(model?.OutputPath))
-                if (model?.FilePath != null)
-                    model!.OutputPath = GetOutputPath(model.FilePath);
+            if (string.IsNullOrEmpty(model?.StartGenerationJson.OutputPath))
+                if (model?.StartGenerationJson.FileName != null)
+                    model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
 
-            if (string.IsNullOrEmpty(model?.SubjectHint))
-                model!.SubjectHint = "";
+            if (string.IsNullOrEmpty(model?.StartGenerationJson.SubjectHint))
+                model!.StartGenerationJson.SubjectHint = "";
 
-            _logger.LogInformation($"Starting frame masking for job: {model!.JobID}");
-            Directory.CreateDirectory(model.OutputPath + model.MaskOutputLoc);
+            _logger.LogInformation($"Starting frame masking for job: {model!.StartGenerationJson.JobID}");
+            Directory.CreateDirectory(model.StartGenerationJson.OutputPath + model.MaskOutputLoc);
 
             var wslUser = _configuration.GetValue<string>("WslUser");
             var wslScriptPath = _configuration.GetValue<string>("WslScriptPath");
             var wslCondaEnv = _configuration.GetValue<string>("WslCondaEnv");
             var wslCmd = _configuration.GetValue<string>("WslStartCmd");
 
-            string args = $"-d Ubuntu-20.04 -u {wslUser} sh -c \"cd \'{wslScriptPath!}\' && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv!} python ./gen_masks.py -p \'{GetWslPathFromWindowsPath(model.OutputPath!)}\' -m {model.SubjectHint}\"";
+            string args = $"-d Ubuntu-20.04 -u {wslUser} sh -c \"cd \'{wslScriptPath!}\' && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv!} python ./gen_masks.py -p \'{GetWslPathFromWindowsPath(model.StartGenerationJson.OutputPath!)}\' -m {model.StartGenerationJson.SubjectHint}\"";
             _logger.LogInformation($"args: {args}");
             var startInfo = new ProcessStartInfo(fileName: wslCmd!, arguments: args);
             
@@ -369,7 +431,7 @@ public class GenerationController : ControllerBase
             var proc = Process.Start(startInfo);
             proc?.WaitForExit();
 
-            _logger.LogInformation($"Frame masking for job: {model.JobID} has completed successfully.");
+            _logger.LogInformation($"Frame masking for job: {model.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
             {
                 statusCode = 200,
@@ -399,44 +461,53 @@ public class GenerationController : ControllerBase
      * <returns>A StatusResult representing the result of the method.</returns>
      */
     [HttpPost("preprocess/validate")]
-    public ActionResult ValidFileCheck(StartGenerationModel? model)
+    public async Task<ActionResult> ValidFileCheck([FromForm] StartGenerationModel? model)
     {
-        if (model == null)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, new
-            {
-                statusCode = 500,
-                jobStatus = "Failed Validation",
-                message = "Error: No valid details provided"
-            });
-        }
-
         try
         {
-            if (model.FilePath != null)
+            var checks = CheckForValidRequestData(model);
+            if(checks.StatusCode == StatusCodes.Status418ImATeapot)
+                return CheckForValidRequestData(model);
+            
+            model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID!);
+            if (!string.IsNullOrEmpty(model.StartGenerationJson.OutputPath))
             {
-                model.OutputPath = GetOutputPath(model.FilePath);
-                if (!string.IsNullOrEmpty(model.OutputPath))
+                Directory.CreateDirectory(model.StartGenerationJson.OutputPath);
+                _logger.LogInformation(
+                    $"Success: Valid output directory created at path: {model.StartGenerationJson.OutputPath}");
+
+                if (model.InputFile != null)
                 {
-                    Directory.CreateDirectory(model.OutputPath);
+                    using (var fileStream = new FileStream(model.StartGenerationJson.OutputPath + "/" + model.StartGenerationJson.FileName, FileMode.Create))
+                    {
+                        await model.InputFile.CopyToAsync(fileStream);
+                    }
+                    
                     _logger.LogInformation(
-                        $"Success: Valid file found and output directory created at path: {model.OutputPath}");
+                        $"Success: File was saved to output directory");
                     return StatusCode(StatusCodes.Status200OK, new
                     {
                         statusCode = 200,
                         jobStatus = "Completed Validation",
-                        message = $"Success: Valid file found and output directory created at path: {model.OutputPath}"
+                        message = $"Success: Valid output directory created at path: {model.StartGenerationJson.OutputPath} and input file saved"
                     });
                 }
-
-                _logger.LogError($"Error: No valid file found at path: {model.FilePath}");
-                return StatusCode(StatusCodes.Status404NotFound, new
+                
+                return StatusCode(StatusCodes.Status200OK, new
                 {
-                    statusCode = 404,
-                    jobStatus = "Failed Validation",
-                    message = $"Error: No valid file found at path: {model.FilePath}"
+                    statusCode = 200,
+                    jobStatus = "Completed Validation",
+                    message = $"Success: Valid output directory created at path: {model.StartGenerationJson.OutputPath}"
                 });
             }
+
+            _logger.LogError($"Error: No valid file found at path: {model.StartGenerationJson.FileName}");
+            return StatusCode(StatusCodes.Status404NotFound, new
+            {
+                statusCode = 404,
+                jobStatus = "Failed Validation",
+                message = $"Error: No valid file found at path: {model.StartGenerationJson.FileName}"
+            });
         }
         catch (Exception e)
         {
@@ -448,37 +519,35 @@ public class GenerationController : ControllerBase
                 message = $"Error: {e.Message}"
             });
         }
-        return StatusCode(StatusCodes.Status500InternalServerError, new
-        {
-            statusCode = 500,
-            jobStatus = "Failed Validation",
-            message = $"Error: Internal error"
-        });
     }
 
     /**
      * <summary> Gets the output path for generation. </summary>
      *
-     * <param name="filePath"> The file path of the file being generated</param>
+     * <param name="jobID"> The jobID of the file being generated</param>
      *
      * <returns>Output path as string or null if an error occurs.</returns>
      */
-    private string? GetOutputPath(string filePath)
+    private string? GetOutputPath(Guid? jobID)
     {
-        if (System.IO.File.Exists(filePath))
-        {
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string? directory = Path.GetDirectoryName(filePath);
-            if (directory != null)
-            {
-                string outputPath = Path.Join(directory, "gen_out_" + fileName);
-                return outputPath.Replace("\\", "/");
-            }
-
+        if (jobID == null)
             return null;
-        }
+        
+        var path = Path.Join(_configuration.GetValue<string>("OutputRootFolder"), "job_" + jobID.ToString());
+        
+        string outputPath = path;
+        return outputPath.Replace("\\", "/");
 
-        return null;
+    }
+
+    private StartGenerationJson GetFromJson()
+    {
+        StringValues data;
+        HttpContext.Request.Form.TryGetValue("StartGenerationJson", out data);
+        var j = JsonValue.Parse(data);
+        var jj = StartGenerationJsonConverter.FromJson(j);
+        jj.OutputPath = GetOutputPath(jj.JobID!);
+        return jj;
     }
 
 

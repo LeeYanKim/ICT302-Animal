@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<Model3D>> GetModel3DsAsync()
         {
             var models = await _ctx.Model3D.ToListAsync();
+            models.ForEach(a => _ctx.Model3D.Attach(a));
             return models;
         }
 

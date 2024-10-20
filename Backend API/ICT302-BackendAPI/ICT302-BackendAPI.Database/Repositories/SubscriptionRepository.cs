@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<Subscription>> GetSubscriptionsAsync()
         {
             var subscriptions = await _ctx.Subscriptions.ToListAsync();
+            subscriptions.ForEach(a => _ctx.Subscriptions.Attach(a));
             return subscriptions;
         }
 

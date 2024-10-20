@@ -23,8 +23,4 @@
       <ProjectReference Include="..\ICT302-BackendAPI.Database\ICT302-BackendAPI.Database.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Controllers\Backend\" />
-    </ItemGroup>
-
 </Project>

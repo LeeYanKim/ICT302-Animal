@@ -26,26 +26,26 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly IGraphicRepository _graphicRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository,  IWebHostEnvironment webHostEnvironment)
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository,  IWebHostEnvironment webHostEnvironment, IGraphicRepository graphicRepository)
         {
             _configuration = configuration;
             _logger = logger;
             _animalRepository = animalRepository;
-            //_graphicRepository = graphicRepository;
+            _graphicRepository = graphicRepository;
             _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadFileAsync(IFormFile file, [FromForm] string animalName, [FromForm] string animalType, [FromForm] string dateOfBirth)
+        public async Task<IActionResult> UploadFileAsync(IFormFile files, [FromForm] string animalName, [FromForm] string animalType, [FromForm] string dateOfBirth)
         {
             try
             {
-                _logger.LogInformation("Received file upload request: AnimalName = {AnimalName}, AnimalType = {AnimalType}, DateOfBirth = {DateOfBirth}", animalName, animalType, dateOfBirth);
+                _logger.LogInformation($"Received file upload request: AnimalName = {animalName}, AnimalType = {animalType}, DateOfBirth = {dateOfBirth}");
 
                 // Validate input fields
-                if (file == null || file.Length == 0)
+                if (files == null || files.Length == 0)
                 {
-                    string msg = String.Format("Invalid request: No file provided {0} is empty", file.FileName);
+                    string msg = String.Format("Invalid request: No file provided {0} is empty", files.FileName);
                     _logger.LogWarning(msg);
                     return BadRequest(new { message = msg });
                 }
@@ -93,26 +93,20 @@ namespace ICT302_BackendAPI.API.Controllers
         }
 
                 // Validate file type
-                string fileExtension = Path.GetExtension(file.FileName);
+                string fileExtension = Path.GetExtension(files.FileName);
                 if (!IsFileTypeAllowed(fileExtension))
                 {
-                    string msg = String.Format("Uploaded file: {FileName} is of a file type that is not supported", file.FileName);
+                    string msg = String.Format("Uploaded file: {FileName} is of a file type that is not supported", files.FileName);
                     _logger.LogWarning(msg);
                     return BadRequest(new { message = msg });
                 }
 
                 // Sanitize and generate a unique file name
-                string sanitizedFileName = SanitizeFileName(Path.GetFileNameWithoutExtension(file.FileName));
-                string uniqueFileName = $"{sanitizedFileName}_{Guid.NewGuid()}{fileExtension}";
-                string filePath = Path.Combine(storedFilesPath, uniqueFileName);
-
-                // Save the file to disk
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-                _logger.LogInformation("File successfully saved at: {FilePath}", filePath);
-
+                //string sanitizedFileName = SanitizeFileName(Path.GetFileNameWithoutExtension(files.FileName));
+                var gpcid = Guid.NewGuid();
+                string uniqueFileName = $"{gpcid}{fileExtension}";
+                string filePath = uniqueFileName; // Should be the path relative to the main upload folder
+                
                 // Add entry to the database
                 var animal = new Animal
                 {
@@ -121,9 +115,41 @@ namespace ICT302_BackendAPI.API.Controllers
                     AnimalType = animalType,
                     AnimalDOB = parsedAnimalDOB
                 };
+                // Add the animal before processing upload...
+                var a = await _animalRepository.CreateAnimalAsync(animal);
 
+                int length = 0;
+
+                if (a.AnimalID != Guid.Empty)
+                {
+                    // Save the file to disk
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        var graphic = new Graphic
+                        {
+                            GPCID = gpcid,
+                            AnimalID = animal.AnimalID,
+                            GPCName = animal.AnimalName + "_" + animal.AnimalType,
+                            GPCDateUpload = DateTime.Now,
+                            FilePath = filePath,
+                            GPCSize = (int)fileStream.Length,
+                            Animal = animal
+                    
+                        };
+                        animal.Graphics.Add(graphic);
+                        var g = await _graphicRepository.CreateGraphicAsync(graphic);
+                        if (g.AnimalID != Guid.Empty)
+                        {
+                            // create the record for the graphic and then and only then process the upload incase there was a sql error
+                            await _animalRepository.UpdateAnimalAsync(animal);
+                            await files.CopyToAsync(fileStream);
+                        }
+
+                    }
+                }
+                
+                _logger.LogInformation("File successfully saved at: {FilePath}", filePath);
                 _logger.LogInformation("Creating animal entry in the database: AnimalName = {AnimalName}", animal.AnimalName);
-                await _animalRepository.CreateAnimalAsync(animal);
                 _logger.LogInformation("Animal entry created in the database with ID: {AnimalID}", animal.AnimalID);
 
                 return Ok(new { message = "File uploaded and animal data saved successfully." });

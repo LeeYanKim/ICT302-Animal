@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<OrganisationAccess>> GetOrganisationAccessesAsync()
         {
             var organisationAccesses = await _ctx.OrganisationAccesses.ToListAsync();
+            organisationAccesses.ForEach(a => _ctx.OrganisationAccesses.Attach(a));
             return organisationAccesses;
         }
 

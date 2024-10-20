@@ -18,6 +18,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         public async Task<IEnumerable<Billing>> GetBillingsAsync()
         {
             var billings = await _ctx.Billings.ToListAsync();
+            billings.ForEach(a => _ctx.Billings.Attach(a));
             return billings;
         }
 
