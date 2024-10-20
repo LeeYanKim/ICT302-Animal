@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Box, Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
+import { styled } from '@mui/material/styles';
+import { Grid2, Box, Paper,Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
 import API from "../../Internals/API";
 import DeleteGraphicButton from './DeleteGraphicButton';
 import NewGeneration from "../Generation/NewGeneration"; 
-import ViewGenerateButton from "../Generation/ViewGenerationButton";  
+import ViewGenerateButton from "../Generation/ViewGenerationButton";
+import FullFeaturedCrudGrid from './FullFeaturedCrudGrid'; 
 
 interface Animal {
   animalID: string;
@@ -114,6 +116,17 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     console.log("Viewing the generated model...");
   };
 
+  const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+    ...theme.applyStyles('dark', {
+      backgroundColor: '#1A2027',
+    }),
+  }));
+
   return (
     <Box>
       {/* Fixed banner with animal photo and name */}
@@ -124,7 +137,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
       </Box>
 
       {/* Tabs for different sections */}
-      <AppBar position="static">
+      <AppBar position="static" color ='transparent'>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="animal details tabs">
           <Tab label="Information" />
           <Tab label="Media Uploaded" />
@@ -133,10 +146,35 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         </Tabs>
       </AppBar>
     
-          {/* Tab Content */}
-          <Box sx={{ p: 2 }}>
+      {/* Tab Content */}
+      <Box sx={{ p: 2 }}>
         {tabValue === 0 && (
+        <Box>
           <Typography variant="body1">Details about {animalData.animalName} can go here.</Typography>
+          <Box sx={{ width: '100%' }}>
+      <Grid2 container spacing={0.5} rowSpacing={0.5} columns={15} columnSpacing={{ xs: 0.5, sm: 1, md: 2 }}>
+        <Grid2 size={5}>
+          <Item>Name: </Item>
+        </Grid2>
+        <Grid2 size={10}>
+          <Item>{animalData.animalName}</Item>
+        </Grid2>
+        <Grid2 size={5}>
+          <Item>Type: </Item>
+        </Grid2>
+        <Grid2 size={10}>
+          <Item>{animalData.animalType}</Item>
+        </Grid2>
+        <Grid2 size={5}>
+          <Item>Date of Birth: </Item>
+        </Grid2>
+        <Grid2 size={10}>
+          <Item>{new Date(animalData.animalDOB).toLocaleDateString()}</Item>
+        </Grid2>
+      </Grid2>
+    </Box>
+        </Box>
+        
         )}
         
         {tabValue === 1 && (
@@ -243,7 +281,12 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         </Box>)}
 
         {tabValue === 2 && (
+        <Box>
           <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
+          <FullFeaturedCrudGrid /> {/* Render the DataGrid component here */}
+        
+        
+        </Box>
         )}
 
         {tabValue === 3 && (
