@@ -48,26 +48,47 @@ public class SecurityController : ControllerBase
             StringValues data;
             if (HttpContext.Request.Form.TryGetValue("StartGenerationJson", out data))
             {
-                if (data.Count > 0)
+                switch (data.Count)
                 {
-                    var j = JsonNode.Parse(data);
-                    var jj = StartGenerationJsonConverter.FromJson(j);
-                    return jj;
+                    case 0:
+                        return null;
+                    case 1:
+                        var a = new StartGenerationJson
+                        {
+                            Token = data[0]
+                        };
+                        return a;
+                    case 2:
+                        var b = new StartGenerationJson
+                        {
+                            Token = data[0],
+                            JobID = Guid.Parse(data[1])
+                        };
+                        return b;
+                    case 3:
+                        var j = JsonNode.Parse(data);
+                        var jj = StartGenerationJsonConverter.FromJson(j);
+                        return jj;
+                    default:
+                        return null;
                 }
-
+                
                 return null;
             }
             
             if (HttpContext.Request.Form.TryGetValue("StartGenerationJson.Token", out data))
             {
-                if (data.Count > 0)
+                switch (data.Count)
                 {
-                    var j = new StartGenerationJson();
-                    j.Token = data[0];
-                    return j;
+                    case 1:
+                        var a = new StartGenerationJson
+                        {
+                            Token = data[0]
+                        };
+                        return a;
+                    default:
+                        return null;
                 }
-
-                return null;
             }
 
             return null;

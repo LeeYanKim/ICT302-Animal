@@ -40,6 +40,12 @@ namespace ICT302_BackendAPI.Database.Repositories
             return job;
         }
 
+        public int DeleteJobsPending(JobsPending jobsPending)
+        {
+            _ctx.JobsPending.Remove(jobsPending);
+            return _ctx.SaveChanges();
+        }
+
         public async Task<JobsPending?> GetJobsPendingByIDAsync(int id)
         {
             var job = await _ctx.JobsPending.FindAsync(id);
