@@ -1,5 +1,5 @@
 // NewUpload.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Dialog,
@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 
 import API from '../../Internals/API';
+import { FrontendContext } from '../../Internals/ContextStore';
 
 interface NewUploadProps {
   open: boolean;
@@ -32,6 +33,8 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null); // To track upload status
+  const frontendContext = useContext(FrontendContext);  // Access the frontend context
+  const userid = frontendContext.user.contextRef.current.userId;
 
 
   // Handle File Upload
@@ -59,6 +62,7 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
     formData.append('animalType', animalDetails.animalType);
     const formattedDOB = animalDetails.dateOfBirth;
     formData.append('dateOfBirth', formattedDOB);
+    formData.append('userId' , userid);
 
     // Append each file
     filesToUpload.forEach((file) => {
