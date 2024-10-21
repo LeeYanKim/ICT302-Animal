@@ -16,5 +16,7 @@ namespace ICT302_BackendAPI.Database.Repositories
         Task<Subscription?> GetSubscriptionByIDAsync(Guid id);
         
         Task<Subscription?> GetDefaultSubscriptionAsync();
+        
+        Task<string> GetEmailByIDAsync(Guid userID);
     }
 }

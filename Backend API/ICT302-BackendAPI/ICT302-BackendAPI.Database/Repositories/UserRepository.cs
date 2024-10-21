@@ -76,5 +76,11 @@ namespace ICT302_BackendAPI.Database.Repositories
             
             return subs.FirstOrDefault();
         }
+        
+        public async Task<string> GetEmailByIDAsync(Guid userID)
+        {
+            var user = await _ctx.Users.FindAsync(userID);
+            return user?.UserEmail; // Return null if the user is not found
+        }
     }
 }

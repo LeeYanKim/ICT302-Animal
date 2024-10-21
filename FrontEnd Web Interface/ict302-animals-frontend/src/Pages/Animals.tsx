@@ -17,34 +17,51 @@ interface AnimalProps {
 const Animals: React.FC<AnimalProps> = ({actTab}) => {
   const frontendContext = useContext(FrontendContext);
   const navigate = useNavigate();
-  const [animals, setAnimals] = useState<[]>([]);
+  const [animals, setAnimals] = useState<any[]>([]);
   const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(actTab); // 0 for AnimalGrid, 1 for AnimalDetails
+  const userId = frontendContext.user.contextRef.current.userId; // Get userId from context
 
+
+
+
+  // Fetch animal IDs and details for the user
   const fetchAnimalsData = async () => {
     try {
-      const response = await fetch(API.Animals());
-      if (response.ok) {
-        const data = await response.json();
-        setAnimals(data);
+      const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
+      if (animalAccessResponse.ok) {
+        const animalIDs = await animalAccessResponse.json();
+        console.log(animalIDs);
+        // Fetch details for each animal ID
+        const animalDetailsPromises = animalIDs.map((animalID: string) =>
+          fetch(API.Download() + `/animals/details/${animalID}`)
+        );
+        const animalDetailsResponses = await Promise.all(animalDetailsPromises);
+        const animalsData = await Promise.all(
+          animalDetailsResponses.map(response => response.json())
+        );
+        
+        setAnimals(animalsData);
       } else {
         console.error('Failed to fetch animals data');
       }
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchAnimalsData();
-  }, [activeTab]);
+    if (userId) {
+      fetchAnimalsData(); // Fetch animals when userId is available
+    }
+  }, [activeTab, userId]);
 
   // Define the handleAnimalClick function here
-  const handleAnimalClick = (animalId: string) => {
+  const handleAnimalClick = (animalId: string , animalName : string) => {
     console.log('Navigating to animalID:', animalId);
     setSelectedAnimalId(animalId);
     setActiveTab(1); // Switch to AnimalDetails view
-    navigate(`/dashboard/animals/${animalId}`); // Navigate to details page
+    navigate(`/dashboard/animals/${animalName}`, {state: { animalName}}); // Navigate to details page
   };
 
   return (

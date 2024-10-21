@@ -1,10 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Box, Button, FormControl, FormLabel, TextField, Typography } from '@mui/material';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import ReCAPTCHA from 'react-google-recaptcha'; // Import the reCAPTCHA component
-import { FrontendContext } from "../Internals/ContextStore"; // Import frontend context
-import { storeUserInBackend, updateFrontendContext } from '../Components/User/userUtils';
+import ReCAPTCHA from 'react-google-recaptcha';
+import { FrontendContext } from "../Internals/ContextStore";
+import { storeUserInBackend, updateFrontendContext, validateInput, sanitizeInput, checkPasswordStrength, passwordFeedback } from '../Components/User/userUtils';
 
 interface SignUpProps {
   onSignUpSuccess?: () => void;
@@ -14,14 +14,47 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [username, setUsername] = useState(''); // New username state
+  const [username, setUsername] = useState('');
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const frontendContext = useContext(FrontendContext); // Get the frontend context
+  const [passwordStrength, setPasswordStrength] = useState(''); // Password strength state
+  const [passwordFeedbackMessages, setPasswordFeedbackMessages] = useState<string[]>([]); // Password feedback state
+  const frontendContext = useContext(FrontendContext);
   const nav = useNavigate();
+
+  useEffect(() => {
+    const strength = checkPasswordStrength(password);
+    setPasswordStrength(strength);
+
+    const feedback = passwordFeedback(password);
+    setPasswordFeedbackMessages(feedback);
+  }, [password]);
 
   const handleSignUpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const usernameWhitelist = 'a-zA-Z0-9';
+    const emailWhitelist = 'a-zA-Z0-9@._-';
+    const passwordWhitelist = 'a-zA-Z0-9!@#$%^&*()_+-=';
+
+    const isUsernameValid = validateInput(username, usernameWhitelist);
+    const isEmailValid = validateInput(email, emailWhitelist);
+    const isPasswordValid = validateInput(password, passwordWhitelist);
+
+    if (!isUsernameValid) {
+      setError('Username contains invalid characters. Please use only letters and numbers.');
+      return;
+    }
+
+    if (!isEmailValid) {
+      setError('Email contains invalid characters.');
+      return;
+    }
+
+    if (!isPasswordValid) {
+      setError('Password contains invalid characters.');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
@@ -33,42 +66,40 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
       return;
     }
 
-    try {
-      // Create user with Firebase authentication
-      const userCredential = await createUserWithEmailAndPassword(frontendContext.firebaseAuth.current, email, password);
-      const user = userCredential.user; // Firebase authenticated user
+    const sanitizedUsername = sanitizeInput(username, usernameWhitelist);
+    const sanitizedEmail = sanitizeInput(email, emailWhitelist);
+    const sanitizedPassword = sanitizeInput(password, passwordWhitelist);
 
-      // Update the user's display name in Firebase
+    try {
+      const userCredential = await createUserWithEmailAndPassword(frontendContext.firebaseAuth.current, sanitizedEmail, sanitizedPassword);
+      const user = userCredential.user;
+
       await updateProfile(user, {
-        displayName: username, // Set the display name
+        displayName: sanitizedUsername,
       });
 
-      // Retrieve the ID token
       const idToken = await user.getIdToken();
 
-      // Store the user in the backend
       await storeUserInBackend(frontendContext, user, idToken);
-      
-      // On successful sign up
+
       if (onSignUpSuccess) onSignUpSuccess();
 
       await updateFrontendContext(frontendContext, user);
-      console.log('User context updated, navigating to dashboard');
 
-      nav('/dashboard'); // Navigate to the dashboard or desired page
+      nav('/dashboard');
     } catch (error) {
       setError('Error creating account: ' + (error as Error).message);
     }
   };
 
   const handleRecaptchaChange = (token: string | null) => {
-    setRecaptchaToken(token); // Store reCAPTCHA token on change
+    setRecaptchaToken(token);
   };
 
   return (
     <Box component="form" onSubmit={handleSignUpSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
       <FormControl>
-        <FormLabel htmlFor="username">Username</FormLabel> {/* Username label */}
+        <FormLabel htmlFor="username">Username</FormLabel>
         <TextField
           id="username"
           type="text"
@@ -77,7 +108,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           required
           fullWidth
           value={username}
-          onChange={(e) => setUsername(e.target.value)} // Update username state
+          onChange={(e) => setUsername(e.target.value)}
         />
       </FormControl>
 
@@ -107,6 +138,18 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        {passwordStrength && (
+          <Typography color={passwordStrength === 'Weak' ? 'error' : passwordStrength === 'Medium' ? 'warning' : 'success'}>
+            Password Strength: {passwordStrength}
+          </Typography>
+        )}
+        {passwordFeedbackMessages.length > 0 && (
+          <ul>
+            {passwordFeedbackMessages.map((message, index) => (
+              <li key={index} style={{ color: 'red' }}>{message}</li>
+            ))}
+          </ul>
+        )}
       </FormControl>
 
       <FormControl>
@@ -126,7 +169,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
       {error && <Typography color="error">{error}</Typography>}
 
       <FormControl>
-        <ReCAPTCHA
+      <ReCAPTCHA
           sitekey="6LdD8VgqAAAAAFZ2fzniAJ9rmDc_es3C0fp9P9Ma"
           onChange={handleRecaptchaChange}
         />
@@ -140,4 +183,3 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess }) => {
 };
 
 export default SignUp;
-

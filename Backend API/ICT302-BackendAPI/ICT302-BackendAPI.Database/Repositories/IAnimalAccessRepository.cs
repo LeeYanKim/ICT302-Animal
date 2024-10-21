@@ -12,5 +12,6 @@ namespace ICT302_BackendAPI.Database.Repositories
         Task<AnimalAccess?> GetAnimalAccessByIDAsync(Guid id);
         Task<IEnumerable<AnimalAccess>> GetAnimalAccessesAsync();
         Task<AnimalAccess> UpdateAnimalAccessAsync(AnimalAccess animalAccess);
+        Task<IEnumerable<Guid>> GetAnimalIDsByUserIDAsync(Guid userID);
     }
 }

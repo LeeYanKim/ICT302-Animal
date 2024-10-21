@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Grid2 as Grid, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
 import { Theme } from '@mui/material/styles'; // Import the Theme type
 import AnimalCard from './AnimalCard';
+import { FrontendContext } from '../../Internals/ContextStore';
 
 // Props interface for AnimalsGrid
 interface AnimalsGridProps {
   triggerRefresh: boolean;
-  onAnimalClick: (animalID: string) => void; // Add this line
+  onAnimalClick: (animalID: string , animalName : string) => void; // Add this line
 }
 
 interface AnimalData {
@@ -21,32 +22,43 @@ interface AnimalData {
 const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick }) => {
   const [animals, setAnimals] = useState<AnimalData[]>([]);
   const navigate = useNavigate();
+  
+  const frontendContext = useContext(FrontendContext);
+  const userId = frontendContext.user.contextRef.current.userId; // Get userId from context
 
-  // Fetch animals from API
-  const fetchUploadedAnimals = async () => {
+
+
+
+  // Fetch animal IDs and details for the user
+  const fetchAnimalsData = async () => {
     try {
-      const response = await fetch(API.Download() + '/animals/list');
-      if (!response.ok) {
-        throw new Error('Failed to fetch uploaded animals');
+      const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
+      if (animalAccessResponse.ok) {
+        const animalIDs = await animalAccessResponse.json();
+        console.log(animalIDs);
+        // Fetch details for each animal ID
+        const animalDetailsPromises = animalIDs.map((animalID: string) =>
+          fetch(API.Download() + `/animals/details/${animalID}`)
+        );
+        const animalDetailsResponses = await Promise.all(animalDetailsPromises);
+        const animalsData = await Promise.all(
+          animalDetailsResponses.map(response => response.json())
+        );
+        
+        setAnimals(animalsData);
+      } else {
+        console.error('Failed to fetch animals data');
       }
-      const data = await response.json();
-      setAnimals(data);
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Trigger fetching when component mounts or refresh is triggered
   useEffect(() => {
-    fetchUploadedAnimals();
-  }, [triggerRefresh]);
-
-  // Handle click to navigate to animal details page
-  // *** consider remove this handleAnimalClick as onAnimalClick has same effect
-  //const handleAnimalClick = (animalID: string) => {
-    //console.log('Navigating to animalID:', animalID);
-    //navigate(`/dashboard/animals/${animalID}`);
-  //};
+    if (userId) {
+      fetchAnimalsData(); // Fetch animals when userId is available
+    }
+  }, [userId]);
 
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
@@ -58,7 +70,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
               animalName={animal.animalName}
               animalDOB={animal.videoUploadDate || ''}
               animalType={animal.animalType}
-              onClick={() => onAnimalClick(animal.animalID)}
+              onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
             />
           </Grid>
         ))}

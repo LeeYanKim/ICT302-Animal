@@ -3,6 +3,7 @@ import QueueItem  from './data/QueueItem';
 import CompletedItem from './data/CompletedItem';
 
 export default class UserProfile {
+    userId : string
     username: string
     email: string
     initials: string
