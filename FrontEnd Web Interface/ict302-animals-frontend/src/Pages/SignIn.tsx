@@ -88,11 +88,10 @@ const SignIn: React.FC = () => {
       const idToken = await user.getIdToken();
 
       // Check the firebase token does not store user in backend in this context.
-      const userId = await storeUserInBackend(frontendContext, user, idToken);
+      await storeUserInBackend(frontendContext, user, idToken);
 
       updateFrontendContext(frontendContext, user);
   
-
       // Navigate to the dashboard
       nav('/dashboard');
       
