@@ -118,7 +118,8 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
               selectedAnimal.graphics.map((graphic) => (
                 <div key={graphic.gpcID} style={{ marginBottom: '20px' }}>
                   <h4>{graphic.gpcName}</h4>
-                  <video controls width="600">
+                  {/* Add key to ensure React re-renders video */}
+                  <video key={graphic.filePath} controls width="600">
                     <source src={graphic.filePath} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
@@ -133,7 +134,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         {/* Display only the 6 most recent uploads */}
         <Grid container spacing={3}>
           {filteredAnimals.length > 0 && filteredAnimals.slice(0, 9).map((animal) => (  // Limit to 6 most recent animals
-            <Grid  sx={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
+            <Grid sx={{ xs: 12, sm: 6, md: 4 }} key={animal.animalID}>
               <Box
                 sx={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }}
                 onClick={() => handleAnimalClick(animal)}
