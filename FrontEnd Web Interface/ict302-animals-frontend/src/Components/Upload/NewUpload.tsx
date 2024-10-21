@@ -27,7 +27,8 @@ interface NewUploadProps {
   onUploadSuccess?: () => void;
 }
 
-export default function NewUpload({ open, handleClose, animalDetails, filesToUpload, onUploadSuccess  }: NewUploadProps) {
+
+const NewUpload : React.FC<NewUploadProps> = ({ open, handleClose, animalDetails, filesToUpload, onUploadSuccess  }: NewUploadProps) => {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -59,6 +60,7 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
     formData.append('animalType', animalDetails.animalType);
     const formattedDOB = animalDetails.dateOfBirth;
     formData.append('dateOfBirth', formattedDOB);
+    formData.append('userId' , )
 
     // Append each file
     filesToUpload.forEach((file) => {
@@ -155,3 +157,6 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
     </>
   );
 }
+
+export default NewUpload;
+

@@ -81,6 +81,8 @@ const handleBackBtnClick = () => {
     ? API.Download() + `/animals/videos/${animalData.videoFileName}`
     : null;
 
+   console.log(API.User());
+
   const togglePlayerClose = () => {
     setPlayerOpen(!PlayerOpen); 
   };

@@ -26,7 +26,7 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly IGraphicRepository _graphicRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository,  IWebHostEnvironment webHostEnvironment, IGraphicRepository graphicRepository)
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment, IGraphicRepository graphicRepository)
         {
             _configuration = configuration;
             _logger = logger;
@@ -36,7 +36,7 @@ namespace ICT302_BackendAPI.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadFileAsync(IFormFile files, [FromForm] string animalName, [FromForm] string animalType, [FromForm] string dateOfBirth)
+        public async Task<IActionResult> UploadFileAsync(IFormFile files, [FromForm] string animalName, [FromForm] string animalType, [FromForm] string dateOfBirth, [FromForm] Guid userId)
         {
             try
             {
@@ -86,11 +86,11 @@ namespace ICT302_BackendAPI.API.Controllers
                     return StatusCode(500, new { message = "Configuration error: StoredFilesPath is not defined." });
                 }
 
-        // Ensure directory exists
-        if (!Directory.Exists(storedFilesPath))
-        {
-            Directory.CreateDirectory(storedFilesPath);
-        }
+                // Ensure directory exists
+                if (!Directory.Exists(storedFilesPath))
+                {
+                    Directory.CreateDirectory(storedFilesPath);
+                }
 
                 // Validate file type
                 string fileExtension = Path.GetExtension(files.FileName);
@@ -106,7 +106,7 @@ namespace ICT302_BackendAPI.API.Controllers
                 var gpcid = Guid.NewGuid();
                 string uniqueFileName = $"{gpcid}{fileExtension}";
                 string filePath = uniqueFileName; // Should be the path relative to the main upload folder
-                
+
                 // Add entry to the database
                 var animal = new Animal
                 {
@@ -134,7 +134,7 @@ namespace ICT302_BackendAPI.API.Controllers
                             FilePath = filePath,
                             GPCSize = (int)fileStream.Length,
                             Animal = animal
-                    
+
                         };
                         animal.Graphics.Add(graphic);
                         var g = await _graphicRepository.CreateGraphicAsync(graphic);
@@ -143,11 +143,20 @@ namespace ICT302_BackendAPI.API.Controllers
                             // create the record for the graphic and then and only then process the upload incase there was a sql error
                             await _animalRepository.UpdateAnimalAsync(animal);
                             await files.CopyToAsync(fileStream);
+
+                            // Create AnimalAccess entry
+                            var access = new AnimalAccess
+                            {
+                                AccessID = Guid.NewGuid(),
+                                AnimalID = animal.AnimalID,
+                                UserID = userId,
+                                AssignedDate = DateTime.Now
+                            };
                         }
 
                     }
                 }
-                
+
                 _logger.LogInformation($"File successfully saved at: {Path.Join(storedFilesPath, filePath)}");
                 _logger.LogInformation($"Creating animal entry in the database: AnimalName = {animal.AnimalName}");
                 _logger.LogInformation($"Animal entry created in the database with ID: {animal.AnimalID}");
@@ -251,37 +260,37 @@ namespace ICT302_BackendAPI.API.Controllers
         }
 
         [HttpDelete("animal/{animalId}/graphic/{graphicId}")]
-public async Task<IActionResult> DeleteGraphicAsync(Guid animalId, string graphicId)
-{
-    try
-    {
-        // Fetch the animal from the database using the animalId
-        var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
-        if (animal == null)
+        public async Task<IActionResult> DeleteGraphicAsync(Guid animalId, string graphicId)
         {
-            return NotFound(new { message = "Animal not found." });
+            try
+            {
+                // Fetch the animal from the database using the animalId
+                var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
+                if (animal == null)
+                {
+                    return NotFound(new { message = "Animal not found." });
+                }
+
+                // Determine the stored file path
+                string storedFilesPath = GetStoredFilesPath();
+
+                // Delete the graphic 
+                bool fileDeleted = DeleteFile(storedFilesPath, graphicId);
+                if (!fileDeleted)
+                {
+                    return NotFound(new { message = "Graphic file not found." });
+                }
+
+                // Will need to change when the structure of animal changes
+
+                return Ok(new { message = "Graphic deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting the graphic.");
+                return StatusCode(500, new { message = "Internal server error during graphic deletion." });
+            }
         }
-
-        // Determine the stored file path
-        string storedFilesPath = GetStoredFilesPath();
-
-        // Delete the graphic 
-        bool fileDeleted = DeleteFile(storedFilesPath, graphicId);
-        if (!fileDeleted)
-        {
-            return NotFound(new { message = "Graphic file not found." });
-        }
-
-        // Will need to change when the structure of animal changes
-
-        return Ok(new { message = "Graphic deleted successfully." });
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "An error occurred while deleting the graphic.");
-        return StatusCode(500, new { message = "Internal server error during graphic deletion." });
-    }
-}
 
 
     }
