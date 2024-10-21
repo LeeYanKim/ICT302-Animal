@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Button, Tabs, Tab } from "@mui/material";
-import API from "../../Internals/API"; 
+import API from "../../Internals/API";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface Graphic {
@@ -34,12 +34,12 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   const [generating, setGenerating] = useState<boolean>(false);
   const [tabValue, setTabValue] = useState(0);
   const [progressLabel, setProgressLabel] = useState<string>("Pending");
-  const [ModelExist, setModelExist] = useState<boolean>(false);  
+  const [ModelExist, setModelExist] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const animalNameFromState = location.state?.animalName;
-  
+
   // Ensure animalId is available before making a request
   useEffect(() => {
     const fetchAnimalData = async () => {
@@ -85,7 +85,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     : null;
 
   const togglePlayerClose = () => {
-    setPlayerOpen(!PlayerOpen); 
+    setPlayerOpen(!PlayerOpen);
   };
 
   const handleModelGeneration = async () => {
@@ -100,7 +100,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     const res = await fetch(API.Generate(), {
       method: "POST",
       headers: {
-          "Content-Type": "application/json"
+        "Content-Type": "application/json"
       }, body: JSON.stringify({
         AnimalId: animalId,
         AnimalGraphicFileName: videoFileName, //Graphics is now an array
@@ -116,14 +116,14 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     await setTimeout(() => setProgressLabel("Cleaning-Up"), 7000);
     await setTimeout(() => {
       setProgressLabel("Finished"); // Clear progress label when finished
-      setGenerating(false); 
-      setModelExist(true); 
+      setGenerating(false);
+      setModelExist(true);
     }, 3000);
   };
 
   const handleViewGeneration = () => {
     console.log("Viewing the generated model...");
-};
+  };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -134,6 +134,8 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     const date = new Date(dob);
     return date.toLocaleDateString(); // Format the date as MM/DD/YYYY (or according to the user's locale)
   };
+
+
 
   return (
     <Box>
@@ -148,11 +150,11 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
       </Box>
 
       {/* Tabs for different sections */}
-      <Tabs 
-        value={tabValue} 
-        onChange={handleTabChange} 
-        centered 
-        variant='fullWidth' 
+      <Tabs
+        value={tabValue}
+        onChange={handleTabChange}
+        centered
+        variant='fullWidth'
         indicatorColor='secondary'
         aria-label="animal details tabs"
       >
@@ -178,7 +180,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
             </Typography>
           </Box>
         )}
-        
+
         {tabValue === 1 && (
           <Box>
             <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
@@ -195,9 +197,16 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
                       backgroundColor: 'black', // Background in case of empty space
                     }}
                   >
-                    <source src={graphic.filePath} type="video/mp4" />
+                    {graphic.filePath.endsWith('.mp4') && <source src={graphic.filePath} type="video/mp4" />}
+                    {graphic.filePath.endsWith('.webm') && <source src={graphic.filePath} type="video/webm" />}
+                    {graphic.filePath.endsWith('.mov') && <source src={graphic.filePath} type="video/quicktime" />}
+                    {graphic.filePath.endsWith('.mkv') && <source src={graphic.filePath} type="video/x-matroska" />}
+
                     Your browser does not support the video tag.
                   </video>
+                  <Button variant="contained" onClick={handleModelGeneration}>
+                    Generate from this Video
+                  </Button>
                 </Box>
               ))
             ) : (
