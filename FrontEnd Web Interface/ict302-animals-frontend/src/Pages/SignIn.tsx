@@ -1,9 +1,10 @@
 import React, { useContext, useState, Suspense } from 'react';
-import {Box, Button, Checkbox, FormControlLabel, Divider, FormLabel, FormControl, TextField, Typography, Stack, Card as MuiCard, LinearProgress, ThemeProvider, createTheme, styled, PaletteMode} from '@mui/material';
+import {Box, Button, Checkbox, FormControlLabel, Divider, FormLabel, FormControl, TextField, Typography, Stack, Card as MuiCard, ThemeProvider, createTheme, styled, PaletteMode} from '@mui/material';
 import {Link, useNavigate} from 'react-router-dom';
 
 import ForgotPassword from '../Components/SignIn/ForgotPassword';
 import getSignInTheme from '../Components/SignIn/theme/getSignInTheme';
+import CircularProgressWithLabel from '../Components/User/CircularProgressWithLabel';
 
 import { GoogleIcon } from '../Components/SignUp/CustomIcons';
 
@@ -60,6 +61,7 @@ const SignIn: React.FC = () => {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false); 
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
@@ -98,6 +100,7 @@ const SignIn: React.FC = () => {
       return;
     }
 
+    setLoading(true);
     setProgress(10); // Start progress
   
     // Continue with authentication logic
@@ -150,26 +153,32 @@ const SignIn: React.FC = () => {
 
   const handleGoogleSignIn = async () => {
     const googleProvider = new GoogleAuthProvider();
-  
+    setLoading(true);
+    setProgress(10);
+
     try {
       // Sign in with Google
       const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
+      setProgress(40);
       const user = result.user; // This is the authenticated user
   
       //console.log('Google sign-in successful:', user);
   
       // Retrieve the ID token
       const idToken = await user.getIdToken();
-
+      setProgress(60);
       // Store the user in the backend
       await storeUserInBackend(frontendContext, user, idToken);
+      setProgress(80);
 
       updateFrontendContext(frontendContext, user);
-  
+      setProgress(100);
+
       // Navigate to the dashboard
       nav('/dashboard');
     } catch (error) {
       console.error("Error signing in with Google:", error);
+      setLoading(false); //Hides loading symbol
     }
   };
 
@@ -184,6 +193,11 @@ const SignIn: React.FC = () => {
             <Typography component="h1" variant="h4">
               {isSignUp ? 'Sign up' : 'Sign in'}
             </Typography>
+            {loading && (
+                <Box sx={{ my: 2, display: 'flex', justifyContent: 'center' }}>
+                  <CircularProgressWithLabel value={progress} />
+                </Box>
+            )}
 
             {isSignUp ? (
               // Render SignUp Form (loaded lazily)
@@ -239,7 +253,8 @@ const SignIn: React.FC = () => {
                   </>
                 )}
               </Typography>
-
+              
+              
 
           </Card>
         </SignInContainer>
