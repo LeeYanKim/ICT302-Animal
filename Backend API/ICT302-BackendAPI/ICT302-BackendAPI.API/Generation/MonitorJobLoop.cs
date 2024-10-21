@@ -4,11 +4,7 @@ using ICT302_BackendAPI.Database.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Net;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using ZstdSharp.Unsafe;
 
 namespace ICT302_BackendAPI.API.Generation;
 
@@ -24,18 +20,18 @@ public sealed class MonitorJobLoop(
 {
     private HttpClient? _sharedHttpClient;
 
-    private static int totalInQueue = 0;
-    private static int apiAliveDelayS = 10;
-    
-    private static int apiAliveDelayMs = apiAliveDelayS * 1000;
-    
+    private static int _totalInQueue;
+    private const int ApiAliveDelayS = 10;
+
+    private const int ApiAliveDelayMs = ApiAliveDelayS * 1000;
+
     private readonly CancellationToken _cancellationToken = applicationLifetime.ApplicationStopping;
     public void StartMonitorLoop()
     {
         logger.LogInformation($"Pending job queue monitor loop is starting.");
         
-        // Run a init check if there are any pending jobs on start up
-        Task.Run(async () => await AssignJobWorkItem());
+        // Run an init check if there are any pending jobs on start up
+        Task.Run(async () => await AssignJobWorkItem(), _cancellationToken);
     }
 
     private HttpClient GetHttpClient()
@@ -44,55 +40,57 @@ public sealed class MonitorJobLoop(
         {
             _sharedHttpClient = new()
             {
-                BaseAddress = new Uri(configuration["GenerationApiAddress"] ?? "http://localhost:5000")
+                BaseAddress = new Uri(configuration["GenAPIUrl"] ?? "http://localhost:5000")
             };
             return _sharedHttpClient;
         }
         return _sharedHttpClient;
     }
 
-    public async ValueTask AssignJobWorkItem()
+    private async Task<HttpRequestMessage> CreateAliveRequestAsync()
     {
-        
-        //Check if the Generator API is alive and note how many items are waiting...
-        //if alive continue with work items, if not delay for x seconds and check again until gen api is alive
-        var genApiUrl = new Uri(webHostEnvironment.IsDevelopment() ? "http://localhost:5000/alive" : configuration["GenAPIUrl"] + "/alive");
-        HttpResponseMessage? alive = null;
+        var genApiUrl = new Uri(configuration["GenAPIUrl"] + "/alive");
         
         var data = new
         {
             Token = configuration["GenAPIAuthToken"]
         };
         
-        using var request = new HttpRequestMessage(HttpMethod.Post, genApiUrl);
-        using var content = new MultipartFormDataContent
-        {
-            // Other data
-            {JsonContent.Create(data), "StartGenerationJson"},
-        };
-                    
-        request.Content = content;
+        var request = new HttpRequestMessage(HttpMethod.Post, genApiUrl);
+        var content = new MultipartFormDataContent();
+        content.Add(JsonContent.Create(data), "StartGenerationJson");
 
-        totalInQueue++;
+        request.Content = content;
+        return request;
+    }
+    
+    public async ValueTask AssignJobWorkItem()
+    {
+        
+        //Check if the Generator API is alive and note how many items are waiting...
+        //if alive continue with work items, if not delay for x seconds and check again until gen api is alive
+        _totalInQueue++;
+        
+        HttpResponseMessage? alive = null;
         
         while (alive == null || alive.IsSuccessStatusCode)
         {
             try
             {
-                alive = GetHttpClient().Send(request);
-                var response = await alive.Content.ReadAsStringAsync();
+                alive = await GetHttpClient().SendAsync(await CreateAliveRequestAsync(), _cancellationToken);
             }
             catch (Exception e)
             {
-                logger.LogWarning($"Generation API is down or not responding... retrying in {apiAliveDelayS} seconds...");
-                var delay = Task.Delay(apiAliveDelayMs);
+                logger.LogWarning("Generation API is down or not responding... retrying in {seconds} seconds...", ApiAliveDelayS);
+                logger.LogWarning("Error: {error}", e.Message);
+                var delay = Task.Delay(ApiAliveDelayMs, _cancellationToken);
                 await delay;
             }
         }
 
-        for (var i = 0; i < totalInQueue; i++)
+        for (var i = 0; i < _totalInQueue; i++)
         {
-            taskQueue.QueueBackgroundWorkItemAsync(BuildJobWorkItem);
+            await taskQueue.QueueBackgroundWorkItemAsync(BuildJobWorkItem);
         }
     }
 
@@ -103,7 +101,7 @@ public sealed class MonitorJobLoop(
         if (job is null)
             return;
         
-        string storedFilesPath = "";
+        string storedFilesPath;
         if (webHostEnvironment.IsDevelopment())
         {
             // Dev environment
@@ -119,190 +117,118 @@ public sealed class MonitorJobLoop(
         DateTime startTime = DateTime.Now;
         
         // Each step of processing. Job is finished when status is Closed
-        while (!token.IsCancellationRequested && job.Status != "Closed")
+        while (!token.IsCancellationRequested && job.Status != JobStatus.Closed)
         {
-            string genEndpoint = GetEndpointFromCurrentStep(job.Status);
-            HttpResponseMessage? result = null;
+            string genEndpoint = JobStatusHelper.GetJobStatusEndpoint(job.Status);
             try
             {
                 var data = new
                 {
                     Token = configuration["GenAPIAuthToken"], JobID = job.JobDetailsId,
-                    FilePath = job.JobDetails.Graphic.FilePath
+                    FileName = job.JobDetails.Graphic.FilePath, SubjectHint = job.JobDetails.Graphic.Animal?.AnimalType,
+                    ModelPath = job.JobDetails.JDID + ".glb", ModelVersion = 1
                 };
-                
-                if (job.Status == "Pending")
+
+                HttpResponseMessage? result = null;
+                if (job.Status == JobStatus.Validating)
                 {
                     using var request = new HttpRequestMessage(HttpMethod.Post, genEndpoint);
-                    using var stream =
+                    await using var stream =
                         File.OpenRead(Path.Join(storedFilesPath, job.JobDetails.Graphic.FilePath));
-                    using var content = new MultipartFormDataContent
-                    {
-                        // file
-                        { new StreamContent(stream), "InputFile", job.JobDetails.Graphic.FilePath },
-                        
-                        // Other data
-                        {JsonContent.Create(data), "StartGenerationJson"},
-                    };
+                    using var content = new MultipartFormDataContent();
+                    
+                    content.Add(new StreamContent(stream), "InputFile", job.JobDetails.Graphic.FilePath); // Other data
+                    content.Add(JsonContent.Create(data), "StartGenerationJson");
 
                     request.Content = content;
 
-                    result = GetHttpClient().Send(request);
+                    result = await GetHttpClient().SendAsync(request, token);
+                    logger.LogInformation("Result: {0}", result.Content.ReadAsStringAsync().Result );
                 }
-                else
+                else if (JobStatusHelper.IsJobInProcessingStaus(job.Status))
                 {
-                    if (job.Status == "Closing")
-                        continue;
-                    
-                    using var request = new HttpRequestMessage(HttpMethod.Post, genEndpoint);
-                    using var content = new MultipartFormDataContent
+                    if (job.Status != JobStatus.Submitted)
                     {
+                        using var request = new HttpRequestMessage(HttpMethod.Post, genEndpoint);
+                        using var content = new MultipartFormDataContent();
                         // Other data
-                        {JsonContent.Create(data), "StartGenerationJson"},
-                    };
-                    
-                    request.Content = content;
+                        content.Add(JsonContent.Create(data), "StartGenerationJson");
 
-                    result = GetHttpClient().Send(request);
-                }
+                        request.Content = content;
 
-                if (result.IsSuccessStatusCode && (job.Status == "Pending" || job.Status == "PreProcessing" || job.Status == "Generating" || job.Status == "Converting" || job.Status == "Cleaning-Up"))
-                {
-                    job.Status = GetNextJobStepFromPreviousStep(job.Status);
-                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
-                    continue;
-                }
-
-                if (job.Status == "Finished")
-                {
-                    job.Status = GetNextJobStepFromPreviousStep(job.Status);
-                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
-                    continue;
-                }
-                
-                if (result.IsSuccessStatusCode && job.Status == "Fetching")
-                {
-                    job.Status = GetNextJobStepFromPreviousStep(job.Status);
-                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
-
-                    using (var fs = new FileStream(
-                               Path.Join(storedFilesPath, job.JobDetails.JDID.ToString() + ".glb"),
-                               FileMode.CreateNew))
-                    {
-                        await result.Content.CopyToAsync(fs);
+                        result = await GetHttpClient().SendAsync(request, token);
+                        logger.LogInformation("Result: {0}", result.Content.ReadAsStringAsync().Result );
                     }
-                    logger.LogInformation(
-                        $"File saved...");
+                }
+
+                if ((result != null && result.IsSuccessStatusCode && JobStatusHelper.IsJobInProcessingStaus(job.Status)) || job.Status == JobStatus.Submitted)
+                {
+                    job.Status = JobStatusHelper.GetNextJobStatusFromPrevious(job.Status);
+                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
+                    continue;
+                }
+
+                if (job.Status == JobStatus.Finished)
+                {
+                    job.Status = JobStatusHelper.GetNextJobStatusFromPrevious(job.Status);
+                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
+                    continue;
                 }
                 
-                if (job.Status == "Closing")
+                if (result != null && result.IsSuccessStatusCode && job.Status == JobStatus.Fetching)
                 {
-                    var comp = new JobsCompleted();
-                    comp.JobID = job.JobDetailsId;
-                    comp.JobDetails = job.JobDetails;
-                    comp.JobsEnd = DateTime.Now;
-                    comp.JobType = "BITE"; // TODO: Update this to grab from the original request
-                    comp.JobSize = job.JobDetails.Graphic.GPCSize;
-                    comp.JobsStart = startTime;
+                    job.Status = JobStatusHelper.GetNextJobStatusFromPrevious(job.Status);
+                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
+
+                    var modelFilePath = Path.Join(storedFilesPath, job.JobDetails.JDID + ".glb");
+                    await using (var fs = new FileStream(modelFilePath, FileMode.CreateNew))
+                    {
+                        await result.Content.CopyToAsync(fs, token);
+                    }
+                    logger.LogInformation("Model file fetched successfully and saved to {modelFilePath}", modelFilePath);
+                }
+                
+                if (job.Status == JobStatus.Closing)
+                {
+                    var comp = new JobsCompleted
+                    {
+                        JobID = job.JobDetailsId,
+                        JobDetails = job.JobDetails,
+                        JobsEnd = DateTime.Now,
+                        JobType = "BITE", // TODO: Update this to grab from the original request
+                        JobSize = job.JobDetails.Graphic.GPCSize,
+                        JobsStart = startTime
+                    };
                     await jobsCompletedRepository.CreateJobsCompletedAsync(comp);
-                    
                     await jobsPendingRepository.DeleteJobsPendingAsync(job);
                 }
                 
 
-                if (job.Status == "Error")
+                if (job.Status == JobStatus.Error)
                 {
-                    logger.LogInformation(
-                        $"Queued work item {job.JobDetailsId} occured an error and has been canceled.");
+                    logger.LogInformation("Queued work item {jobId} occured an error and has been canceled", job.JobDetailsId);
                     var jd = job.JobDetails;
                     await jobsPendingRepository.DeleteJobsPendingAsync(job);
                     await jobDetailsRepository.DeleteJobDetailsAsync(jd);
                     break;
                 }
-                
-                // If we got to this point, there was an issue...
-                job.Status = "Error";
-                logger.LogError($"Error: job {job.JobDetailsId} failed.");
-                var j = job.JobDetails;
-                await jobsPendingRepository.DeleteJobsPendingAsync(job);
-                await jobDetailsRepository.DeleteJobDetailsAsync(j);
-                
+
+                if (job.Status != JobStatus.Submitted)
+                {
+                    // If we got to this point, there was an issue...
+                    job.Status = JobStatus.Error;
+                    logger.LogError("Error: job {jobId} failed.", job.JobDetailsId);
+                    var j = job.JobDetails;
+                    await jobsPendingRepository.DeleteJobsPendingAsync(job);
+                    await jobDetailsRepository.DeleteJobDetailsAsync(j);
+                }
             }
             catch (Exception e)
             {
-                logger.LogInformation($"Error processing job: {e.Message}");
+                logger.LogInformation("Error processing job: {error}", e.Message);
             }
         }
 
         
-    }
-    
-    private string GetNextJobStepFromPreviousStep(string currentStep)
-    {
-        switch (currentStep)
-        {
-            case "Pending":
-                return "PreProcessing";
-            case "PreProcessing":
-                return "Generating";
-            case "Generating":
-                return "Converting";
-            case "Converting":
-                return "Cleaning-Up";
-            case "Cleaning-Up":
-                return "Finished";
-            case "Finished":
-                return "Fetching";
-            case "Fetching":
-                return "Closing";
-            case "Closing":
-                return "Closed";
-            case "Error":
-                return "Closed";
-            default:
-                return "Closed";
-        }
-    }
-
-    private string GetEndpointFromCurrentStep(string currentStep)
-    {
-        switch (currentStep)
-        {
-            case "Pending":
-                return "/api/gen/preprocess/validate";
-            case "PreProcessing":
-                return "/api/gen/preprocess/split";
-            case "Generating":
-                return "/api/gen/start";
-            case "Converting":
-                return "/api/gen/postprocess/convert";
-            case "Cleaning-Up":
-                return "/api/gen/postprocess/cleanup";
-            case "Finished":
-                return "";
-            case "Fetching":
-                return "/api/gen/files";
-            case "Closing":
-                return "";
-            case "Error":
-                return "";
-            case "Closed":
-                return "";
-            default:
-                return "";
-        }
-    }
-    
-    private string GetMimeType(string filePath)
-    {
-        var extension = Path.GetExtension(filePath).ToLowerInvariant();
-        return extension switch
-        {
-            ".mp4" => "video/mp4",
-            ".mov" => "video/quicktime",
-            ".avi" => "video/x-msvideo",
-            ".mkv" => "video/x-matroska",
-            _ => "application/octet-stream",
-        };
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+
 #pragma warning disable CS8618
 namespace ICT302_BackendAPI.Database.Models;
 
@@ -169,10 +170,10 @@ public class JobDetails
     public string ModelGenType { get; set; }
 
     [ForeignKey("GPCID")]
-    public virtual Graphic Graphic { get; set; }
+    public virtual Graphic? Graphic { get; set; }
 
     [ForeignKey("ModelID")]
-    public virtual Model3D Model3D { get; set; }
+    public virtual Model3D? Model3D { get; set; }
     
 }
 
@@ -225,7 +226,7 @@ public class JobsPending
     [Required]
     [Column("Status", TypeName = "char(35)")]
     [StringLength(35)]
-    public string Status { get; set; }
+    public JobStatus Status { get; set; }
 
     [Required]
     [Column("JD_ID", TypeName = "binary(16)")]
@@ -262,7 +263,7 @@ public class Model3D
     public Guid GPCID { get; set; }
 
     [ForeignKey("GPCID")]
-    public virtual Graphic Graphic { get; set; }
+    public virtual Graphic? Graphic { get; set; }
 }
 
 [Table("org_requests")]
