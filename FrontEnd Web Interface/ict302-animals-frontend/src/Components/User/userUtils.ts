@@ -48,6 +48,7 @@ export const storeUserInBackend = async (
  // Utility function to update frontend context
 export const updateFrontendContext = async (frontendContext: any, user: { uid: string; displayName: string | null; email: string | null }) => {
     frontendContext.user.valid = true;
+    console.log("User ID from backend:", user.uid);
     //frontendContext.user.contextRef.current.userId = user.uid;
     frontendContext.user.contextRef.current.username = user.displayName || '';
     frontendContext.user.contextRef.current.email = user.email || '';
@@ -57,3 +58,72 @@ export const updateFrontendContext = async (frontendContext: any, user: { uid: s
     frontendContext.user.contextRef.current.loggedInState = true;
 
   };
+
+  /**
+ * Validates if the input contains only whitelisted characters.
+ * @param {string} input - The input string to validate.
+ * @param {string} whitelist - A string of allowed characters (regex format).
+ * @returns {boolean} - True if the input contains only whitelisted characters, false otherwise.
+ */
+export const validateInput = (input: string, whitelist: string): boolean => {
+  const regex = new RegExp(`^[${whitelist}]+$`);
+  return regex.test(input);
+};
+
+/**
+ * Sanitizes the input by removing characters not in the whitelist.
+ * @param {string} input - The input string to sanitize.
+ * @param {string} whitelist - A string of allowed characters (regex format).
+ * @returns {string} - The sanitized input string.
+ */
+export const sanitizeInput = (input: string, whitelist: string): string => {
+  const regex = new RegExp(`[^${whitelist}]`, 'g');
+  return input.replace(regex, '');
+};
+
+/**
+ * Checks if the password meets security requirements and returns the strength level.
+ * @param {string} password - The password to check.
+ * @returns {string} - Returns 'Weak', 'Medium', or 'Strong' based on the criteria.
+ */
+export const checkPasswordStrength = (password: string): string => {
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  const strengthConditions = [hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar].filter(Boolean).length;
+
+  if (password.length < minLength) return 'Weak';
+  if (strengthConditions === 1 || strengthConditions === 2) return 'Weak';
+  if (strengthConditions === 3) return 'Medium';
+  if (strengthConditions === 4) return 'Strong';
+
+  return 'Weak';
+};
+
+/**
+ * Provides feedback on which criteria are not met by the password.
+ * @param {string} password - The input password to check.
+ * @returns {string[]} - An array of feedback messages indicating what the password is missing.
+ */
+export const passwordFeedback = (password: string): string[] => {
+  const feedback: string[] = [];
+  if (password.length < 8) {
+    feedback.push('Password must be at least 8 characters long.');
+  }
+  if (!/[A-Z]/.test(password)) {
+    feedback.push('Password must contain at least one uppercase letter.');
+  }
+  if (!/[a-z]/.test(password)) {
+    feedback.push('Password must contain at least one lowercase letter.');
+  }
+  if (!/[0-9]/.test(password)) {
+    feedback.push('Password must contain at least one number.');
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    feedback.push('Password must contain at least one special character.');
+  }
+  return feedback;
+};

@@ -4,6 +4,7 @@ import {Link, useNavigate} from 'react-router-dom';
 
 import ForgotPassword from '../Components/SignIn/ForgotPassword';
 import getSignInTheme from '../Components/SignIn/theme/getSignInTheme';
+import CircularProgressWithLabel from '../Components/User/CircularProgressWithLabel';
 
 import { GoogleIcon } from '../Components/SignUp/CustomIcons';
 
@@ -16,7 +17,7 @@ import { getAnalytics } from "firebase/analytics";
 import { signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
 
 import API from '../Internals/API';
-import { storeUserInBackend, updateFrontendContext } from '../Components/User/userUtils';
+import { storeUserInBackend, updateFrontendContext, validateInput, sanitizeInput } from '../Components/User/userUtils';
 
 // Dynamically import the SignUp component
 const SignUp = React.lazy(() => import('../Pages/SignUp'));
@@ -59,6 +60,8 @@ const SignIn: React.FC = () => {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false); 
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
@@ -79,26 +82,46 @@ const SignIn: React.FC = () => {
     const data = new FormData(event.currentTarget);
     const email = data.get('email') as string;
     const password = data.get('password') as string;
+  
+    // Define whitelist characters (e.g., alphanumeric and basic symbols)
+    const emailWhitelist = 'a-zA-Z0-9@._-';
+    const passwordWhitelist = 'a-zA-Z0-9!@#$%^&*()_+-=';
+  
+    // Validate email and password
+    if (!validateInput(email, emailWhitelist)) {
+      setEmailError(true);
+      setEmailErrorMessage('Invalid characters in email.');
+      return;
+    }
+  
+    if (!validateInput(password, passwordWhitelist)) {
+      setPasswordError(true);
+      setPasswordErrorMessage('Invalid characters in password.');
+      return;
+    }
 
+    setLoading(true);
+    setProgress(10); // Start progress
+  
+    // Continue with authentication logic
     try {
       const userCredential = await signInWithEmailAndPassword(frontendContext.firebaseAuth.current, email, password);
       const user = userCredential.user;
 
-      // Get Firebase ID token to send to the backend
-      const idToken = await user.getIdToken();
-
-      // Check the firebase token does not store user in backend in this context.
-      await storeUserInBackend(frontendContext, user, idToken);
-
-      updateFrontendContext(frontendContext, user);
+      setProgress(50);
   
-      // Navigate to the dashboard
+      const idToken = await user.getIdToken();
+  
+      await storeUserInBackend(frontendContext, user, idToken);
+      setProgress(75);
+      updateFrontendContext(frontendContext, user);
+      setProgress(100);
+      
       nav('/dashboard');
       
     } catch (error) {
       console.error("Error signing in with email and password:", error);
     }
-
   };
 
   const validateInputs = () => {
@@ -128,30 +151,34 @@ const SignIn: React.FC = () => {
     return isValid;
   };
 
-
-
   const handleGoogleSignIn = async () => {
     const googleProvider = new GoogleAuthProvider();
-  
+    setLoading(true);
+    setProgress(10);
+
     try {
       // Sign in with Google
       const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
+      setProgress(40);
       const user = result.user; // This is the authenticated user
   
       //console.log('Google sign-in successful:', user);
   
       // Retrieve the ID token
       const idToken = await user.getIdToken();
-
+      setProgress(60);
       // Store the user in the backend
       await storeUserInBackend(frontendContext, user, idToken);
+      setProgress(80);
 
       updateFrontendContext(frontendContext, user);
-  
+      setProgress(100);
+
       // Navigate to the dashboard
       nav('/dashboard');
     } catch (error) {
       console.error("Error signing in with Google:", error);
+      setLoading(false); //Hides loading symbol
     }
   };
 
@@ -166,6 +193,11 @@ const SignIn: React.FC = () => {
             <Typography component="h1" variant="h4">
               {isSignUp ? 'Sign up' : 'Sign in'}
             </Typography>
+            {loading && (
+                <Box sx={{ my: 2, display: 'flex', justifyContent: 'center' }}>
+                  <CircularProgressWithLabel value={progress} />
+                </Box>
+            )}
 
             {isSignUp ? (
               // Render SignUp Form (loaded lazily)
@@ -177,11 +209,11 @@ const SignIn: React.FC = () => {
               <Box component="form" onSubmit={HandleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
                 <FormControl>
                   <FormLabel htmlFor="email">Email</FormLabel>
-                  <TextField id="email" type="email" name="email" placeholder="your@email.com" required fullWidth />
+                  <TextField id="email" type="email" name="email" placeholder="your@email.com" required fullWidth error={emailError} helperText={emailError ? emailErrorMessage : ''} />
                 </FormControl>
                 <FormControl>
                   <FormLabel htmlFor="password">Password</FormLabel>
-                  <TextField id="password" type="password" name="password" placeholder="••••••" required fullWidth />
+                  <TextField id="password" type="password" name="password" placeholder="••••••" required fullWidth error={passwordError} helperText={passwordError ? passwordErrorMessage : ''} />
                 </FormControl>
                 <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
                 <Button type="submit" fullWidth variant="contained">Sign in</Button>
@@ -221,6 +253,8 @@ const SignIn: React.FC = () => {
                   </>
                 )}
               </Typography>
+              
+              
 
           </Card>
         </SignInContainer>
