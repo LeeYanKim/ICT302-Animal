@@ -323,6 +323,21 @@ class API {
         return base + db + endpoint;
     }
 
+    /**
+     * 
+     * @param userId The unique identifier for the user
+     * @returns The URL for deleting a user by ID
+     * 
+     * Example: http://localhost:5173/api/db/user/{userId}
+     */
+    public static DeleteUserByID(userId: string) {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const db = this.endpoint?.dbEndpoint ?? '';
+        const endpoint = this.endpoint?.user;
+        return `${base}${db}${endpoint}/${userId}`;
+    }
+
 
     /**
      * 
