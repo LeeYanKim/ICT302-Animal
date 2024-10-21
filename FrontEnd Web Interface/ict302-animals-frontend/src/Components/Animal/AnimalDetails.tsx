@@ -104,6 +104,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
       }, body: JSON.stringify({
         AnimalId: animalId,
         AnimalGraphicFileName: videoFileName, //Graphics is now an array
+        GraphicId: animalData.graphics[0].gpcid,
         GenType: "BITE",
       }),
     });

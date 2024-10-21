@@ -43,7 +43,10 @@ namespace ICT302_BackendAPI.API.APIs
                 // Construct video URLs dynamically based on the filename
                 foreach (var graphic in animal.Graphics)
                 {
-                    graphic.FilePath = $"{Request.Scheme}://{Request.Host}/api/files/animals/videos/{graphic.FilePath}";
+                    if(_webHostEnvironment.EnvironmentName == "Development")
+                        graphic.FilePath = $"http://{Request.Host}/api/files/animals/videos/{graphic.FilePath}";
+                    else
+                        graphic.FilePath = $"https://{Request.Host}/api/files/animals/videos/{graphic.FilePath}";
                 }
 
                 return Ok(animal);

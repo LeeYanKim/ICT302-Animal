@@ -167,7 +167,6 @@ public class JobStatusHelper
             case JobStatus.CleaningUp:
                 return true;
             case JobStatus.Finished:
-            case JobStatus.Fetching:
             case JobStatus.Closing:
             case JobStatus.Closed:
             case JobStatus.Error:

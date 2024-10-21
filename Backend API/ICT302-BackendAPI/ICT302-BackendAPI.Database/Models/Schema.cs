@@ -208,7 +208,7 @@ public class JobsCompleted
     public Guid JDID { get; set; }
 
     [ForeignKey("JDID")]
-    public virtual JobDetails JobDetails { get; set; }
+    public virtual JobDetails? JobDetails { get; set; }
 }
 
 [Table("jobspending")]
