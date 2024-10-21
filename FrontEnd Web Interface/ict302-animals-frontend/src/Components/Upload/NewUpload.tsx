@@ -35,7 +35,7 @@ const NewUpload : React.FC<NewUploadProps> = ({ open, handleClose, animalDetails
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null); // To track upload status
   const frontendContext = useContext(FrontendContext);  // Access the frontend context
-  const userid = frontendContext.user.contextRef.current.userId;
+  //const userid = frontendContext.user.contextRef.current.userId;
   
 
 
