@@ -26,13 +26,21 @@ namespace ICT302_BackendAPI.Database.Repositories
         // Get animal by ID
         public async Task<Animal?> GetAnimalByIDAsync(Guid? id)
         {
-            if(id == null) return null;
-            
-            var animal = await _ctx.Animals.FindAsync(id);
-            if(animal != null)
-                _ctx.Animals.Attach(animal);
+           if (id == null) return null;
+
+            // Use Include to eagerly load the related Graphics data
+            var animal = await _ctx.Animals
+                .Include(a => a.Graphics)
+                .FirstOrDefaultAsync(a => a.AnimalID == id); // Use FirstOrDefaultAsync instead of FindAsync to support Include
+
+            if (animal != null)
+            {
+                _ctx.Animals.Attach(animal); // Attach the entity to the context
+            }
+
             return animal;
         }
+
 
         // Create a new animal
         public async Task<Animal> CreateAnimalAsync(Animal animal)
