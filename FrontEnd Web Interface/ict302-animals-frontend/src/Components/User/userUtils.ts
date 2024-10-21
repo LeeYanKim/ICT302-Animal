@@ -46,8 +46,9 @@ export const storeUserInBackend = async (
   };
 
  // Utility function to update frontend context
-export const updateFrontendContext = async (frontendContext: any, user: { displayName?: string | null, email?: string | null }) => {
+export const updateFrontendContext = async (frontendContext: any, user: { uid: string; displayName: string | null; email: string | null }) => {
     frontendContext.user.valid = true;
+    frontendContext.user.contextRef.current.userId = user.uid;
     frontendContext.user.contextRef.current.username = user.displayName || '';
     frontendContext.user.contextRef.current.email = user.email || '';
     frontendContext.user.contextRef.current.initials = user.displayName
