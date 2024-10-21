@@ -138,7 +138,7 @@ public class GenerationController : ControllerBase
             var wslCmd = _configuration.GetValue<string>("WslStartCmd");
             var biteCmd = _configuration.GetValue<string>("BitePythonCmd");
             
-            string args = $"wsl -d Ubuntu-20.04 -u {wslUser} sh -c \"cd {wslScriptPath} && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv} {biteCmd} {model.StartGenerationJson.JobID}\"";
+            string args = $"-c \"cd {wslScriptPath} && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv} {biteCmd} {model.StartGenerationJson.JobID}\" && exit";
             _logger.LogInformation(args);
             var startInfo = new ProcessStartInfo(fileName: wslCmd!, arguments: args)
             {
@@ -152,7 +152,7 @@ public class GenerationController : ControllerBase
             
             var biteOutput = _configuration.GetValue<string>("BiteResultPath");
             var genFolderName = "test_ImgCropList_ttopt_" + model.StartGenerationJson.JobID;
-            var inputModelFile = Path.Join(biteOutput, genFolderName, "001_res_e150.obj");
+            var inputModelFile = Path.Join(biteOutput, genFolderName, "0001_res_e150.obj");
             var outputModelFile = Path.Join(model.StartGenerationJson.OutputPath + genFolderName, "bite_output.obj");
             System.IO.File.Copy(inputModelFile, outputModelFile, true);
             
