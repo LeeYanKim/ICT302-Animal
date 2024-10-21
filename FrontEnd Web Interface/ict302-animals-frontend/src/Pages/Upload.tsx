@@ -34,7 +34,10 @@ const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
         </Box>
 
         {/* Recently Uploaded Section */}
+        <Box sx={{ maxWidth: '1050px', margin: '0 auto' }}>
         <RecentlyUploaded triggerRefresh={refreshThumbnails} />
+        </Box>
+        
       </Box>
     </>
   );
