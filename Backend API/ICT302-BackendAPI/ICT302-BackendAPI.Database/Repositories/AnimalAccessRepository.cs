@@ -49,5 +49,13 @@ namespace ICT302_BackendAPI.Database.Repositories
             _ctx.AnimalAccesses.Remove(animalAccess);
             return await _ctx.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Guid>> GetAnimalIDsByUserIDAsync(Guid userID)
+        {
+            return await _ctx.AnimalAccesses
+                .Where(a => a.UserID == userID)
+                .Select(a => a.AnimalID)
+                .ToListAsync();
+        }
     }
 }
