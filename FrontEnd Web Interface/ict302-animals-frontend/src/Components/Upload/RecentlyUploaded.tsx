@@ -40,13 +40,12 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         throw new Error('Failed to fetch uploaded animals');
       }
       const data: AnimalData[] = await response.json();
-      if(data.length > 0){
+      if (data.length > 0) {
         setAnimals(data);
         setFilteredAnimals(data);
         const types = Array.from(new Set(data.map((animal) => animal.animalType)));
         setAnimalTypes(types);
-      }
-      else{
+      } else {
         setError('No animals found.');
       }
     } catch (error) {
@@ -118,7 +117,16 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
               selectedAnimal.graphics.map((graphic) => (
                 <div key={graphic.gpcID} style={{ marginBottom: '20px' }}>
                   <h4>{graphic.gpcName}</h4>
-                  <video controls width="600">
+                  <video
+                    key={graphic.filePath}
+                    controls
+                    style={{
+                      width: '600px', // Fixed width
+                      height: '340px', // Fixed height to ensure consistency
+                      objectFit: 'cover', // Makes the video cover the area while maintaining aspect ratio
+                      backgroundColor: 'black', // Adds background in case of cropping
+                    }}
+                  >
                     <source src={graphic.filePath} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
@@ -133,7 +141,7 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         {/* Display only the 6 most recent uploads */}
         <Grid container spacing={3}>
           {filteredAnimals.length > 0 && filteredAnimals.slice(0, 9).map((animal) => (  // Limit to 6 most recent animals
-            <Grid  sx={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
+            <Grid sx={{ xs: 12, sm: 6, md: 4 }} key={animal.animalID}>
               <Box
                 sx={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }}
                 onClick={() => handleAnimalClick(animal)}
@@ -152,6 +160,5 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     </div>
   );
 };
-
 
 export default RecentlyUploaded;

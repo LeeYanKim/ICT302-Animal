@@ -1,38 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Box, Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
+import { Box, Typography, CircularProgress, Button, Tabs, Tab } from "@mui/material";
 import API from "../../Internals/API"; 
 import { useNavigate } from 'react-router-dom';
+
+interface Graphic {
+  gpcid: string;
+  gpcName: string;
+  gpcDateUpload: string;
+  filePath: string;
+  animalID: string;
+}
 
 interface Animal {
   animalID: string;
   animalName: string;
   animalType: string;
   animalDOB: string;
-  videoFileName?: string;
-  photoFileName?: string; // Assume you have a field for the animal's photo
+  graphics: Graphic[]; // Updated to include media files as graphics array
+  photoFileName?: string;
 }
 
-// Define the props interface
 interface AnimalDetailsProps {
-  animalId: string; // Expecting animalId as a prop
-  activeTab: number; // Tab index
-  setActiveTab: React.Dispatch<React.SetStateAction<number>>; // Function to change the active tab
-  setSelectedAnimalId: React.Dispatch<React.SetStateAction<string | null>>; // Function to change the active tab
+  animalId: string;
+  activeTab: number;
+  setActiveTab: React.Dispatch<React.SetStateAction<number>>;
+  setSelectedAnimalId: React.Dispatch<React.SetStateAction<string | null>>;
 }
-
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [tabValue, setTabValue] = useState(0);
   const navigate = useNavigate();
-  const [backBtnClicked, setBackBtnClicked] = useState(false);
-  const [PlayerOpen, setPlayerOpen] = useState(false);
-  const [ModelExist, setModelExist] = useState<boolean>(false);  
-  const [newGenOpen, setNewGenOpen] = useState<boolean>(false);  
-  const [generating, setGenerating] = useState<boolean>(false); 
-  const [progressLabel, setProgressLabel] = useState<string>("Pending"); // Label for progress steps
 
   // Ensure animalId is available before making a request
   useEffect(() => {
@@ -48,23 +47,23 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
       } catch (error) {
         console.error("Error fetching animal data:", error);
       } finally {
-        setLoading(false); // Set loading to false after API call
+        setLoading(false);
       }
     };
 
     fetchAnimalData();
   }, [animalId]);
 
-const handleBackBtnClick = () => {
-  navigate('/dashboard/animals');
-  setActiveTab(0);
-  setSelectedAnimalId(null);
-}
+  const handleBackBtnClick = () => {
+    navigate('/dashboard/animals');
+    setActiveTab(0);
+    setSelectedAnimalId(null);
+  };
 
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress /> {/* Better loading feedback */}
+        <CircularProgress /> {/* Loading feedback */}
       </Box>
     );
   }
@@ -73,12 +72,9 @@ const handleBackBtnClick = () => {
     return <div>No animal data available.</div>;
   }
 
+  // URLs for photo
   const photoUrl = animalData.photoFileName
-  ? API.Download() + `/animals/photos/${animalData.photoFileName}`
-  : null;
-
-  const videoUrl = animalData.videoFileName
-    ? API.Download() + `/animals/videos/${animalData.videoFileName}`
+    ? API.Download() + `/animals/photos/${animalData.photoFileName}`
     : null;
 
    console.log(API.User());
@@ -113,13 +109,20 @@ const handleBackBtnClick = () => {
   const handleViewGeneration = () => {
     console.log("Viewing the generated model...");
 };
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
+  // Format date of birth (DoB)
+  const formatDOB = (dob: string) => {
+    const date = new Date(dob);
+    return date.toLocaleDateString(); // Format the date as MM/DD/YYYY (or according to the user's locale)
+  };
+
   return (
     <Box>
-      {/* Fixed banner with animal photo and name */}
+      {/* Banner with animal photo and name */}
       <Box sx={{ position: 'relative', overflow: 'hidden', mb: 2 }}>
         {photoUrl && (
           <img src={photoUrl} alt={animalData.animalName} style={{ width: '100%', height: 'auto' }} />
@@ -130,53 +133,72 @@ const handleBackBtnClick = () => {
       </Box>
 
       {/* Tabs for different sections */}
-      <React.Fragment>
-
-        <Tabs 
-          value={tabValue} centered 
-          onChange={handleTabChange} 
-          variant='fullWidth'
-          indicatorColor='secondary' 
-          aria-label="animal details tabs">
-
-          <Tab label="Information" />
-          <Tab label="Media Uploaded" />
-          <Tab label="Version" />
-          <Tab label="Access Granted" />
-        </Tabs>
-      
+      <Tabs 
+        value={tabValue} 
+        onChange={handleTabChange} 
+        centered 
+        variant='fullWidth' 
+        indicatorColor='secondary'
+        aria-label="animal details tabs"
+      >
+        <Tab label="Information" />
+        <Tab label="Media Uploaded" />
+        <Tab label="Version" />
+        <Tab label="Access Granted" />
+      </Tabs>
 
       {/* Tab Content */}
       <Box sx={{ p: 10 }}>
         {tabValue === 0 && (
-          <Typography variant="body1">Animal information {animalData.animalName} can go here.</Typography>
-
+          <Box>
+            <Typography variant="h5">Animal Information:</Typography>
+            <Typography variant="body1">
+              <strong>Name:</strong> {animalData.animalName}
+            </Typography>
+            <Typography variant="body1">
+              <strong>Type:</strong> {animalData.animalType}
+            </Typography>
+            <Typography variant="body1">
+              <strong>Date of Birth:</strong> {formatDOB(animalData.animalDOB)}
+            </Typography>
+          </Box>
         )}
         
         {tabValue === 1 && (
           <Box>
-          <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
-          {videoUrl ? (
-            <Box sx={{ marginTop: '20px' }}>
-              <video controls width="600">
-                <source src={videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </Box>
-          ) : (
-            <Typography>No video available.</Typography>
-          )}
-        </Box>
-      )}
+            <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
+            {animalData.graphics && animalData.graphics.length > 0 ? (
+              animalData.graphics.map((graphic, index) => (
+                <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
+                  <Typography variant="subtitle1">Video {index + 1}:</Typography>
+                  <video
+                    controls
+                    style={{
+                      width: '600px', // Fixed width
+                      height: '340px', // Fixed height to maintain aspect ratio
+                      objectFit: 'cover', // Ensures the video covers the entire space while maintaining aspect ratio
+                      backgroundColor: 'black', // Background in case of empty space
+                    }}
+                  >
+                    <source src={graphic.filePath} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </Box>
+              ))
+            ) : (
+              <Typography>No video available for this animal.</Typography>
+            )}
+          </Box>
+        )}
 
         {tabValue === 2 && (
           <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
         )}
+
         {tabValue === 3 && (
           <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
         )}
       </Box>
-      </React.Fragment>
 
       {/* Back Button */}
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
@@ -186,7 +208,6 @@ const handleBackBtnClick = () => {
       </Box>
     </Box>
   );
-
 };
 
 export default AnimalDetails;
