@@ -32,8 +32,6 @@ public class GenerationController : ControllerBase
 
     private ObjectResult CheckForValidRequestData(StartGenerationModel? model)
     {
-        
-        
         // Null Check
         if (model == null)
         {
@@ -92,8 +90,7 @@ public class GenerationController : ControllerBase
         });
     }
     
-    
-    [HttpPost("start")]
+    [HttpPost("generate/bite")]
     public ActionResult StartGenerationAsync([FromForm] StartGenerationModel? model)
     {
         try
@@ -103,7 +100,7 @@ public class GenerationController : ControllerBase
                 return CheckForValidRequestData(model);
             
             
-            if (Directory.Exists(Path.Join(GetOutputPath(model!.StartGenerationJson.JobID!), model.GenOutputLoc)) &&
+            if (Directory.Exists(Path.Join(GetOutputPath(model!.StartGenerationJson!.JobID!), model.GenOutputLoc)) &&
                 Directory.GetFiles(Path.Join(GetOutputPath(model.StartGenerationJson.JobID!), model.GenOutputLoc)).Length > 0)
             {
                 // Output file full, masks already exist
@@ -119,10 +116,18 @@ public class GenerationController : ControllerBase
             if (string.IsNullOrEmpty(model?.StartGenerationJson.OutputPath))
                 model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID!);
             
-            _logger.LogInformation($"Starting frame masking for job: {model!.StartGenerationJson.JobID}");
+            _logger.LogInformation($"Starting Bite Generation for job: {model!.StartGenerationJson.JobID}");
             Directory.CreateDirectory(model.StartGenerationJson.OutputPath + model.GenOutputLoc);
 
-            // TODO: Add safety check for directory and input files before launching BITE
+            
+            //move frame to bite input
+            var biteInput = _configuration.GetValue<string>("BiteInputPath");
+            var inputFramePath = Path.Join(model.StartGenerationJson.OutputPath + model.ImageOutputLoc, "0001.png");
+            var outputFramePath = Path.Join(biteInput, "0001.png");
+            System.IO.File.Copy(inputFramePath, outputFramePath, true);
+            
+            
+            
 
             _logger.LogInformation($"Starting 3D generation for job: {model.StartGenerationJson.JobID}");
             Directory.CreateDirectory(model.StartGenerationJson.OutputPath + model.GenOutputLoc);
@@ -131,9 +136,10 @@ public class GenerationController : ControllerBase
             var wslScriptPath = _configuration.GetValue<string>("WslScriptPath");
             var wslCondaEnv = _configuration.GetValue<string>("WslCondaEnv");
             var wslCmd = _configuration.GetValue<string>("WslStartCmd");
+            var biteCmd = _configuration.GetValue<string>("BitePythonCmd");
             
-            string args = $"-d Ubuntu-20.04 -u {wslUser} sh -c \"cd \'{wslScriptPath!}\' && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv!} python ./gen_model.StartGenerationJson.py -p \'{GetWslPathFromWindowsPath(model.StartGenerationJson.OutputPath!)}\'";
-            
+            string args = $"wsl -d Ubuntu-20.04 -u {wslUser} sh -c \"cd {wslScriptPath} && . ~/.bashrc && ~/anaconda3/bin/conda run -n {wslCondaEnv} {biteCmd} {model.StartGenerationJson.JobID}\"";
+            _logger.LogInformation(args);
             var startInfo = new ProcessStartInfo(fileName: wslCmd!, arguments: args)
             {
                 CreateNoWindow = true,
@@ -144,7 +150,12 @@ public class GenerationController : ControllerBase
             var proc = Process.Start(startInfo);
             proc?.WaitForExit();
             
-            //TODO: Add exit code checks
+            var biteOutput = _configuration.GetValue<string>("BiteResultPath");
+            var genFolderName = "test_ImgCropList_ttopt_" + model.StartGenerationJson.JobID;
+            var inputModelFile = Path.Join(biteOutput, genFolderName, "001_res_e150.obj");
+            var outputModelFile = Path.Join(model.StartGenerationJson.OutputPath + genFolderName, "bite_output.obj");
+            System.IO.File.Copy(inputModelFile, outputModelFile, true);
+            
 
             _logger.LogInformation($"3D generation for {model.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
@@ -180,22 +191,12 @@ public class GenerationController : ControllerBase
                 if (model?.StartGenerationJson.FileName != null)
                     model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
 
-            _logger.LogInformation($"Starting GLB conversion for job: {model?.StartGenerationJson.FileName}");
-
-            //TODO: Remove
-            _logger.LogInformation($"GLB conversion for job: {model!.StartGenerationJson.JobID} has completed successfully.");
-            return StatusCode(StatusCodes.Status200OK, new
-            {
-                statusCode = 200,
-                jobStatus = "Completed Conversion",
-                message = "Success: GLB conversion completed successfully"
-            });
+            _logger.LogInformation($"Starting GLB conversion for job: {model!.StartGenerationJson!.JobID}");
             
             model.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
-            var scene = Scene.FromFile(Path.Join(model!.StartGenerationJson.OutputPath, model.GenOutputLoc, "bite.obj"));
-            var fileName = Path.GetFileNameWithoutExtension(model.StartGenerationJson.FileName);
+            var scene = Scene.FromFile(Path.Join(model!.StartGenerationJson.OutputPath + model.GenOutputLoc, "bite_output.obj"));
             var root = model.StartGenerationJson.OutputPath;
-            scene.Save(Path.Join(root, fileName + ".glb"));
+            scene.Save(Path.Join(root, model.StartGenerationJson.JobID + ".glb"));
 
             _logger.LogInformation($"GLB conversion for job: {model.StartGenerationJson.JobID} has completed successfully.");
             return StatusCode(StatusCodes.Status200OK, new
@@ -313,7 +314,7 @@ public class GenerationController : ControllerBase
             Directory.CreateDirectory(model!.StartGenerationJson.OutputPath + model.ImageOutputLoc);
 
             var ffmpeg = _configuration.GetValue<string>("Ffmpeg_bin_path");
-            var OutputRootFolder = _configuration.GetValue<string>("OutputRootFolder");
+            var outputRootFolder = _configuration.GetValue<string>("OutputRootFolder");
             
             var outFormat = "/%0004d.png";
             var startInfo = new ProcessStartInfo(fileName: ffmpeg!,
@@ -357,12 +358,14 @@ public class GenerationController : ControllerBase
     [HttpPost("preprocess/evaluate")]
     private ActionResult StartFrameEvaluationAsync([FromForm] StartGenerationModel? model)
     {
+        //TODO: Implement frame eval. This is a code stub and is ready for functionality to be added.
+        
         var checks = CheckForValidRequestData(model);
         if(checks.StatusCode == StatusCodes.Status418ImATeapot)
-            return CheckForValidRequestData(model);
+            return checks;
         
-        //TODO: Implement evaluation
-        _logger.LogInformation($"Frame evaluation for {model!.StartGenerationJson.JobID} has completed successfully.");
+        
+        _logger.LogInformation($"Frame evaluation for {model!.StartGenerationJson!.JobID} has completed successfully.");
         return StatusCode(StatusCodes.Status200OK, new
         {
             statusCode = 200,
@@ -388,9 +391,9 @@ public class GenerationController : ControllerBase
         {
             var checks = CheckForValidRequestData(model);
             if(checks.StatusCode == StatusCodes.Status418ImATeapot)
-                return CheckForValidRequestData(model);
+                return checks;
 
-            if (model!.StartGenerationJson.FileName != null &&
+            if (model!.StartGenerationJson!.FileName != null &&
                 Directory.Exists(Path.Join(GetOutputPath(model.StartGenerationJson.JobID), model.MaskOutputLoc)) &&
                 Directory.GetFiles(Path.Join(GetOutputPath(model.StartGenerationJson.JobID), model.MaskOutputLoc)).Length > 0)
             {
@@ -467,9 +470,9 @@ public class GenerationController : ControllerBase
         {
             var checks = CheckForValidRequestData(model);
             if(checks.StatusCode == StatusCodes.Status418ImATeapot)
-                return CheckForValidRequestData(model);
+                return checks;
             
-            model!.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID!);
+            model!.StartGenerationJson!.OutputPath = GetOutputPath(model.StartGenerationJson.JobID!);
             if (!string.IsNullOrEmpty(model.StartGenerationJson.OutputPath))
             {
                 Directory.CreateDirectory(model.StartGenerationJson.OutputPath);
@@ -524,33 +527,24 @@ public class GenerationController : ControllerBase
     /**
      * <summary> Gets the output path for generation. </summary>
      *
-     * <param name="jobID"> The jobID of the file being generated</param>
+     * <param name="jobId"> The jobID of the file being generated</param>
      *
      * <returns>Output path as string or null if an error occurs.</returns>
      */
-    private string? GetOutputPath(Guid? jobID)
+    private string? GetOutputPath(Guid? jobId)
     {
-        if (jobID == null)
-            return null;
-        
-        var path = Path.Join(_configuration.GetValue<string>("OutputRootFolder"), "job_" + jobID.ToString());
-        
-        string outputPath = path;
-        return outputPath.Replace("\\", "/");
-
+        return jobId == null ? null : Path.Join(_configuration.GetValue<string>("OutputRootFolder"), "job_" + jobId.ToString()).Replace("\\", "/");
     }
 
     private StartGenerationJson GetFromJson()
     {
-        StringValues data;
-        HttpContext.Request.Form.TryGetValue("StartGenerationJson", out data);
-        var j = JsonValue.Parse(data);
+        HttpContext.Request.Form.TryGetValue("StartGenerationJson", out var data);
+        var j = JsonNode.Parse(data!);
         var jj = StartGenerationJsonConverter.FromJson(j);
         jj.OutputPath = GetOutputPath(jj.JobID!);
         return jj;
     }
-
-
+    
     private string GetWslPathFromWindowsPath(string windowsPath)
     {
         string fullWindowsPath = Path.GetFullPath(windowsPath);

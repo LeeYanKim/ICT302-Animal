@@ -29,6 +29,16 @@ public class StartGenerationJson
         ModelPath = null;
         ModelVersion = null;
     }
+    public StartGenerationJson(string token)
+    {
+        Token = token;
+        JobID = null;
+        FileName = null;
+        OutputPath = null;
+        SubjectHint = null;
+        ModelPath = null;
+        ModelVersion = null;
+    }
     public StartGenerationJson(string token, Guid jobId, string fileName)
     {
         Token = token;
@@ -50,13 +60,72 @@ public class StartGenerationJson
 
 public class StartGenerationJsonConverter
 {
-    public static StartGenerationJson FromJson(JsonNode json)
+    public static StartGenerationJson FromJson(JsonNode? json)
     {
-        string? token = json["token"]?.ToString();
-        string? sguid = json["jobID"]?.ToString();
-        string? file = json["filePath"]?.ToString();
+        if(json == null)
+            return new StartGenerationJson();
+        
+        var token = json["token"]?.ToString();
+        var sguid = json["jobID"]?.ToString();
+        var file = json["fileName"]?.ToString();
+        
+        if(string.IsNullOrEmpty(token))
+            return new StartGenerationJson();
+        
+        if(string.IsNullOrEmpty(sguid))
+            return new StartGenerationJson();
+        
+        if(string.IsNullOrEmpty(file))
+            return new StartGenerationJson();
         
         return new StartGenerationJson(token, Guid.Parse(sguid), file);
+    }
+    
+    public static StartGenerationJson? GetFromJson(IFormCollection form)
+    {
+        try
+        {
+            if (form.ContainsKey("StartGenerationJson"))
+            {
+                var values = new StartGenerationJson();
+                var jsonData = form["StartGenerationJson"].ToString();
+                
+                var jsonDoc = JsonDocument.Parse(jsonData);
+                
+                if (jsonDoc.RootElement.TryGetProperty("token", out var tokenVal))
+                {
+                    Console.WriteLine("Token provided for the request");
+                    values.Token = tokenVal.GetString();
+                }
+                if (jsonDoc.RootElement.TryGetProperty("jobId", out var jobIdVal))
+                {
+                    values.JobID = Guid.Parse(jobIdVal.GetString()!);
+                }
+                if (jsonDoc.RootElement.TryGetProperty("fileName", out var fileNameVal))
+                {
+                    values.FileName = fileNameVal.GetString();
+                }
+                if (jsonDoc.RootElement.TryGetProperty("subjectHint", out var subjectHintVal))
+                {
+                    values.SubjectHint = subjectHintVal.GetString();
+                }
+                if (jsonDoc.RootElement.TryGetProperty("modelPath", out var modelPathVal))
+                {
+                    values.ModelPath = modelPathVal.GetString();
+                }
+                if (jsonDoc.RootElement.TryGetProperty("modelVersion", out var modelVerVal))
+                {
+                    values.ModelVersion = modelVerVal.GetInt32();
+                }
+                
+            }
+            return null;    
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Error: {0}", e.Message);
+            return null;
+        }
     }
 }
 

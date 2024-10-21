@@ -53,6 +53,28 @@ public class GenerationController : ControllerBase
         _animalRepository = animalRepository;
     }
 
+    [HttpGet]
+    public ActionResult IsAlive()
+    {
+        var client = new HttpClient()
+        {
+            BaseAddress = new Uri(_configuration["GenAPIUrl"])
+        };
+        var data = new
+        {
+            Token = _configuration["GenAPIAuthToken"]
+        };
+        
+        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_configuration["GenAPIUrl"]));
+        var content = new MultipartFormDataContent();
+        content.Add(JsonContent.Create(data), "StartGenerationJson");
+
+        request.Content = content;
+        var res = client.Send(request);
+        return Ok(res.IsSuccessStatusCode);
+
+    }
+
     [HttpPost]
     public async Task<ActionResult> GenerateFromGraphicAsync(GenerationRequest? request)
     {
@@ -125,37 +147,42 @@ public class GenerationController : ControllerBase
             
             
             // Create the model record for the job
-            Model3D model = new Model3D();
-            model.Graphic = graphic;
-            model.GPCID = graphic.GPCID;
-            model.ModelID = Guid.NewGuid();
-            model.ModelTitle = request.AnimalGraphicFileName;
-            model.FilePath = Path.GetFileName(graphic.FilePath) + ".glb";
-            model.ModelDateGen = DateTime.Now;
+            var model = new Model3D
+            {
+                GPCID = graphic.GPCID,
+                ModelID = Guid.NewGuid(),
+                ModelTitle = request.AnimalGraphicFileName,
+                FilePath = Path.GetFileName(graphic.FilePath) + ".glb",
+                ModelDateGen = DateTime.Now
+            };
             await _model3DRepository.CreateModel3DAsync(model);
 
             // Create the details for the job
-            JobDetails newJob = new JobDetails();
-            newJob.JDID = Guid.NewGuid();
-            newJob.GPCID = graphic.GPCID;
-            newJob.Graphic = graphic;
-            newJob.ModelGenType = request.GenType;
-            newJob.Model3D = model;
-            newJob.ModelID = model.ModelID;
+            var newJob = new JobDetails
+            {
+                JDID = Guid.NewGuid(),
+                GPCID = graphic.GPCID,
+                ModelGenType = request.GenType,
+                ModelID = model.ModelID
+            };
             await _jobDetailsRepository.CreateJobDetailsAsync(newJob);
 
             _logger.LogInformation("Required model and job details generated... adding to job queue...");
 
             //Create the Pending job and let the repo set the queue position
-            JobsPending newPendingJob = new JobsPending();
-            newPendingJob.JobDetails = newJob;
-            newPendingJob.JobDetailsId = newJob.JDID;
-            newPendingJob.QueueNumber = -1;
-            newPendingJob.Status = "Pending";
-            newPendingJob.JobAdded = DateTime.Now;
+            var newPendingJob = new JobsPending
+            {
+                JobDetails = newJob,
+                JobDetailsId = newJob.JDID,
+                QueueNumber = -1,
+                Status = JobStatus.Submitted,
+                JobAdded = DateTime.Now
+            };
             await _jobsPendingRepository.CreateJobsPendingAsync(newPendingJob);
 
             // Telling the job monitor there's a job pending and needs to be added to the job queue
+            // DO NOT await. We don't want the api to wait for gen to complete before returning to the frontend
+            // This is a fire and forget return. A background thread will do the work from here
             _jobLoop.AssignJobWorkItem();
 
             return Ok(new { message = "Success: Job was successfully lodged and will begin generation shortly!" });
