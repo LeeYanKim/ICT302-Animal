@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Button, Tabs, Tab } from "@mui/material";
 import API from "../../Internals/API"; 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface Graphic {
   gpcid: string;
@@ -37,7 +37,9 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   const [ModelExist, setModelExist] = useState<boolean>(false);  
 
   const navigate = useNavigate();
-
+  const location = useLocation();
+  const animalNameFromState = location.state?.animalName;
+  
   // Ensure animalId is available before making a request
   useEffect(() => {
     const fetchAnimalData = async () => {

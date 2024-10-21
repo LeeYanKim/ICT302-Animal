@@ -57,11 +57,11 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   }, [activeTab, userId]);
 
   // Define the handleAnimalClick function here
-  const handleAnimalClick = (animalId: string) => {
+  const handleAnimalClick = (animalId: string , animalName : string) => {
     console.log('Navigating to animalID:', animalId);
     setSelectedAnimalId(animalId);
     setActiveTab(1); // Switch to AnimalDetails view
-    navigate(`/dashboard/animals/${animalId}`); // Navigate to details page
+    navigate(`/dashboard/animals/${animalName}`, {state: { animalName}}); // Navigate to details page
   };
 
   return (

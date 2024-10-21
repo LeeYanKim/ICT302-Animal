@@ -9,7 +9,7 @@ import { FrontendContext } from '../../Internals/ContextStore';
 // Props interface for AnimalsGrid
 interface AnimalsGridProps {
   triggerRefresh: boolean;
-  onAnimalClick: (animalID: string) => void; // Add this line
+  onAnimalClick: (animalID: string , animalName : string) => void; // Add this line
 }
 
 interface AnimalData {
@@ -70,7 +70,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
               animalName={animal.animalName}
               animalDOB={animal.videoUploadDate || ''}
               animalType={animal.animalType}
-              onClick={() => onAnimalClick(animal.animalID)}
+              onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
             />
           </Grid>
         ))}
