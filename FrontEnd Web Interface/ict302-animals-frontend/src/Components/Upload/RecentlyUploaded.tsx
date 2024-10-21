@@ -40,13 +40,12 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
         throw new Error('Failed to fetch uploaded animals');
       }
       const data: AnimalData[] = await response.json();
-      if(data.length > 0){
+      if (data.length > 0) {
         setAnimals(data);
         setFilteredAnimals(data);
         const types = Array.from(new Set(data.map((animal) => animal.animalType)));
         setAnimalTypes(types);
-      }
-      else{
+      } else {
         setError('No animals found.');
       }
     } catch (error) {
@@ -118,8 +117,16 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
               selectedAnimal.graphics.map((graphic) => (
                 <div key={graphic.gpcID} style={{ marginBottom: '20px' }}>
                   <h4>{graphic.gpcName}</h4>
-                  {/* Add key to ensure React re-renders video */}
-                  <video key={graphic.filePath} controls width="600">
+                  <video
+                    key={graphic.filePath}
+                    controls
+                    style={{
+                      width: '600px', // Fixed width
+                      height: '340px', // Fixed height to ensure consistency
+                      objectFit: 'cover', // Makes the video cover the area while maintaining aspect ratio
+                      backgroundColor: 'black', // Adds background in case of cropping
+                    }}
+                  >
                     <source src={graphic.filePath} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
@@ -153,6 +160,5 @@ const RecentlyUploaded: React.FC<RecentlyUploadedProps> = ({ triggerRefresh }) =
     </div>
   );
 };
-
 
 export default RecentlyUploaded;
