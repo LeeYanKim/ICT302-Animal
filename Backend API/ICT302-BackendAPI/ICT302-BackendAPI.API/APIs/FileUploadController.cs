@@ -24,15 +24,20 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly ILogger<FileUploadController> _logger;
         private readonly IAnimalRepository _animalRepository;
         private readonly IGraphicRepository _graphicRepository;
+        private readonly IAnimalAccessRepository _animalAccessRepository; 
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment, IGraphicRepository graphicRepository)
+        // Include IAnimalAccessRepository in the constructor
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, 
+            IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment, 
+            IGraphicRepository graphicRepository, IAnimalAccessRepository animalAccessRepository) 
         {
             _configuration = configuration;
             _logger = logger;
             _animalRepository = animalRepository;
             _graphicRepository = graphicRepository;
             _webHostEnvironment = webHostEnvironment;
+            _animalAccessRepository = animalAccessRepository;  
         }
 
         [HttpPost]
@@ -40,7 +45,7 @@ namespace ICT302_BackendAPI.API.Controllers
         {
             try
             {
-                _logger.LogInformation($"Received file upload request: AnimalName = {animalName}, AnimalType = {animalType}, DateOfBirth = {dateOfBirth}");
+                _logger.LogInformation($"Received file upload request: AnimalName = {animalName}, AnimalType = {animalType}, DateOfBirth = {dateOfBirth}, userID = {userId}");
 
                 // Validate input fields
                 if (files == null || files.Length == 0)
@@ -62,6 +67,12 @@ namespace ICT302_BackendAPI.API.Controllers
                     string msg = String.Format("Invalid date of birth format: {0}, Required format: yyyy-MM-dd", dateOfBirth);
                     _logger.LogWarning(msg, dateOfBirth);
                     return BadRequest(new { message = msg });
+                }
+
+                if(userId == null){
+                    string msg = String.Format("Invalid ID , id : {userId}" , userId);
+                    _logger.LogWarning(msg);
+                    return BadRequest(new{message = msg});
                 }
 
                 // Determine stored file path
@@ -150,17 +161,25 @@ namespace ICT302_BackendAPI.API.Controllers
                                 AccessID = Guid.NewGuid(),
                                 AnimalID = animal.AnimalID,
                                 UserID = userId,
+                                AccessType = "Default", 
                                 AssignedDate = DateTime.Now
                             };
+                            // Confirm AnimalAccess creation
+                            var accessResult = await _animalAccessRepository.CreateAnimalAccessAsync(access);
+                            if (accessResult != null)
+                            {
+                                _logger.LogInformation($"AnimalAccess entry created successfully for AnimalID: {animal.AnimalID}, UserID: {userId}");
+                            }
+                            else
+                            {
+                                _logger.LogError($"Failed to create AnimalAccess for AnimalID: {animal.AnimalID}, UserID: {userId}");
+                            }
                         }
-
                     }
                 }
-
                 _logger.LogInformation($"File successfully saved at: {Path.Join(storedFilesPath, filePath)}");
                 _logger.LogInformation($"Creating animal entry in the database: AnimalName = {animal.AnimalName}");
                 _logger.LogInformation($"Animal entry created in the database with ID: {animal.AnimalID}");
-
                 return Ok(new { message = "File uploaded and animal data saved successfully." });
             }
             catch (Exception ex)

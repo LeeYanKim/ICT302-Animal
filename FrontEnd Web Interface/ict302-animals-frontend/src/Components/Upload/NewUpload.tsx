@@ -28,15 +28,13 @@ interface NewUploadProps {
   onUploadSuccess?: () => void;
 }
 
-
-const NewUpload : React.FC<NewUploadProps> = ({ open, handleClose, animalDetails, filesToUpload, onUploadSuccess  }: NewUploadProps) => {
+export default function NewUpload({ open, handleClose, animalDetails, filesToUpload, onUploadSuccess  }: NewUploadProps) {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null); // To track upload status
   const frontendContext = useContext(FrontendContext);  // Access the frontend context
-  //const userid = frontendContext.user.contextRef.current.userId;
-  
+  const userid = frontendContext.user.contextRef.current.userId;
 
 
   // Handle File Upload
@@ -64,7 +62,7 @@ const NewUpload : React.FC<NewUploadProps> = ({ open, handleClose, animalDetails
     formData.append('animalType', animalDetails.animalType);
     const formattedDOB = animalDetails.dateOfBirth;
     formData.append('dateOfBirth', formattedDOB);
-    //formData.append('userId' , )
+    formData.append('userId' , userid);
 
     // Append each file
     filesToUpload.forEach((file) => {
@@ -161,6 +159,3 @@ const NewUpload : React.FC<NewUploadProps> = ({ open, handleClose, animalDetails
     </>
   );
 }
-
-export default NewUpload;
-
