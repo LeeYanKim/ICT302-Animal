@@ -24,23 +24,28 @@ namespace ICT302_BackendAPI.API.Controllers
         private readonly ILogger<FileUploadController> _logger;
         private readonly IAnimalRepository _animalRepository;
         private readonly IGraphicRepository _graphicRepository;
+        private readonly IAnimalAccessRepository _animalAccessRepository; 
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, IAnimalRepository animalRepository,  IWebHostEnvironment webHostEnvironment, IGraphicRepository graphicRepository)
+        // Include IAnimalAccessRepository in the constructor
+        public FileUploadController(IConfiguration configuration, ILogger<FileUploadController> logger, 
+            IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment, 
+            IGraphicRepository graphicRepository, IAnimalAccessRepository animalAccessRepository) 
         {
             _configuration = configuration;
             _logger = logger;
             _animalRepository = animalRepository;
             _graphicRepository = graphicRepository;
             _webHostEnvironment = webHostEnvironment;
+            _animalAccessRepository = animalAccessRepository;  
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadFileAsync(IFormFile files, [FromForm] string animalName, [FromForm] string animalType, [FromForm] string dateOfBirth)
+        public async Task<IActionResult> UploadFileAsync(IFormFile files, [FromForm] string animalName, [FromForm] string animalType, [FromForm] string dateOfBirth, [FromForm] Guid userId)
         {
             try
             {
-                _logger.LogInformation($"Received file upload request: AnimalName = {animalName}, AnimalType = {animalType}, DateOfBirth = {dateOfBirth}");
+                _logger.LogInformation($"Received file upload request: AnimalName = {animalName}, AnimalType = {animalType}, DateOfBirth = {dateOfBirth}, userID = {userId}");
 
                 // Validate input fields
                 if (files == null || files.Length == 0)
@@ -62,6 +67,12 @@ namespace ICT302_BackendAPI.API.Controllers
                     string msg = String.Format("Invalid date of birth format: {0}, Required format: yyyy-MM-dd", dateOfBirth);
                     _logger.LogWarning(msg, dateOfBirth);
                     return BadRequest(new { message = msg });
+                }
+
+                if(userId == null){
+                    string msg = String.Format("Invalid ID , id : {userId}" , userId);
+                    _logger.LogWarning(msg);
+                    return BadRequest(new{message = msg});
                 }
 
                 // Determine stored file path
@@ -86,11 +97,11 @@ namespace ICT302_BackendAPI.API.Controllers
                     return StatusCode(500, new { message = "Configuration error: StoredFilesPath is not defined." });
                 }
 
-        // Ensure directory exists
-        if (!Directory.Exists(storedFilesPath))
-        {
-            Directory.CreateDirectory(storedFilesPath);
-        }
+                // Ensure directory exists
+                if (!Directory.Exists(storedFilesPath))
+                {
+                    Directory.CreateDirectory(storedFilesPath);
+                }
 
                 // Validate file type
                 string fileExtension = Path.GetExtension(files.FileName);
@@ -106,7 +117,7 @@ namespace ICT302_BackendAPI.API.Controllers
                 var gpcid = Guid.NewGuid();
                 string uniqueFileName = $"{gpcid}{fileExtension}";
                 string filePath = uniqueFileName; // Should be the path relative to the main upload folder
-                
+
                 // Add entry to the database
                 var animal = new Animal
                 {
@@ -134,7 +145,7 @@ namespace ICT302_BackendAPI.API.Controllers
                             FilePath = filePath,
                             GPCSize = (int)fileStream.Length,
                             Animal = animal
-                    
+
                         };
                         animal.Graphics.Add(graphic);
                         var g = await _graphicRepository.CreateGraphicAsync(graphic);
@@ -143,15 +154,32 @@ namespace ICT302_BackendAPI.API.Controllers
                             // create the record for the graphic and then and only then process the upload incase there was a sql error
                             await _animalRepository.UpdateAnimalAsync(animal);
                             await files.CopyToAsync(fileStream);
-                        }
 
+                            // Create AnimalAccess entry
+                            var access = new AnimalAccess
+                            {
+                                AccessID = Guid.NewGuid(),
+                                AnimalID = animal.AnimalID,
+                                UserID = userId,
+                                AccessType = "Default", 
+                                AssignedDate = DateTime.Now
+                            };
+                            // Confirm AnimalAccess creation
+                            var accessResult = await _animalAccessRepository.CreateAnimalAccessAsync(access);
+                            if (accessResult != null)
+                            {
+                                _logger.LogInformation($"AnimalAccess entry created successfully for AnimalID: {animal.AnimalID}, UserID: {userId}");
+                            }
+                            else
+                            {
+                                _logger.LogError($"Failed to create AnimalAccess for AnimalID: {animal.AnimalID}, UserID: {userId}");
+                            }
+                        }
                     }
                 }
-                
                 _logger.LogInformation($"File successfully saved at: {Path.Join(storedFilesPath, filePath)}");
                 _logger.LogInformation($"Creating animal entry in the database: AnimalName = {animal.AnimalName}");
                 _logger.LogInformation($"Animal entry created in the database with ID: {animal.AnimalID}");
-
                 return Ok(new { message = "File uploaded and animal data saved successfully." });
             }
             catch (Exception ex)
@@ -251,37 +279,37 @@ namespace ICT302_BackendAPI.API.Controllers
         }
 
         [HttpDelete("animal/{animalId}/graphic/{graphicId}")]
-public async Task<IActionResult> DeleteGraphicAsync(Guid animalId, string graphicId)
-{
-    try
-    {
-        // Fetch the animal from the database using the animalId
-        var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
-        if (animal == null)
+        public async Task<IActionResult> DeleteGraphicAsync(Guid animalId, string graphicId)
         {
-            return NotFound(new { message = "Animal not found." });
+            try
+            {
+                // Fetch the animal from the database using the animalId
+                var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
+                if (animal == null)
+                {
+                    return NotFound(new { message = "Animal not found." });
+                }
+
+                // Determine the stored file path
+                string storedFilesPath = GetStoredFilesPath();
+
+                // Delete the graphic 
+                bool fileDeleted = DeleteFile(storedFilesPath, graphicId);
+                if (!fileDeleted)
+                {
+                    return NotFound(new { message = "Graphic file not found." });
+                }
+
+                // Will need to change when the structure of animal changes
+
+                return Ok(new { message = "Graphic deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting the graphic.");
+                return StatusCode(500, new { message = "Internal server error during graphic deletion." });
+            }
         }
-
-        // Determine the stored file path
-        string storedFilesPath = GetStoredFilesPath();
-
-        // Delete the graphic 
-        bool fileDeleted = DeleteFile(storedFilesPath, graphicId);
-        if (!fileDeleted)
-        {
-            return NotFound(new { message = "Graphic file not found." });
-        }
-
-        // Will need to change when the structure of animal changes
-
-        return Ok(new { message = "Graphic deleted successfully." });
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "An error occurred while deleting the graphic.");
-        return StatusCode(500, new { message = "Internal server error during graphic deletion." });
-    }
-}
 
 
     }

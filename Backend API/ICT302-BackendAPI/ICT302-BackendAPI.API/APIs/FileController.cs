@@ -15,70 +15,75 @@ namespace ICT302_BackendAPI.API.APIs
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<FilesController> _logger;
         private readonly IAnimalRepository _animalRepository;
+        private readonly IAnimalAccessRepository _animalAccessRepository; 
 
-        public FilesController(IConfiguration configuration, ILogger<FilesController> logger, IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment)
+        // Ensure there is only one constructor
+        public FilesController(IConfiguration configuration, ILogger<FilesController> logger, 
+            IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment,  
+            IAnimalAccessRepository animalAccessRepository)
         {
             _configuration = configuration;
             _logger = logger;
             _animalRepository = animalRepository;
             _webHostEnvironment = webHostEnvironment;
+            _animalAccessRepository = animalAccessRepository; 
         }
 
-     [HttpGet("animals/details/{id}")]
-    public async Task<IActionResult> GetAnimalDetails(Guid id)
-    {
-        try
+        [HttpGet("animals/details/{id}")]
+        public async Task<IActionResult> GetAnimalDetails(Guid id)
         {
-            var animal = await _animalRepository.GetAnimalByIDAsync(id);
-            if (animal == null)
+            try
             {
-                return NotFound(new { message = "Animal not found" });
-            }
+                var animal = await _animalRepository.GetAnimalByIDAsync(id);
+                if (animal == null)
+                {
+                    return NotFound(new { message = "Animal not found" });
+                }
 
-            // Construct video URLs dynamically based on the filename
-            foreach (var graphic in animal.Graphics)
+                // Construct video URLs dynamically based on the filename
+                foreach (var graphic in animal.Graphics)
+                {
+                    graphic.FilePath = $"{Request.Scheme}://{Request.Host}/api/files/animals/videos/{graphic.FilePath}";
+                }
+
+                return Ok(animal);
+            }
+            catch (Exception ex)
             {
-                graphic.FilePath = $"{Request.Scheme}://{Request.Host}/api/files/animals/videos/{graphic.FilePath}";
+                _logger.LogError(ex, "Error retrieving animal details.");
+                return StatusCode(500, new { message = "Internal server error" });
             }
-
-            return Ok(animal);
         }
-        catch (Exception ex)
+
+
+
+        [HttpGet("animals/videos/{fileName}")]
+        public IActionResult GetAnimalVideo(string fileName)
         {
-            _logger.LogError(ex, "Error retrieving animal details.");
-            return StatusCode(500, new { message = "Internal server error" });
-        }
-    }
-
-
-
-    [HttpGet("animals/videos/{fileName}")]
-    public IActionResult GetAnimalVideo(string fileName)
-    {
-        try
-        {
-            string? storedFilesPath = _webHostEnvironment.IsDevelopment()
-                ? _configuration["dev_StoredFilesPath"]
-                : _configuration["StoredFilesPath"];
-
-            var filePath = Path.Combine(storedFilesPath, fileName);
-
-            if (!System.IO.File.Exists(filePath))
+            try
             {
-                _logger.LogWarning("Requested video file not found: {FilePath}", filePath);
-                return NotFound(new { message = "Video file not found." });
-            }
+                string? storedFilesPath = _webHostEnvironment.IsDevelopment()
+                    ? _configuration["dev_StoredFilesPath"]
+                    : _configuration["StoredFilesPath"];
 
-            var mimeType = GetMimeType(filePath);
-            var videoStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            return File(videoStream, mimeType, enableRangeProcessing: true);
+                var filePath = Path.Combine(storedFilesPath, fileName);
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    _logger.LogWarning("Requested video file not found: {FilePath}", filePath);
+                    return NotFound(new { message = "Video file not found." });
+                }
+
+                var mimeType = GetMimeType(filePath);
+                var videoStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                return File(videoStream, mimeType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while serving video file: {FileName}", fileName);
+                return StatusCode(500, new { message = "Internal server error while fetching video." });
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while serving video file: {FileName}", fileName);
-            return StatusCode(500, new { message = "Internal server error while fetching video." });
-        }
-    }
 
         // Endpoint to get the list of animals
         [HttpGet("animals/list")]
@@ -96,7 +101,7 @@ namespace ICT302_BackendAPI.API.APIs
                 return StatusCode(500, new { message = "Internal server error while fetching animals list." });
             }
         }
-        
+
         private string GetMimeType(string filePath)
         {
             var extension = Path.GetExtension(filePath).ToLowerInvariant();
@@ -109,5 +114,27 @@ namespace ICT302_BackendAPI.API.APIs
                 _ => "application/octet-stream",
             };
         }
+
+        [HttpGet("user/{userID}/animalIDs")]
+        public async Task<IActionResult> GetAnimalIDsByUserID(Guid userID)
+        {
+            try
+            {
+                var animalIDs = await _animalAccessRepository.GetAnimalIDsByUserIDAsync(userID);
+                if (!animalIDs.Any())
+                {
+                    return NotFound(new { message = "No animals found for this user." });
+                }
+                return Ok(animalIDs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching animal IDs for the user.");
+                return StatusCode(500, new { message = "Internal server error while fetching animal IDs." });
+            }
+        }
+
+
+
     }
 }

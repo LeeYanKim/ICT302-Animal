@@ -84,7 +84,7 @@ public sealed class MonitorJobLoop(
             }
             catch (Exception e)
             {
-                logger.LogWarning($"Generation API is down or not responding... retrying in {apiAliveDelayS} seconds...");
+                //logger.LogWarning($"Generation API is down or not responding... retrying in {apiAliveDelayS} seconds...");
                 var delay = Task.Delay(apiAliveDelayMs);
                 await delay;
             }
