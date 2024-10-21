@@ -23,6 +23,18 @@ public class SchemaContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseMySQL(_connectionString);
+        
+        optionsBuilder.EnableSensitiveDataLogging();
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<JobsPending>()
+            .Property(job => job.Status)
+            .HasConversion(
+                v => v.ToString(), // Converts job status enum to string
+                v => (JobStatus)Enum.Parse(typeof(JobStatus), v) // Converts string to job status
+            );
     }
 
 
