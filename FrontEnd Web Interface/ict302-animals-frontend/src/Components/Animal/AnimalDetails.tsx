@@ -30,7 +30,12 @@ interface AnimalDetailsProps {
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const [animalData, setAnimalData] = useState<Animal | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [PlayerOpen, setPlayerOpen] = useState(false);
+  const [generating, setGenerating] = useState<boolean>(false);
   const [tabValue, setTabValue] = useState(0);
+  const [progressLabel, setProgressLabel] = useState<string>("Pending");
+  const [ModelExist, setModelExist] = useState<boolean>(false);  
+
   const navigate = useNavigate();
 
   // Ensure animalId is available before making a request
@@ -77,20 +82,28 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     ? API.Download() + `/animals/photos/${animalData.photoFileName}`
     : null;
 
-   console.log(API.User());
-
   const togglePlayerClose = () => {
     setPlayerOpen(!PlayerOpen); 
   };
 
   const handleModelGeneration = async () => {
     setGenerating(true);
+    const videoFileName = animalData?.graphics?.[0]?.filePath;
+
+    if (!videoFileName) {
+      console.error("No video available for this animal.");
+      setGenerating(false);
+      return;
+    }
     const res = await fetch(API.Generate(), {
       method: "POST",
       headers: {
           "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ AnimalId: animalId, AnimalGraphicFileName: animalData.videoFileName, GenType: "BITE"}),
+      }, body: JSON.stringify({
+        AnimalId: animalId,
+        AnimalGraphicFileName: videoFileName, //Graphics is now an array
+        GenType: "BITE",
+      }),
     });
 
     // Simulate the different stages of progress
