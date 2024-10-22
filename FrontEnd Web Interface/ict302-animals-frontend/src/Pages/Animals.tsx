@@ -47,7 +47,12 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   };
 
   return (
-    <Box>
+    <Box
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    paddingTop={2} // Add some padding to move it down a bit from the top
+    >
       <h1>Animals test here</h1>
       {/* Render RecentlyUploaded to display animals */}
       {activeTab === 0 && (

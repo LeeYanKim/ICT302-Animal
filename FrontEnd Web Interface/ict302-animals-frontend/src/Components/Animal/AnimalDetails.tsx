@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { styled } from '@mui/material/styles';
-import { Grid2, Box, Paper,Typography, CircularProgress, Button, AppBar, Tabs, Tab } from "@mui/material";
+import { Grid2, Box, Paper,Typography, CircularProgress, Button, AppBar, Tabs, Tab,Container } from "@mui/material";
 import API from "../../Internals/API";
 import DeleteGraphicButton from './DeleteGraphicButton';
 import NewGeneration from "../Generation/NewGeneration"; 
 import ViewGenerateButton from "../Generation/ViewGenerationButton";
 import FullFeaturedCrudGrid from './FullFeaturedCrudGrid'; 
+
 
 interface Animal {
   animalID: string;
@@ -128,62 +129,56 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   }));
 
   return (
-    <Box>
+    <Box sx={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+    
       {/* Fixed banner with animal photo and name */}
-      <Box textAlign="center" sx={{ mt: 5 }}>
+      <Box textAlign="center" sx={{ mt: 5 , pb: 3 }}>
         <Typography variant="h4">{animalData.animalName}</Typography>
         <Typography variant="subtitle1">Type: {animalData.animalType}</Typography>
         <Typography variant="subtitle2">DOB: {new Date(animalData.animalDOB).toLocaleDateString()}</Typography>
       </Box>
 
       {/* Tabs for different sections */}
-      <AppBar position="static" color ='transparent'>
-        <Tabs value={tabValue} onChange={handleTabChange} aria-label="animal details tabs">
-          <Tab label="Information" />
-          <Tab label="Media Uploaded" />
-          <Tab label="Version" />
-          <Tab label="Access Granted" />
+      <AppBar position="sticky" color ='transparent' sx={{ width: '100%'}} >
+        <Tabs value={tabValue} variant="fullWidth" indicatorColor="secondary" 
+          textColor="inherit" onChange={handleTabChange} 
+          aria-label="animal details tabs" 
+          //sx={{ width: '100%' }}
+          //</AppBar>sx={{ flexDirection: 'column', alignItems: 'flex-start' }}
+          sx={{ display: 'flex', flexGrow: 1 }}>
+          <Tab label="Information" sx={{ flex: 1 }} />
+          <Tab label="Media Uploaded" sx={{ flex: 1 }} />
+          <Tab label="History" sx={{ flex: 1 }} />
+          <Tab label="Access Granted" sx={{ flex: 1 }} />
         </Tabs>
       </AppBar>
     
       {/* Tab Content */}
-      <Box sx={{ p: 2 }}>
+      
+      <Box sx={{ p: 5, width: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {tabValue === 0 && (
-        <Box>
+        <Box sx={{ flex: 1 ,width: '100%'}}>
           <Typography variant="body1">Details about {animalData.animalName} can go here.</Typography>
-          <Box sx={{ width: '100%' }}>
-      <Grid2 container spacing={0.5} rowSpacing={0.5} columns={15} columnSpacing={{ xs: 0.5, sm: 1, md: 2 }}>
-        <Grid2 size={5}>
-          <Item>Name: </Item>
-        </Grid2>
-        <Grid2 size={10}>
-          <Item>{animalData.animalName}</Item>
-        </Grid2>
-        <Grid2 size={5}>
-          <Item>Type: </Item>
-        </Grid2>
-        <Grid2 size={10}>
-          <Item>{animalData.animalType}</Item>
-        </Grid2>
-        <Grid2 size={5}>
-          <Item>Date of Birth: </Item>
-        </Grid2>
-        <Grid2 size={10}>
-          <Item>{new Date(animalData.animalDOB).toLocaleDateString()}</Item>
-        </Grid2>
-      </Grid2>
-    </Box>
+            <Grid2 container spacing={0.5} rowSpacing={0.5} columns={15} columnSpacing={{ xs: 0.5, sm: 1, md: 2 }}>
+              <Grid2 size={5}><Item>Name: </Item></Grid2>
+              <Grid2 size={10}><Item>{animalData.animalName}</Item></Grid2>
+              <Grid2 size={5}><Item>Type: </Item></Grid2>
+              <Grid2 size={10}><Item>{animalData.animalType}</Item></Grid2>
+              <Grid2 size={5}><Item>Date of Birth: </Item></Grid2>
+              <Grid2 size={10}><Item>{new Date(animalData.animalDOB).toLocaleDateString()}</Item></Grid2>
+            </Grid2>
         </Box>
         
         )}
         
         {tabValue === 1 && (
-        <Box>
+        <Box sx={{ flex: 1,width: '100%' }}>
           <Box>
             <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
             {videoUrl ? (
-              <Box sx={{ marginTop: '20px' }}>
-                <video controls width="600">
+              <Box sx={{ flex: 1 ,width: '100%'}}>
+              {/*<Box sx={{ marginTop: '20px' }}>*/}
+                <video controls width="100%">
                   <source src={videoUrl} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
@@ -208,7 +203,8 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
           </Box>
 
            {/* Video Player */}
-          <Box sx={{ flex: 1, maxWidth: '1000px' }}>  {/* Set maxWidth here */}
+          <Box sx={{ flex: 1 ,width: '100%'}}>  {/* Set maxWidth here */}
+          {/*<Box sx={{ flex: 1, maxWidth: '1000px' }}>  {/* Set maxWidth here */}
             {videoUrl && PlayerOpen ? (
               <>
               <Button 
@@ -281,8 +277,8 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         </Box>)}
 
         {tabValue === 2 && (
-        <Box>
-          <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
+        <Box sx={{ flex: 1}}>
+          <Typography variant="body1">Animal history for {animalData.animalName} can go here.</Typography>
           <FullFeaturedCrudGrid /> {/* Render the DataGrid component here */}
         
         
@@ -290,7 +286,9 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         )}
 
         {tabValue === 3 && (
+        <Box sx={{ flex: 1}}>
           <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
+        </Box>
         )}
       </Box>
 
@@ -300,7 +298,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
           Back to Animals
         </Button>
       </Box>
-
+      
     </Box>
   );
     

@@ -21,13 +21,16 @@ import {
   GridSlots,
 } from '@mui/x-data-grid';
 
-const roles = ['Market', 'Finance', 'Development'];
+const ModelType= ['Mesh', 'Nurbs', 'Volumetric','Rigged','low-polygons'];
 
 
 const initialRows: GridRowsProp = [
-    { id: 1, name: 'Alice', age: 25, joinDate: new Date(), role: 'Market' },
-    { id: 2, name: 'Bob', age: 36, joinDate: new Date(), role: 'Finance' },
-    { id: 3, name: 'Charlie', age: 19, joinDate: new Date(), role: 'Development' },
+    { id: 1, DateGen: new Date(), ModelType: 'Mesh', Note:'note'  },
+    { id: 2, DateGen: new Date(), ModelType: 'Volumetric', Note:'note' },
+    { id: 3, DateGen: new Date(), ModelType: 'low-polygons', Note:'note' },
+    //{ id: 1, name: 'Alice', age: 25, joinDate: new Date(), role: 'Market' },
+    //{ id: 2, name: 'Bob', age: 36, joinDate: new Date(), role: 'Finance' },
+    //{ id: 3, name: 'Charlie', age: 19, joinDate: new Date(), role: 'Development' },
 ];
 
 interface EditToolbarProps {
@@ -39,17 +42,17 @@ interface EditToolbarProps {
 }
 
 function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel, rows } = props;
+  const { setRows, setRowModesModel, rows = [] } = props;
 
   const handleClick = () => {
     const id = rows.length + 1;
     setRows((oldRows) => [
       ...oldRows,
-      { id, name: '', age: '', role: '', isNew: true },
+      { id, DateGen: '', ModelType: '', Note: '', isNew: true },
     ]);
     setRowModesModel((oldModel) => ({
       ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'DateGen' },
     }));
   };
 
@@ -107,30 +110,24 @@ export default function FullFeaturedCrudGrid() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Name', width: 180, editable: true },
     {
-      field: 'age',
-      headerName: 'Age',
-      type: 'number',
-      width: 80,
-      align: 'left',
-      headerAlign: 'left',
-      editable: true,
-    },
-    {
-      field: 'joinDate',
-      headerName: 'Join date',
+      field: 'DateGen',
+      headerName: 'Generated Date',
       type: 'date',
-      width: 180,
-      editable: true,
+      width: 150,
+      editable: false,
     },
     {
-      field: 'role',
-      headerName: 'Department',
-      width: 220,
-      editable: true,
-      type: 'singleSelect',
-      valueOptions: ['Market', 'Finance', 'Development'],
+      field: 'ModelType',
+      headerName: 'Model Type',
+      width: 130,
+      editable: false,
+      valueOptions: ['Mesh', 'Nurbs', 'Volumetric','Rigged','low-polygons'],
+    },
+    { field: 'Note', 
+      headerName: 'Note', 
+      width: 160,
+      editable: true 
     },
     {
       field: 'actions',
@@ -183,7 +180,7 @@ export default function FullFeaturedCrudGrid() {
   return (
     <Box
       sx={{
-        height: 500,
+        height: 300,
         width: '100%',
         '& .actions': {
           color: 'text.secondary',
