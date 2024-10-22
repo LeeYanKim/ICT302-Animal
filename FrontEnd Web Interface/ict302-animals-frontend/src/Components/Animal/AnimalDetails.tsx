@@ -7,7 +7,7 @@ import DeleteGraphicButton from './DeleteGraphicButton';
 import NewGeneration from "../Generation/NewGeneration"; 
 import ViewGenerateButton from "../Generation/ViewGenerationButton";
 import FullFeaturedCrudGrid from './FullFeaturedCrudGrid'; 
-
+import DataGridDemo from './History'; 
 
 interface Animal {
   animalID: string;
@@ -39,6 +39,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   const [newGenOpen, setNewGenOpen] = useState<boolean>(false);  
   const [generating, setGenerating] = useState<boolean>(false); 
   const [progressLabel, setProgressLabel] = useState<string>("Pending"); // Label for progress steps
+  const [refreshThumbnails, setRefreshThumbnails] = React.useState(false);
 
   useEffect(() => {
     if (!animalId) return;
@@ -279,7 +280,8 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         {tabValue === 2 && (
         <Box sx={{ flex: 1}}>
           <Typography variant="body1">Animal history for {animalData.animalName} can go here.</Typography>
-          <FullFeaturedCrudGrid /> {/* Render the DataGrid component here */}
+          {/*<FullFeaturedCrudGrid /> {/* Render the DataGrid component here */}
+          < DataGridDemo triggerRefresh={refreshThumbnails} />
         
         
         </Box>

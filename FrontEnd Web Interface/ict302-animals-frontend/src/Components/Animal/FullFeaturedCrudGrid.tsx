@@ -41,6 +41,17 @@ interface EditToolbarProps {
   rows:GridRowsProp;
 }
 
+interface CrudGridProps {
+  triggerRefresh: boolean;
+}
+
+interface AnimalData {
+  animalID: string;
+  modelType: string;
+  videoGenDate: string;
+
+}
+
 function EditToolbar(props: EditToolbarProps) {
   const { setRows, setRowModesModel, rows = [] } = props;
 
