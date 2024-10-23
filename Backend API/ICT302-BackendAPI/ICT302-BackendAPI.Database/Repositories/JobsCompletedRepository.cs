@@ -54,6 +54,16 @@ namespace ICT302_BackendAPI.Database.Repositories
             await _ctx.SaveChangesAsync();
             return job;
         }
+        
+        public async Task<JobsCompleted?> CreateJobsCompletedAsync(JobsCompleted job, bool attach)
+        {
+            _ctx.Entry<JobsCompleted>(job).State = EntityState.Added;
+            if (attach)
+                _ctx.JobsCompleted.Attach(job);
+            _ctx.JobsCompleted.Add(job);
+            await _ctx.SaveChangesAsync();
+            return null;
+        }
 
         public async Task<JobsCompleted> UpdateJobsCompletedAsync(JobsCompleted job)
         {

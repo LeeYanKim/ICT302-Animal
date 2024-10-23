@@ -151,8 +151,8 @@ public class GenerationController : ControllerBase
             {
                 GPCID = graphic.GPCID,
                 ModelID = Guid.NewGuid(),
-                ModelTitle = request.AnimalGraphicFileName,
-                FilePath = Path.GetFileName(graphic.FilePath) + ".glb",
+                ModelTitle = graphic.GPCName,
+                FilePath = graphic.GPCID + ".glb",
                 ModelDateGen = DateTime.Now
             };
             await _model3DRepository.CreateModel3DAsync(model);

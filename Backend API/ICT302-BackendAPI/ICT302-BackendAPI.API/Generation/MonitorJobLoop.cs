@@ -115,7 +115,7 @@ public sealed class MonitorJobLoop(
         }
         
         DateTime startTime = DateTime.Now;
-        
+        var modelSize = 0;
         // Each step of processing. Job is finished when status is Closed
         while (!token.IsCancellationRequested && job.Status != JobStatus.Closed)
         {
@@ -124,7 +124,7 @@ public sealed class MonitorJobLoop(
             {
                 var data = new
                 {
-                    Token = configuration["GenAPIAuthToken"], JobID = job.JobDetailsId,
+                    Token = configuration["GenAPIAuthToken"], JobID = job.JobDetails.JDID,
                     FileName = job.JobDetails.Graphic.FilePath, SubjectHint = job.JobDetails.Graphic.Animal?.AnimalType,
                     ModelPath = job.JobDetails.JDID + ".glb", ModelVersion = 1
                 };
@@ -145,7 +145,7 @@ public sealed class MonitorJobLoop(
                     result = await GetHttpClient().SendAsync(request, token);
                     logger.LogInformation("Result: {0}", result.Content.ReadAsStringAsync().Result );
                 }
-                else if (JobStatusHelper.IsJobInProcessingStaus(job.Status))
+                else if (JobStatusHelper.IsJobInProcessingStaus(job.Status) || job.Status == JobStatus.Fetching)
                 {
                     if (job.Status != JobStatus.Submitted)
                     {
@@ -157,7 +157,8 @@ public sealed class MonitorJobLoop(
                         request.Content = content;
 
                         result = await GetHttpClient().SendAsync(request, token);
-                        logger.LogInformation("Result: {0}", result.Content.ReadAsStringAsync().Result );
+                        if(job.Status != JobStatus.Fetching)
+                            logger.LogInformation("Result: {0}", result.Content.ReadAsStringAsync().Result );
                     }
                 }
 
@@ -177,33 +178,43 @@ public sealed class MonitorJobLoop(
                 
                 if (result != null && result.IsSuccessStatusCode && job.Status == JobStatus.Fetching)
                 {
-                    job.Status = JobStatusHelper.GetNextJobStatusFromPrevious(job.Status);
-                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
-
-                    var modelFilePath = Path.Join(storedFilesPath, job.JobDetails.JDID + ".glb");
-                    await using (var fs = new FileStream(modelFilePath, FileMode.CreateNew))
+                    var modelFilePath = Path.Join(storedFilesPath, job.JobDetails.Model3D.FilePath);
+                    logger.LogInformation("Model file fetched successfully and saved to {modelFilePath}", modelFilePath);
+                    
+                    await using (var fs = new FileStream(modelFilePath, FileMode.Create, FileAccess.Write))
                     {
                         await result.Content.CopyToAsync(fs, token);
-                    }
-                    logger.LogInformation("Model file fetched successfully and saved to {modelFilePath}", modelFilePath);
+                        
+                    };
+
+                    
+                    modelSize = (int)new FileInfo(modelFilePath).Length;
+                    job.Status = JobStatusHelper.GetNextJobStatusFromPrevious(job.Status);
+                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
                 }
                 
                 if (job.Status == JobStatus.Closing)
                 {
-                    var comp = new JobsCompleted
+                    var id = job.JobDetails.JDID;
+                    var jobSize = job.JobDetails.Graphic.GPCSize;
+                    var genType = job.JobDetails.ModelGenType;
+
+                    var completeJob = new JobsCompleted 
                     {
-                        JobID = job.JobDetailsId,
-                        JobDetails = job.JobDetails,
+                        JobID = id,
                         JobsEnd = DateTime.Now,
-                        JobType = "BITE", // TODO: Update this to grab from the original request
-                        JobSize = job.JobDetails.Graphic.GPCSize,
-                        JobsStart = startTime
+                        JobType = genType,
+                        JobSize = jobSize + modelSize,
+                        JobsStart = startTime,
+                        JDID = id
                     };
-                    await jobsCompletedRepository.CreateJobsCompletedAsync(comp);
-                    await jobsPendingRepository.DeleteJobsPendingAsync(job);
+
+                    await jobsCompletedRepository.CreateJobsCompletedAsync(completeJob, false);
+                    job.Status = JobStatusHelper.GetNextJobStatusFromPrevious(job.Status);
+                    await jobsPendingRepository.UpdateJobsPendingAsync(job);
+                    continue;
                 }
                 
-
                 if (job.Status == JobStatus.Error)
                 {
                     logger.LogInformation("Queued work item {jobId} occured an error and has been canceled", job.JobDetailsId);
@@ -229,6 +240,10 @@ public sealed class MonitorJobLoop(
             }
         }
 
-        
+        if (job.Status == JobStatus.Closed)
+        {
+            logger.LogInformation("Job {jobId} has finished", job.JobDetailsId);
+            await jobsPendingRepository.DeleteJobsPendingAsync(job);
+        }
     }
 }

@@ -13,7 +13,7 @@ public class GenFileController(ILogger<GenerationController> logger, IConfigurat
     private readonly SecurityMaster _securityMaster = securityMaster;
 
     [HttpPost("/api/gen/files")]
-    public async Task<ActionResult> GetGeneratedFileAsync([FromForm] StartGenerationModel? model)
+    public ActionResult GetGeneratedFileAsync([FromForm] StartGenerationModel? model)
     {
         try
         {
@@ -31,8 +31,10 @@ public class GenFileController(ILogger<GenerationController> logger, IConfigurat
             var jobFolder = "job_" + model.StartGenerationJson.JobID;
 
             var jobFile = model.StartGenerationJson.JobID + ".glb";
-            
-            var outPath = Path.Join(_configuration.GetValue<string>("OutputRootFolder"), jobFolder, jobFile);
+
+            var outputRoot = _configuration.GetValue<string>("OutputRootFolder");
+            var userHome = _configuration.GetValue<string>("LinuxHomeUserPath");
+            var outPath = Path.Join(userHome, outputRoot, jobFolder, jobFile);
 
 
             if (System.IO.File.Exists(outPath))
@@ -52,7 +54,7 @@ public class GenFileController(ILogger<GenerationController> logger, IConfigurat
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while serving file: {FileName}", model.StartGenerationJson.FileName);
+            _logger.LogError(ex, "Error occurred while serving file: {FileName}", model!.StartGenerationJson!.FileName);
             return StatusCode(500, new { message = "Internal server error while fetching file." });
         }
         
@@ -62,7 +64,7 @@ public class GenFileController(ILogger<GenerationController> logger, IConfigurat
     {
         StringValues data;
         HttpContext.Request.Form.TryGetValue("StartGenerationJson", out data);
-        var j = JsonValue.Parse(data);
+        var j = JsonNode.Parse(data!);
         var jj = StartGenerationJsonConverter.FromJson(j);
         return jj;
     }

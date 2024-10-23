@@ -19,6 +19,13 @@ public class SecurityController : ControllerBase
         _configuration = configuration;
         _securityMaster = securityMaster;
     }
+
+    [HttpGet("/")]
+    [HttpGet("alive")]
+    public ActionResult Index()
+    {
+        return StatusCode(StatusCodes.Status418ImATeapot);
+    }
     
     /**
      *<summary>Catch-all or alive check if this application is responding</summary>
