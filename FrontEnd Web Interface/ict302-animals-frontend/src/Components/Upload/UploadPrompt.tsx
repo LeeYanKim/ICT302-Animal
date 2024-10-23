@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useContext } from 'react';
+import React, { ChangeEvent, useState, useContext, DragEvent } from 'react';
 import {
   Box,
   Typography,
@@ -6,6 +6,9 @@ import {
   Snackbar,
   Alert,
   Chip,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import NewAnimal from './NewAnimal';
@@ -30,13 +33,34 @@ const UploadPrompt: React.FC<UploadProps> = ({
   });
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false); // State for drag-over styling
 
   // Handle file selection and open the animal form
   const handleFileSelection = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFiles = Array.from(e.target.files);
-      setFilesToUpload(selectedFiles);
-      setIsAnimalFormOpen(true);
+      setFilesToUpload((prevFiles) => [...prevFiles, ...selectedFiles]); // Append files to the existing list
+    }
+  };
+
+  // Handle drag-over event
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(true); // Add drag-over styling
+  };
+
+  // Handle drag leave event
+  const handleDragLeave = () => {
+    setIsDragOver(false); // Remove drag-over styling
+  };
+
+  // Handle drop event to accept dropped files
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false); // Remove drag-over styling
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      setFilesToUpload((prevFiles) => [...prevFiles, ...droppedFiles]); // Append dropped files to the existing list
     }
   };
 
@@ -87,7 +111,26 @@ const UploadPrompt: React.FC<UploadProps> = ({
             <Chip label="mov" />
             <Chip label="webm" />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+
+          {/* Drag-and-Drop Zone */}
+          <Box
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            sx={{
+              border: `2px dashed ${isDragOver ? '#1976d2' : '#ccc'}`,
+              borderRadius: 4,
+              padding: 3,
+              textAlign: 'center',
+              backgroundColor: isDragOver ? '#f5f5f5' : 'transparent',
+              cursor: 'pointer',
+              marginTop: 2,
+              transition: 'background-color 0.3s',
+            }}
+          >
+            <Typography variant="body1">
+              Drag and Drop Your Files Here or Click Below
+            </Typography>
             <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
               Select Files
               <input
@@ -99,6 +142,33 @@ const UploadPrompt: React.FC<UploadProps> = ({
               />
             </Button>
           </Box>
+
+          {/* Display Selected Files */}
+          {filesToUpload.length > 0 && (
+            <Box sx={{ marginTop: 2 }}>
+              <Typography variant="h6">Selected Files:</Typography>
+              <List>
+                {filesToUpload.map((file, index) => (
+                  <ListItem key={index}>
+                    <ListItemText primary={file.name} />
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          )}
+
+          {/* Proceed Button */}
+          {filesToUpload.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 2 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setIsAnimalFormOpen(true)}
+              >
+                Proceed to Animal Details
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Animal form dialog */}
