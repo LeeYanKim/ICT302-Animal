@@ -24,7 +24,6 @@ const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
           sx={{
             background: 'linear-gradient(125deg, rgba(255,105,105,0.9), rgba(173,216,230,0.6))',
             padding: '20px',
-            maxWidth: '1050px',
             borderRadius: '10px',
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
             marginBottom: '30px',

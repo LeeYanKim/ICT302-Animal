@@ -11,7 +11,7 @@ import {FrontendContext} from "../Internals/ContextStore";
 
 import './LandingNav.css';
 
-const pages = ['Home', 'About']; // TODO Add any other pages here, Must match the routes in App.tsx
+const pages = ['Home', 'About' ,'Enterprise']; // TODO Add any other pages here, Must match the routes in App.tsx
 
 const settings = ['Account', 'Dashboard', 'SignOut']; // TODO Add any other settings here
 

@@ -99,13 +99,13 @@ const UploadPrompt: React.FC<UploadProps> = ({
             gap: 2,
           }}
         >
-          <Typography variant="h2" sx={{ alignSelf: 'center', marginLeft: '-150px', }}>
+          <Typography variant="h2" sx={{ alignSelf: 'center' }}>
             Get Started Uploading!
           </Typography>
-          <Typography variant="body1" sx={{ alignSelf: 'center', marginLeft: '-150px',}}>
+          <Typography variant="body1" sx={{ alignSelf: 'center' }}>
             This application is a work in progress.
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', marginLeft: '-150px', }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
             <Chip label="mp4" />
             <Chip label="mkv" />
             <Chip label="mov" />
@@ -119,7 +119,6 @@ const UploadPrompt: React.FC<UploadProps> = ({
             onDrop={handleDrop}
             sx={{
               border: `2px dashed ${isDragOver ? '#1976d2' : '#ccc'}`,
-              maxWidth: '1000px',
               borderRadius: 4,
               padding: 3,
               textAlign: 'center',
