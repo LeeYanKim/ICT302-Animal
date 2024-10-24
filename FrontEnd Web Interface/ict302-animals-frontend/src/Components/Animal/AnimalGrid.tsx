@@ -16,6 +16,7 @@ interface AnimalData {
   animalID: string;
   animalName: string;
   animalType: string;
+  animalDOB: string | null;
   videoUploadDate: string | null;
 }
 
@@ -115,7 +116,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
             <AnimalCard
               animalID={animal.animalID}
               animalName={animal.animalName}
-              animalDOB={animal.videoUploadDate || ''}
+              animalDOB={animal.animalDOB || ''}
               animalType={animal.animalType}
               onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
             />
