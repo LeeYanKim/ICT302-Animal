@@ -24,7 +24,7 @@ const Dashboard: React.FC<DashboardProps> = ({ renderedPage }) => {
   const frontendContext = useContext(FrontendContext);
   let alerts: React.ReactNode[] = [];
 
-  const [currentDashboardPage, setCurrentDashboardPage] = React.useState<DashboardPages>(renderedPage ? getDashboardPageFromPath(renderedPage) : DashboardPages.Home);
+  const [currentDashboardPage, setCurrentDashboardPage] = React.useState<DashboardPages>(renderedPage ? getDashboardPageFromPath(renderedPage) : DashboardPages.Upload);
   const [alertQueue, setAlertQueue] = React.useState<React.ReactNode[]>(alerts);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false); // State to handle drawer open/close
   const isLargeScreen = useMediaQuery((theme: Theme) => theme.breakpoints.up('md')); // Check if screen size is medium or larger
