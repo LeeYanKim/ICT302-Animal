@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, CircularProgress, Button, Tabs, Tab } from "@mui/material";
+import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid} from "@mui/material";
 import API from "../../Internals/API";
 import { useLocation, useNavigate } from 'react-router-dom';
+import ModelViewer from "../ModelViewer/ModelViewer";
 
 interface Graphic {
   gpcid: string;
@@ -9,6 +10,20 @@ interface Graphic {
   gpcDateUpload: string;
   filePath: string;
   animalID: string;
+}
+
+interface Model3D {
+    modelID: string;
+    modelTitle: string;
+    modelDateGen: string;
+    filePath: string;
+    gpcID: string;
+    Graphic: Graphic;
+}
+
+interface AnimalModels {
+  animal: Animal;
+  models: Model3D[];
 }
 
 interface Animal {
@@ -29,6 +44,8 @@ interface AnimalDetailsProps {
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const [animalData, setAnimalData] = useState<Animal | null>(null);
+  const [modelData, setModelData] = useState<Model3D[]>([]);
+  const [animalModels, setAnimalModels] = useState<AnimalModels>();
   const [loading, setLoading] = useState<boolean>(true);
   const [PlayerOpen, setPlayerOpen] = useState(false);
   const [generating, setGenerating] = useState<boolean>(false);
@@ -55,11 +72,35 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         console.error("Error fetching animal data:", error);
       } finally {
         setLoading(false);
+
       }
     };
 
     fetchAnimalData();
+
   }, [animalId]);
+
+  useEffect(() => {
+    const fetchModelData = async () => {
+      try {
+        if(animalData !== null) {
+          const response = await fetch(API.Download() + `/animals/models/${animalId}`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch model data");
+          }
+          const data = await response.json();
+          setModelData(data);
+          console.log(data)
+          let am = {animal: animalData, models: modelData};
+          setAnimalModels(am);
+        }
+      } catch (error) {
+        console.error("Error fetching model data:", error);
+      }
+    };
+
+    fetchModelData();
+  }, [animalData, animalId]);
 
   const handleBackBtnClick = () => {
     navigate('/dashboard/animals');
@@ -88,9 +129,9 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     setPlayerOpen(!PlayerOpen);
   };
 
-  const handleModelGeneration = async () => {
+  const handleModelGeneration = async (graphic: Graphic) => {
     setGenerating(true);
-    const videoFileName = animalData?.graphics?.[0]?.filePath;
+    const videoFileName = graphic?.filePath.split("/").pop();
 
     if (!videoFileName) {
       console.error("No video available for this animal.");
@@ -104,7 +145,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
       }, body: JSON.stringify({
         AnimalId: animalId,
         AnimalGraphicFileName: videoFileName, //Graphics is now an array
-        GraphicId: animalData.graphics[0].gpcid,
+        GraphicId: graphic.gpcid,
         GenType: "BITE",
       }),
     });
@@ -136,6 +177,24 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     return date.toLocaleDateString(); // Format the date as MM/DD/YYYY (or according to the user's locale)
   };
 
+  const MatchGraphicModel = (graphic: Graphic, index: string) => {
+    //TODO: Fix this as model is valid but model.gpcID is undefined
+    modelData.forEach((model) => {
+      if (model.gpcID === graphic.gpcid) {
+        return (<Box key={index}>
+          <ModelViewer modelPath={model.filePath}/>
+        </Box>);
+      }
+    });
+
+    return (<Box key={index}>
+      <Button variant="contained" onClick={() => handleModelGeneration(graphic)} disabled={generating}>
+        {!generating ? (<Typography>Generate from this Video</Typography>)
+            :
+            (<Typography>{progressLabel}</Typography>)}
+      </Button>
+    </Box>)
+  }
 
 
   return (
@@ -186,28 +245,31 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
           <Box>
             <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
             {animalData.graphics && animalData.graphics.length > 0 ? (
-              animalData.graphics.map((graphic, index) => (
+                animalData?.graphics.map((graphic, index) => (
                 <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
                   <Typography variant="subtitle1">Video {index + 1}:</Typography>
-                  <video
-                    controls
-                    style={{
-                      width: '600px', // Fixed width
-                      height: '340px', // Fixed height to maintain aspect ratio
-                      objectFit: 'cover', // Ensures the video covers the entire space while maintaining aspect ratio
-                      backgroundColor: 'black', // Background in case of empty space
-                    }}
-                  >
-                    {graphic.filePath.endsWith('.mp4') && <source src={graphic.filePath} type="video/mp4" />}
-                    {graphic.filePath.endsWith('.webm') && <source src={graphic.filePath} type="video/webm" />}
-                    {graphic.filePath.endsWith('.mov') && <source src={graphic.filePath} type="video/quicktime" />}
-                    {graphic.filePath.endsWith('.mkv') && <source src={graphic.filePath} type="video/x-matroska" />}
+                  <Grid container>
+                    <Grid>
+                      <video
+                        controls
+                        style={{
+                          width: '600px', // Fixed width
+                          height: '340px', // Fixed height to maintain aspect ratio
+                          objectFit: 'cover', // Ensures the video covers the entire space while maintaining aspect ratio
+                          backgroundColor: 'black', // Background in case of empty space
+                        }}>
+                        {graphic.filePath.endsWith('.mp4') && <source src={graphic.filePath} type="video/mp4" />}
+                        {graphic.filePath.endsWith('.webm') && <source src={graphic.filePath} type="video/webm" />}
+                        {graphic.filePath.endsWith('.mov') && <source src={graphic.filePath} type="video/quicktime" />}
+                        {graphic.filePath.endsWith('.mkv') && <source src={graphic.filePath} type="video/x-matroska" />}
 
-                    Your browser does not support the video tag.
-                  </video>
-                  <Button variant="contained" onClick={handleModelGeneration}>
-                    Generate from this Video
-                  </Button>
+                        Your browser does not support the video tag.
+                      </video>
+                    </Grid>
+                    <Grid>
+                      {MatchGraphicModel(graphic, graphic.gpcid)}
+                    </Grid>
+                  </Grid>
                 </Box>
               ))
             ) : (

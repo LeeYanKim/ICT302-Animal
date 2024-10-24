@@ -15,18 +15,22 @@ namespace ICT302_BackendAPI.API.APIs
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<FilesController> _logger;
         private readonly IAnimalRepository _animalRepository;
-        private readonly IAnimalAccessRepository _animalAccessRepository; 
+        private readonly IAnimalAccessRepository _animalAccessRepository;
+        private readonly IGraphicRepository _graphicRepository;
+        private readonly IModel3DRepository _model3DRepository;
 
         // Ensure there is only one constructor
         public FilesController(IConfiguration configuration, ILogger<FilesController> logger, 
             IAnimalRepository animalRepository, IWebHostEnvironment webHostEnvironment,  
-            IAnimalAccessRepository animalAccessRepository)
+            IAnimalAccessRepository animalAccessRepository, IGraphicRepository graphicRepository, IModel3DRepository model3DRepository)
         {
             _configuration = configuration;
             _logger = logger;
             _animalRepository = animalRepository;
             _webHostEnvironment = webHostEnvironment;
             _animalAccessRepository = animalAccessRepository; 
+            _graphicRepository = graphicRepository;
+            _model3DRepository = model3DRepository;
         }
 
         [HttpGet("animals/details/{id}")]
@@ -34,7 +38,7 @@ namespace ICT302_BackendAPI.API.APIs
         {
             try
             {
-                var animal = await _animalRepository.GetAnimalByIDAsync(id);
+                var animal = await _animalRepository.GetAnimalByIdAsync(id);
                 if (animal == null)
                 {
                     return NotFound(new { message = "Animal not found" });
@@ -137,7 +141,77 @@ namespace ICT302_BackendAPI.API.APIs
             }
         }
 
+        [HttpGet("animals/models/graphics/{graphicsId}")]
+        public async Task<ActionResult> GetAnimalModel(Guid graphicsId)
+        {
+            try
+            {
+                var model = await _model3DRepository.GetModel3DFromGraphicsIdAsync(graphicsId);
+                if(model == null)
+                    return NotFound(new { message = "Animal model not found" });
+                
+                return Ok(model);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while fetching the model from the provided graphic");
+                return StatusCode(500, new { message = "Internal server error while fetching the model from the provided graphic" });
+            }
+        }
 
+        [HttpGet("animals/models/{animalId}")]
+        public async Task<ActionResult> GetAllModelsForAnimal(Guid animalId)
+        {
+            try
+            {
+                var models = await _model3DRepository.GetModel3DListFromAnimalIdAsync(animalId);
+                if(models.Count == 0)
+                    return NotFound(new { message = "Animal model not found" });
+                
+                foreach (var model in models)
+                {
+                    if(_webHostEnvironment.EnvironmentName == "Development")
+                        model.FilePath = $"http://{Request.Host}/api/files/animals/models/file/{model.FilePath}";
+                    else
+                        model.FilePath = $"https://{Request.Host}/api/files/animals/models/file/{model.FilePath}";
+                }
+                
+                return Ok(models);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error occurred while fetching the model from the provided graphic");
+                return StatusCode(500, new { message = "Internal server error while fetching the model from the provided graphic" });
+            }
+        }
+
+        [HttpGet("animals/models/file/{fileName}")]
+        public ActionResult GetModelFile(string fileName)
+        {
+            try
+            {
+                string? storedFilesPath = _webHostEnvironment.IsDevelopment()
+                    ? _configuration.GetValue<string>("dev_StoredFilesPath")
+                    : _configuration.GetValue<string>("StoredFilesPath");
+
+                var filePath = Path.Combine(storedFilesPath!, fileName);
+
+                if (!System.IO.File.Exists(filePath))
+                {
+                    _logger.LogWarning("Requested model file not found: {FilePath}", filePath);
+                    return NotFound(new { message = "Model file not found." });
+                }
+
+                var mimeType = GetMimeType(filePath);
+                var modelStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+                return File(modelStream, mimeType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while serving model file: {FileName}", fileName);
+                return StatusCode(500, new { message = "Internal server error while fetching model." });
+            }
+        }
 
     }
 }

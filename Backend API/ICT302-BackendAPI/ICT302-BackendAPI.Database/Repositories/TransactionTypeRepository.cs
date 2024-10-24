@@ -6,47 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class TransactionTypeRepository : ITransactionTypeRepository
+    public class TransactionTypeRepository(SchemaContext ctx) : ITransactionTypeRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public TransactionTypeRepository(SchemaContext ctx)
+        public async Task<IEnumerable<TransactionType>?> GetTransactionTypesAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<TransactionType>> GetTransactionTypesAsync()
-        {
-            var transactionTypes = await _ctx.TransactionType.ToListAsync();
-            transactionTypes.ForEach(a => _ctx.TransactionType.Attach(a));
+            var transactionTypes = await ctx.TransactionType.ToListAsync();
+            transactionTypes.ForEach(a => ctx.TransactionType.Attach(a));
             return transactionTypes;
         }
 
         public async Task<TransactionType?> GetTransactionTypeByIDAsync(Guid id)
         {
-            var transactionType = await _ctx.TransactionType.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var transactionType = await ctx.TransactionType.FindAsync(id);
             return transactionType;
         }
 
-        public async Task<TransactionType> CreateTransactionTypeAsync(TransactionType transactionType)
+        public async Task<TransactionType?> CreateTransactionTypeAsync(TransactionType transactionType)
         {
-            _ctx.TransactionType.Attach(transactionType);
-            _ctx.TransactionType.Add(transactionType);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.TransactionType.Attach(transactionType);
+            ctx.TransactionType.Add(transactionType);
+            await ctx.SaveChangesAsync();
             return transactionType;
         }
 
-        public async Task<TransactionType> UpdateTransactionTypeAsync(TransactionType transactionType)
+        public async Task<TransactionType?> UpdateTransactionTypeAsync(TransactionType transactionType)
         {
-            _ctx.TransactionType.Update(transactionType);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.TransactionType.Update(transactionType);
+            await ctx.SaveChangesAsync();
             return transactionType;
         }
 
-        public async Task<int> DeleteTransactionTypeAsync(TransactionType transactionType)
+        public async Task<int?> DeleteTransactionTypeAsync(TransactionType transactionType)
         {
-            _ctx.TransactionType.Remove(transactionType);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.TransactionType.Remove(transactionType);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

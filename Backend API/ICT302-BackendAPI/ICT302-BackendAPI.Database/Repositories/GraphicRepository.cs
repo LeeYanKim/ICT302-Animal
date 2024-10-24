@@ -7,34 +7,36 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class GraphicRepository : IGraphicRepository
+    public class GraphicRepository(SchemaContext ctx) : IGraphicRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public GraphicRepository(SchemaContext ctx)
+        public async Task<IEnumerable<Graphic>?> GetGraphicsAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<Graphic>> GetGraphicsAsync()
-        {
-            var graphics = await _ctx.Graphics.ToListAsync();
-            graphics.ForEach(a => _ctx.Graphics.Attach(a));
+            var graphics = await ctx.Graphics.ToListAsync();
+            graphics.ForEach(a => ctx.Graphics.Attach(a));
             return graphics;
         }
 
-        public async Task<Graphic> CreateGraphicAsync(Graphic graphic)
+        public async Task<Graphic?> CreateGraphicAsync(Graphic graphic)
         {
-            _ctx.Graphics.Attach(graphic);
-            _ctx.Graphics.Add(graphic);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Graphics.Attach(graphic);
+            ctx.Graphics.Add(graphic);
+            await ctx.SaveChangesAsync();
             return graphic;
         }
 
-        public async Task<Graphic> UpdateGraphicAsync(Graphic graphic)
+        public async Task<Graphic?> UpdateGraphicAsync(Graphic graphic)
         {
-            _ctx.Graphics.Update(graphic);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Graphics.Update(graphic);
+            await ctx.SaveChangesAsync();
             return graphic;
         }
 
@@ -42,26 +44,36 @@ namespace ICT302_BackendAPI.Database.Repositories
         {
             if(id == null) return null;
             
-            var graphic = await _ctx.Graphics.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            
+            var graphic = await ctx.Graphics.FindAsync(id);
             if(graphic != null)
-                _ctx.Graphics.Attach(graphic);
+                ctx.Graphics.Attach(graphic);
             return graphic;
         }
 
         public async Task<Graphic?> GetGraphicByFileNameAsync(string fileName)
         {
-            var graphics = await _ctx.Graphics.ToListAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var graphics = await ctx.Graphics.ToListAsync();
             var graphic = graphics.Find(fn => fn.FilePath == fileName);
             
             if(graphic != null)
-                _ctx.Graphics.Attach(graphic);
+                ctx.Graphics.Attach(graphic);
             return graphic;
         }
 
-        public async Task<int> DeleteGraphicAsync(Graphic graphic)
+        public async Task<int?> DeleteGraphicAsync(Graphic graphic)
         {
-            _ctx.Graphics.Remove(graphic);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Graphics.Remove(graphic);
+            return await ctx.SaveChangesAsync();
         }
         
     }

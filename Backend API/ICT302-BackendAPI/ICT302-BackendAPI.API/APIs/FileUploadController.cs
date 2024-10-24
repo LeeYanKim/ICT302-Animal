@@ -207,7 +207,7 @@ namespace ICT302_BackendAPI.API.Controllers
         }
         private async Task<bool> DeleteAnimal(Guid animalId)
         {
-            var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
+            var animal = await _animalRepository.GetAnimalByIdAsync(animalId);
             if (animal == null)
             {
                 return false; // Animal not found
@@ -260,7 +260,7 @@ namespace ICT302_BackendAPI.API.Controllers
             try
             {
                 // Fetch the animal from the database using the animalId
-                var animal = await _animalRepository.GetAnimalByIDAsync(animalId);
+                var animal = await _animalRepository.GetAnimalByIdAsync(animalId);
                 if (animal == null)
                 {
                     return NotFound(new { message = "Animal not found." });

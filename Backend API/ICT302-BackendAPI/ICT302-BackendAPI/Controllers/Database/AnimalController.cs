@@ -67,7 +67,7 @@ public class AnimalController : ControllerBase
     {
         try
         {
-            var animal = await _animalRepo.GetAnimalByIDAsync(id);
+            var animal = await _animalRepo.GetAnimalByIdAsync(id);
             if (animal == null)
             {
                 return NotFound(new
@@ -94,7 +94,7 @@ public class AnimalController : ControllerBase
     {
         try
         {
-            var existingAnimal = await _animalRepo.GetAnimalByIDAsync(id);
+            var existingAnimal = await _animalRepo.GetAnimalByIdAsync(id);
             if (existingAnimal == null)
             {
                 return NotFound(new
@@ -123,7 +123,7 @@ public class AnimalController : ControllerBase
     {
         try
         {
-            var existingAnimal= await _animalRepo.GetAnimalByIDAsync(animalToUpdate.AnimalID);
+            var existingAnimal= await _animalRepo.GetAnimalByIdAsync(animalToUpdate.AnimalID);
             if (existingAnimal == null)
             {
                 return NotFound(new

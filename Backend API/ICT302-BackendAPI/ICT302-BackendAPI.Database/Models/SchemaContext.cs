@@ -1,30 +1,48 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 
 namespace ICT302_BackendAPI.Database.Models;
 
 public class SchemaContext : DbContext
 {
-    //private readonly IConfiguration _configuration;
+    private readonly ILogger<SchemaContext> _logger;
+    private readonly string _connectionString;
+    private const int CommandTimeout = 60;
 
-    // TODO: Update this back to reading appsettings file rather than hard code a connection string
-    private readonly string _connectionString = "server=10.51.33.50;port=3306;user=api;password=APIPass!;database=it01-animals"; // Main MySQL VM server
-
-    public SchemaContext()
+    public SchemaContext(IConfiguration configuration, ILogger<SchemaContext> logger)
     {
-        //_configuration = configuration;
-
-        //Safty check for null connection string
-        //string? connString = _configuration.GetConnectionString(name: "wildVisionDB");
-        //string? connString = _configuration.GetConnectionString(name: "devDB");
-        //_connectionString = connString != null ? connString : "";
+        _logger = logger;
+        
+        var fallbackConnectionString = "server=10.51.33.50;port=3306;user=api;password=APIPass!;database=it01-animals";
+        var mainConnection = configuration.GetConnectionString("wildVisionDB");
+        var backupConnection = configuration.GetConnectionString("wildVisionDB-Backup");
+        _connectionString = mainConnection ?? backupConnection ?? fallbackConnectionString;
+        
+        // Logging the server= portion of the connection string
+        _logger.LogInformation("Connection to MySQL {server}", _connectionString.Split(";")[0]);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseMySQL(_connectionString);
+        try
+        {
+            //TODO: Add more checks for connection errors to prevent the app from crashing
+            
+            optionsBuilder.UseMySQL(_connectionString, op =>
+            {
+                op.CommandTimeout(CommandTimeout);
+                op.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
+            });
         
-        optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.EnableSensitiveDataLogging();
+        }
+        catch (MySqlException e)
+        {
+            _logger.LogError(e, "Error while connecting to MySQL");
+        }
+        
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,7 +55,32 @@ public class SchemaContext : DbContext
             );
     }
 
+    /**
+     * <summary>Checks if the Database is available.</summary>
+     *
+     * <returns>True if the database is available and false if not</returns>
+     *
+     * <remarks>This function only trys to open a connection to the database and returns if the database is available.
+     * It does not check if the database is up-to-date with the current schema/creation</remarks>
+     */
+    public async Task<bool> CheckDbIsAvailable()
+    {
+        try
+        {
+            await Database.OpenConnectionAsync();
+            await Database.CloseConnectionAsync();
+        }
+        catch (MySqlException e)
+        {
+            _logger.LogError("Cannot open connection to MySQL: {message}", e.Message);
+            if(e.Number == -2)
+                _logger.LogError("MySQL connection timed out: {message}", e.Message);
+            return false;
+        }
 
+        return true;
+    }
+    
     public DbSet<Model3D> Model3D { get; set; }
     public DbSet<AccessType> AccessTypes { get; set; }
     public DbSet<Animal> Animals { get; set; }
