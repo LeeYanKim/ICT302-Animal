@@ -92,5 +92,21 @@ namespace ICT302_BackendAPI.Database.Repositories
             ctx.JobsPending.Remove(jobsPending);
             return await ctx.SaveChangesAsync();
         }
+
+        public async Task<bool?> ShuffleJobQueue()
+        {
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var pendingJobs = await ctx.JobsPending.ToListAsync();
+            foreach (var job in pendingJobs)
+            {
+                job.QueueNumber -= 1;
+                ctx.JobsPending.Update(job);
+                await ctx.SaveChangesAsync();
+            }
+
+            return true;
+        }
     }
 }
