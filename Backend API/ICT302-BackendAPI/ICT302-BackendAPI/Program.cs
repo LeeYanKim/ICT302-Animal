@@ -2,28 +2,30 @@ using ICT302_BackendAPI.API.Generation;
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 using System.Text.Json.Serialization;
-
 using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
-
-
+using ICT302_BackendAPI.Firebase;
+using NReco.Logging.File;
 using ICT302_BackendAPI.Utility;
 
-
-var cors = "_localCORSOrigins";
+// Creating web app builder
 var builder = WebApplication.CreateBuilder(args);
 
-// Initialize Firebase Admin SDK
-FirebaseApp.Create(new AppOptions()
+// Load Firebase config from appsettings
+builder.Services.Configure<FirebaseConfig>(builder.Configuration.GetSection("Firebase"));
+builder.Services.AddSingleton<FirebaseService>();
+
+// Force port 5173 and opening on 0.0.0.0 as localhost is unreachable to external systems
+builder.WebHost.UseUrls("http://0.0.0.0:5173");
+
+// Registering file logger
+builder.Services.AddLogging(loggingBuilder =>
 {
-    Credential = GoogleCredential.FromFile("wildvision-firebase-adminsdk.json") //To check
+    loggingBuilder.AddConsole();
+    loggingBuilder.AddFile("it01-backend-api.log", append: true);
 });
 
-Console.WriteLine(builder.Configuration["Firebase"]);
-
-builder.WebHost.UseKestrel();
-
 // Allowing Cross-Origin from frontend to API via localhost on different ports
+var cors = "_localCORSOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: cors, policy =>
@@ -39,19 +41,18 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Registering Swagger API Explorer
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-// Adding Access to our custom DB Context
+// Registering db context
 builder.Services.AddTransient<SchemaContext>();
 
-// Register repositories for Animal, Model3D, and AccessType
-builder.Services.AddTransient<IAnimalRepository, AnimalRepository>(); // Animal Repository
+// Register db repositories
+builder.Services.AddTransient<IAnimalRepository, AnimalRepository>();
 builder.Services.AddTransient<IModel3DRepository, Model3DRepository>();
-builder.Services.AddTransient<IAccessTypeRepository, AccessTypeRepository>(); // AccessType Repository
+builder.Services.AddTransient<IAccessTypeRepository, AccessTypeRepository>();
 builder.Services.AddTransient<IAnimalAccessRepository, AnimalAccessRepository>();
 builder.Services.AddTransient<IBillingRepository, BillingRepository>();
 builder.Services.AddTransient<IGraphicRepository, GraphicRepository>();
@@ -67,8 +68,10 @@ builder.Services.AddTransient<ITransactionTypeRepository, TransactionTypeReposit
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IUserAccessRepository, UserAccessRepository>();
 
+// Adding controllers
 builder.Services.AddControllers();
 
+// Registering generation job queue background services
 builder.Services.AddSingleton<MonitorJobLoop>();
 builder.Services.AddHostedService<QueuedJobService>();
 builder.Services.AddSingleton<IBackgroundJobQueue>(_ => 
@@ -81,37 +84,40 @@ builder.Services.AddSingleton<IBackgroundJobQueue>(_ =>
     return new BackgroundJobQueue(queueCapacity);
 });
 
-
+// Building App
 var app = builder.Build();
+app.Logger.LogInformation("Application starting...");
 
-bool.TryParse(builder.Configuration["EnableSwagger"], out var enable);
+// Loading firebase config
+var fb = app.Services.GetRequiredService<FirebaseService>();
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = fb.GetGoogleCredential()
+});
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || enable)
+
+
+// Setting up swagger ui
+var enableSwagger = builder.Configuration.GetValue <bool>("EnableSwagger");
+if (app.Environment.IsDevelopment() || enableSwagger)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Setting up Cors, Https, Routing and Controllers
 app.UseHttpsRedirection();
 app.UseCors(cors);
-
 app.UseRouting();
+app.MapControllers();
 
-#pragma warning disable ASP0014
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
-
+// Log app config to console and log file
 var util = new Utility(app.Configuration, app.Logger, app.Environment);
-
 util.PrintStartingConfig();
 
-
+// Start the pending job queue monitor
 MonitorJobLoop monitorJobLoop = app.Services.GetRequiredService<MonitorJobLoop>()!;
 monitorJobLoop.StartMonitorLoop();
 
-
-
+// Start the app
 app.Run();

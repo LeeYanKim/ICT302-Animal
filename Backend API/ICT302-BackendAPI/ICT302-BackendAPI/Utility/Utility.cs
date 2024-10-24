@@ -2,45 +2,38 @@
 
 namespace ICT302_BackendAPI.Utility;
 
-public class Utility
+public class Utility(IConfiguration configuration, ILogger logger, IWebHostEnvironment environment)
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger _logger;
-    private readonly IWebHostEnvironment _environment;
-
-    public Utility(IConfiguration configuration, ILogger logger,IWebHostEnvironment environment)
-    {
-        _configuration = configuration;
-        _logger = logger;
-        _environment = environment;
-    }
-    
     public void PrintStartingConfig()
     {
-        _logger.LogInformation("Starting with configuration:\n");
-        string config = "\tApp Environment: " + _environment.EnvironmentName +"\n";
+        string config = "Starting with configuration:\n";
+        config += "\tApp Environment: " + environment.EnvironmentName +"\n";
 
-        if (_environment.IsDevelopment())
+        if (environment.IsDevelopment())
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                config += "\tUser Storage Path: " + _configuration["dev_StoredFilesPath_Linux"] +"\n";
-                config += "\tUser Thumbnail Path: " + _configuration["dev_StoredThumbs_Linux"] +"\n";
+                config += "\tUser Storage Path: " + configuration["dev_StoredFilesPath_Linux"] +"\n";
+                config += "\tUser Thumbnail Path: " + configuration["dev_StoredThumbs_Linux"] +"\n";
             }
             else
             {
-                config += "\tUser Storage Path: " + _configuration["dev_StoredFilesPath"] +"\n";
-                config += "\tUser Thumbnail Path: " + _configuration["dev_StoredThumbs"] +"\n";
+                config += "\tUser Storage Path: " + configuration["dev_StoredFilesPath"] +"\n";
+                config += "\tUser Thumbnail Path: " + configuration["dev_StoredThumbs"] +"\n";
             }
             
         }
         else
         {
-            config += "\tUser Storage Path: " + _configuration["StoredFilesPath"] +"\n";
-            config += "\tUser Thumbnail Path: " + _configuration["StoredThumbs"] +"\n";
+            config += "\tUser Storage Path: " + configuration["StoredFilesPath"] +"\n";
+            config += "\tUser Thumbnail Path: " + configuration["StoredThumbs"] +"\n";
         }
         
-        _logger.LogInformation(config);
+        config += "\tLogging file: " + configuration.GetValue<string>("Logging:File:Path") +"\n";
+        config += "\tSwagger Enabled: " + configuration.GetValue<bool>("EnableSwagger") +"\n";
+        config += "\tGenAPI URL: " + configuration.GetValue<string>("GenAPIUrl") +"\n";
+        
+        logger.LogInformation(config);
         
     }
 }

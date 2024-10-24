@@ -6,47 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class OrganisationRepository : IOrganisationRepository
+    public class OrganisationRepository(SchemaContext ctx) : IOrganisationRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public OrganisationRepository(SchemaContext ctx)
+        public async Task<IEnumerable<Organisation>?> GetOrganisationsAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<Organisation>> GetOrganisationsAsync()
-        {
-            var organisations = await _ctx.Organisations.ToListAsync();
-            organisations.ForEach(a => _ctx.Organisations.Attach(a));
+            var organisations = await ctx.Organisations.ToListAsync();
+            organisations.ForEach(a => ctx.Organisations.Attach(a));
             return organisations;
         }
 
         public async Task<Organisation?> GetOrganisationByIDAsync(Guid id)
         {
-            var organisation = await _ctx.Organisations.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var organisation = await ctx.Organisations.FindAsync(id);
             return organisation;
         }
 
-        public async Task<Organisation> CreateOrganisationAsync(Organisation organisation)
+        public async Task<Organisation?> CreateOrganisationAsync(Organisation organisation)
         {
-            _ctx.Organisations.Attach(organisation);
-            _ctx.Organisations.Add(organisation);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Organisations.Attach(organisation);
+            ctx.Organisations.Add(organisation);
+            await ctx.SaveChangesAsync();
             return organisation;
         }
 
-        public async Task<Organisation> UpdateOrganisationAsync(Organisation organisation)
+        public async Task<Organisation?> UpdateOrganisationAsync(Organisation organisation)
         {
-            _ctx.Organisations.Update(organisation);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.Organisations.Update(organisation);
+            await ctx.SaveChangesAsync();
             return organisation;
         }
 
-        public async Task<int> DeleteOrganisationAsync(Organisation organisation)
+        public async Task<int?> DeleteOrganisationAsync(Organisation organisation)
         {
-            _ctx.Organisations.Remove(organisation);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Organisations.Remove(organisation);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

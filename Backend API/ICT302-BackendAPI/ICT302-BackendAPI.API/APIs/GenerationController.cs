@@ -101,7 +101,7 @@ public class GenerationController : ControllerBase
             if (graphic == null)
                 return BadRequest(new { message = "Error: No Graphic could be found with provided ID or file name" });
 
-            graphic.Animal = await _animalRepository.GetAnimalByIDAsync(graphic.AnimalID);
+            graphic.Animal = await _animalRepository.GetAnimalByIdAsync(graphic.AnimalID);
             
             _logger.LogInformation($"3D model for animal: {graphic.AnimalID} with graphic: {graphic.GPCName} has been requested. Checking job status...");
 

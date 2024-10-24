@@ -6,47 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class OrgRequestsRepository : IOrgRequestsRepository
+    public class OrgRequestsRepository(SchemaContext ctx) : IOrgRequestsRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public OrgRequestsRepository(SchemaContext ctx)
+        public async Task<IEnumerable<OrgRequests>?> GetOrgRequestsAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<OrgRequests>> GetOrgRequestsAsync()
-        {
-            var orgRequests = await _ctx.OrgRequests.ToListAsync();
-            orgRequests.ForEach(a => _ctx.OrgRequests.Attach(a));
+            var orgRequests = await ctx.OrgRequests.ToListAsync();
+            orgRequests.ForEach(a => ctx.OrgRequests.Attach(a));
             return orgRequests;
         }
 
         public async Task<OrgRequests?> GetOrgRequestsByIDAsync(Guid id)
         {
-            var orgRequest = await _ctx.OrgRequests.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var orgRequest = await ctx.OrgRequests.FindAsync(id);
             return orgRequest;
         }
 
-        public async Task<OrgRequests> CreateOrgRequestsAsync(OrgRequests orgRequests)
+        public async Task<OrgRequests?> CreateOrgRequestsAsync(OrgRequests orgRequests)
         {
-            _ctx.OrgRequests.Attach(orgRequests);
-            _ctx.OrgRequests.Add(orgRequests);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.OrgRequests.Attach(orgRequests);
+            ctx.OrgRequests.Add(orgRequests);
+            await ctx.SaveChangesAsync();
             return orgRequests;
         }
 
-        public async Task<OrgRequests> UpdateOrgRequestsAsync(OrgRequests orgRequests)
+        public async Task<OrgRequests?> UpdateOrgRequestsAsync(OrgRequests orgRequests)
         {
-            _ctx.OrgRequests.Update(orgRequests);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.OrgRequests.Update(orgRequests);
+            await ctx.SaveChangesAsync();
             return orgRequests;
         }
 
-        public async Task<int> DeleteOrgRequestsAsync(OrgRequests orgRequests)
+        public async Task<int?> DeleteOrgRequestsAsync(OrgRequests orgRequests)
         {
-            _ctx.OrgRequests.Remove(orgRequests);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.OrgRequests.Remove(orgRequests);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

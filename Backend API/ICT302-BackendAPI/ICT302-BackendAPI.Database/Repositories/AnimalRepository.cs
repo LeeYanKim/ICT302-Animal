@@ -6,81 +6,100 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class AnimalRepository : IAnimalRepository
+    public class AnimalRepository(SchemaContext ctx) : IAnimalRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public AnimalRepository(SchemaContext ctx)
-        {
-            _ctx = ctx;
-        }
-
         // Get all animals
-        public async Task<IEnumerable<Animal>> GetAnimalsAsync()
+        public async Task<IEnumerable<Animal>?> GetAnimalsAsync()
         {
-            var animals = await _ctx.Animals.ToListAsync();
-            animals.ForEach(a => _ctx.Animals.Attach(a));
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var animals = await ctx.Animals.ToListAsync();
+            animals.ForEach(a => ctx.Animals.Attach(a));
             return animals;
+
         }
 
         // Get animal by ID
-        public async Task<Animal?> GetAnimalByIDAsync(Guid? id)
+        public async Task<Animal?> GetAnimalByIdAsync(Guid? id)
         {
-           if (id == null) return null;
+            if (id == null) return null;
 
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
             // Use Include to eagerly load the related Graphics data
-            var animal = await _ctx.Animals
+            var animal = await ctx.Animals
                 .Include(a => a.Graphics)
                 .FirstOrDefaultAsync(a => a.AnimalID == id); // Use FirstOrDefaultAsync instead of FindAsync to support Include
 
             if (animal != null)
-            {
-                _ctx.Animals.Attach(animal); // Attach the entity to the context
+            { 
+                ctx.Animals.Attach(animal); // Attach the entity to the context
             }
 
             return animal;
+
         }
 
 
         // Create a new animal
-        public async Task<Animal> CreateAnimalAsync(Animal animal)
+        public async Task<Animal?> CreateAnimalAsync(Animal animal)
         {
-            _ctx.Animals.Attach(animal);
-            _ctx.Animals.Add(animal);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.Animals.Attach(animal);
+            ctx.Animals.Add(animal);
+            await ctx.SaveChangesAsync();
             return animal;
+            
         }
 
         // Update an existing animal
-        public async Task<Animal> UpdateAnimalAsync(Animal animal)
+        public async Task<Animal?> UpdateAnimalAsync(Animal animal)
         {
-            _ctx.Animals.Attach(animal);
-            _ctx.Animals.Update(animal);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.Animals.Attach(animal);
+            ctx.Animals.Update(animal);
+            await ctx.SaveChangesAsync();
             return animal;
+
         }
 
         // Delete an animal
-        public async Task<int> DeleteAnimalAsync(Animal animal)
+        public async Task<int?> DeleteAnimalAsync(Animal animal)
         {
-            _ctx.Animals.Remove(animal);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.Animals.Remove(animal);
+            return await ctx.SaveChangesAsync();
+
         }
 
         // Update animal video data
         public async Task<Animal?> UpdateAnimalVideoDataAsync(Guid animalId, string videoFileName, DateTime uploadDate)
         {
-            var animal = await _ctx.Animals.FindAsync(animalId);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var animal = await ctx.Animals.FindAsync(animalId);
             if (animal == null)
             {
                 return null; // Animal not found
             }
-            
 
-            _ctx.Animals.Update(animal);
-            await _ctx.SaveChangesAsync();
+
+            ctx.Animals.Update(animal);
+            await ctx.SaveChangesAsync();
 
             return animal;
+            
+
+            
         }
     }
 }

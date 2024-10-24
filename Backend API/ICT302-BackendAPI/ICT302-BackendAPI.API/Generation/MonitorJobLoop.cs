@@ -26,10 +26,19 @@ public sealed class MonitorJobLoop(
     private const int ApiAliveDelayMs = ApiAliveDelayS * 1000;
 
     private readonly CancellationToken _cancellationToken = applicationLifetime.ApplicationStopping;
-    public void StartMonitorLoop()
+    public async void StartMonitorLoop()
     {
-        logger.LogInformation($"Pending job queue monitor loop is starting.");
+        logger.LogInformation("Pending job queue monitor loop is starting.");
+        logger.LogInformation("Checking if Database is available.");
+
+        // Don't start the monitor unless the database is available 
+        if (!await jobsPendingRepository.CheckDbAvailability())
+        {
+            logger.LogInformation("Database is not available. Monitoring pending jobs will be disabled.");
+            return;
+        }
         
+        logger.LogInformation("Database is available.");
         // Run an init check if there are any pending jobs on start up
         Task.Run(async () => await AssignJobWorkItem(), _cancellationToken);
     }

@@ -7,10 +7,10 @@ namespace ICT302_BackendAPI.Database.Repositories
 {
     public interface IAccessTypeRepository
     {
-        Task<AccessType> CreateAccessTypeAsync(AccessType accessType);
-        Task<int> DeleteAccessTypeAsync(AccessType accessType);
+        Task<AccessType?> CreateAccessTypeAsync(AccessType accessType);
+        Task<int?> DeleteAccessTypeAsync(AccessType accessType);
         Task<AccessType?> GetAccessTypeByIDAsync(Guid id);
-        Task<IEnumerable<AccessType>> GetAccessTypesAsync();
-        Task<AccessType> UpdateAccessTypeAsync(AccessType accessType);
+        Task<IEnumerable<AccessType>?> GetAccessTypesAsync();
+        Task<AccessType?> UpdateAccessTypeAsync(AccessType accessType);
     }
 }

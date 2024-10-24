@@ -4,6 +4,8 @@
 firebase-adminsdk.json
 3D Generation/ICT302-Animals-Generator-API/ICT302-Animals-Generator-API/bin/
 3D Generation/ICT302-Animals-Generator-API/ICT302-Animals-Generator-API/obj/
+# Backend Logs
+*.log
 
 # Jetbrains idea files
 .idea

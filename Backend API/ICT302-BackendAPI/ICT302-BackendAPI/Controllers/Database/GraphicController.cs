@@ -31,7 +31,7 @@ namespace ICT302_BackendAPI.Controllers.Database
             try
             {
                 graphic.GPCID = Guid.NewGuid();
-                graphic.Animal = await _animalRepo.GetAnimalByIDAsync(graphic.AnimalID) ?? new Animal();
+                graphic.Animal = await _animalRepo.GetAnimalByIdAsync(graphic.AnimalID) ?? new Animal();
                 var g = await _graphicRepo.CreateGraphicAsync(graphic);
                 return Ok(g);
             }
