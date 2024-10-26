@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid} from "@mui/material";
 import API from "../../Internals/API";
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -44,7 +44,7 @@ interface AnimalDetailsProps {
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const [animalData, setAnimalData] = useState<Animal | null>(null);
-  const [modelData, setModelData] = useState<Model3D[]>([]);
+  const modelData = useRef<Model3D[]>([]);
   const [animalModels, setAnimalModels] = useState<AnimalModels>();
   const [loading, setLoading] = useState<boolean>(true);
   const [PlayerOpen, setPlayerOpen] = useState(false);
@@ -89,10 +89,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
             throw new Error("Failed to fetch model data");
           }
           const data = await response.json();
-          setModelData(data);
-          console.log(data)
-          let am = {animal: animalData, models: modelData};
-          setAnimalModels(am);
+          modelData.current = data;
         }
       } catch (error) {
         console.error("Error fetching model data:", error);
@@ -178,27 +175,27 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   };
 
   const MatchGraphicModel = (graphic: Graphic, index: string) => {
-    //TODO: Fix this as model is valid but model.gpcID is undefined
-    modelData.forEach((model) => {
-      if (model.gpcID === graphic.gpcid) {
-        return (<Box key={index}>
-          <ModelViewer modelPath={model.filePath}/>
-        </Box>);
-      }
-    });
-
-    return (<Box key={index}>
-      <Button variant="contained" onClick={() => handleModelGeneration(graphic)} disabled={generating}>
-        {!generating ? (<Typography>Generate from this Video</Typography>)
-            :
-            (<Typography>{progressLabel}</Typography>)}
-      </Button>
-    </Box>)
+    //@ts-ignore
+    let m = modelData.current.find((model, idx) => model.gpcid === graphic.gpcid);
+    if(m !== undefined) {
+      return (<Box key={graphic.gpcid}>
+        <ModelViewer modelPath={m.filePath}/>
+      </Box>);
+    }
+    else {
+      return (<Box key={index}>
+        <Button variant="contained" onClick={() => handleModelGeneration(graphic)} disabled={generating}>
+          {!generating ? (<Typography>Generate from this Video</Typography>)
+              :
+              (<Typography sx={{textColor: "white"}}>{progressLabel}</Typography>)}
+        </Button>
+      </Box>)
+    }
   }
 
 
   return (
-    <Box>
+    <Box sx={{width: "1000px"}}>
       {/* Banner with animal photo and name */}
       <Box sx={{ position: 'relative', overflow: 'hidden', mb: 2 }}>
         {photoUrl && (
