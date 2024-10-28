@@ -13,7 +13,7 @@ import './LandingNav.css';
 
 const pages = ['Home', 'About']; // TODO Add any other pages here, Must match the routes in App.tsx
 
-const settings = ['Account', 'Dashboard', 'SignOut']; // TODO Add any other settings here
+const settings = ['Dashboard', 'SignOut']; // TODO Add any other settings here
 
 
 const LandingNav: React.FC= () => {
