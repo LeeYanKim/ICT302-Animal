@@ -88,7 +88,7 @@ const UploadPrompt: React.FC<UploadProps> = ({
 
   return (
     <FrontendContext.Provider value={frontendContext}> {/* Context provider */}
-      <div style={{ width: '85vw', margin: 10, padding: 0 }}>
+      <div style={{ width: '100%', padding: 0 }}>
         <Box
           component="form"
           noValidate
