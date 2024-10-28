@@ -18,7 +18,7 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
   const frontendContext = useContext(FrontendContext);
 
   const mainListItems = [
-    { text: 'Home', icon: <HomeRoundedIcon /> },
+    //{ text: 'Home', icon: <HomeRoundedIcon /> },
     { text: 'Upload', icon: <CloudUploadIcon /> },
     { text: 'Animals', icon: <PetsIcon /> },
   ];
