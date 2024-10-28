@@ -40,7 +40,7 @@ public sealed class MonitorJobLoop(
         
         logger.LogInformation("Database is available.");
         // Run an init check if there are any pending jobs on start up
-        Task.Run(async () => await AssignJobWorkItem(), _cancellationToken);
+        _ = Task.Run(async () => await AssignJobWorkItem(), _cancellationToken);
     }
 
     private HttpClient GetHttpClient()
@@ -56,7 +56,7 @@ public sealed class MonitorJobLoop(
         return _sharedHttpClient;
     }
 
-    private async Task<HttpRequestMessage> CreateAliveRequestAsync()
+    private HttpRequestMessage CreateAliveRequestAsync()
     {
         var genApiUrl = new Uri(configuration["GenAPIUrl"] + "/alive");
         
@@ -86,7 +86,7 @@ public sealed class MonitorJobLoop(
         {
             try
             {
-                alive = await GetHttpClient().SendAsync(await CreateAliveRequestAsync(), _cancellationToken);
+                alive = await GetHttpClient().SendAsync(CreateAliveRequestAsync(), _cancellationToken);
             }
             catch (Exception e)
             {
@@ -134,7 +134,7 @@ public sealed class MonitorJobLoop(
                 var data = new
                 {
                     Token = configuration["GenAPIAuthToken"], JobID = job.JobDetails.JDID,
-                    FileName = job.JobDetails.Graphic.FilePath, SubjectHint = job.JobDetails.Graphic.Animal?.AnimalType,
+                    FileName = job.JobDetails.Graphic!.FilePath, SubjectHint = job.JobDetails.Graphic.Animal?.AnimalType,
                     ModelPath = job.JobDetails.JDID + ".glb", ModelVersion = 1
                 };
 
@@ -187,7 +187,7 @@ public sealed class MonitorJobLoop(
                 
                 if (result != null && result.IsSuccessStatusCode && job.Status == JobStatus.Fetching)
                 {
-                    var modelFilePath = Path.Join(storedFilesPath, job.JobDetails.Model3D.FilePath);
+                    var modelFilePath = Path.Join(storedFilesPath, job.JobDetails.Model3D!.FilePath);
                     logger.LogInformation("Model file fetched successfully and saved to {modelFilePath}", modelFilePath);
                     
                     await using (var fs = new FileStream(modelFilePath, FileMode.Create, FileAccess.Write))

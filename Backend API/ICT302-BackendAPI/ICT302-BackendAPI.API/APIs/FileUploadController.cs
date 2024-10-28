@@ -99,7 +99,7 @@ namespace ICT302_BackendAPI.API.Controllers
                 // Add the animal to the database before processing upload
                 var a = await _animalRepository.CreateAnimalAsync(animal);
 
-                if (a.AnimalID == Guid.Empty)
+                if (a != null && a.AnimalID == Guid.Empty)
                 {
                     string msg = "Failed to create animal in the database.";
                     _logger.LogError(msg);
@@ -228,9 +228,9 @@ namespace ICT302_BackendAPI.API.Controllers
 
         private string GetStoredFilesPath()
         {
-            string storedFilesPath = _webHostEnvironment.IsDevelopment()
-                ? _configuration["dev_StoredFilesPath"]
-                : _configuration["StoredFilesPath"];
+            string? storedFilesPath = _webHostEnvironment.IsDevelopment()
+                ? _configuration.GetValue<string>("dev_StoredFilesPath")
+                : _configuration.GetValue<string>("StoredFilesPath");
 
             if (string.IsNullOrEmpty(storedFilesPath))
             {
@@ -245,7 +245,7 @@ namespace ICT302_BackendAPI.API.Controllers
         private bool IsFileTypeAllowed(string fileExtension)
         {
             var allowedExtensions = _configuration.GetSection("AllowedFileUploadTypes").Get<string[]>();
-            return allowedExtensions.Contains(fileExtension.ToLowerInvariant());
+            return allowedExtensions!.Contains(fileExtension.ToLowerInvariant());
         }
 
         private string SanitizeFileName(string fileName)

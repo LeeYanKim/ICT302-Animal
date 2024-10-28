@@ -10,9 +10,9 @@ namespace ICT302_BackendAPI.Controllers.Database
 {
     public class AddUserRequest
     {
-        public string userName { get; set; }
-        public string userEmail { get; set; }
-        public string permissionLevel { get; set; }
+        public string? userName { get; set; }
+        public string? userEmail { get; set; }
+        public string? permissionLevel { get; set; }
     }
     
     [Route("api/db")]
@@ -84,8 +84,8 @@ namespace ICT302_BackendAPI.Controllers.Database
                         user.SubscriptionID = user.Subscription!.SubscriptionID;
                         
                         user.UserPassword = "";
-                        user.UserEmail = userRequested.userEmail;
-                        user.UserName = userRequested.userName;
+                        user.UserEmail = userRequested.userEmail!;
+                        user.UserName = userRequested.userName!;
 
                         var createdUser = await _userRepo.CreateUserAsync(user);
 
@@ -93,7 +93,7 @@ namespace ICT302_BackendAPI.Controllers.Database
                         {
                             statusCode = 200,
                             message = "User created successfully",
-                            userId = createdUser.UserID
+                            userId = createdUser!.UserID
                         });
                     }
 

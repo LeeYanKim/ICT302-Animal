@@ -33,7 +33,6 @@ public class GenerationController : ControllerBase
     private readonly MonitorJobLoop _jobLoop;
     private readonly IAnimalRepository _animalRepository;
     
-    private static HttpClient? _sharedHttpClient = null;
 
     public GenerationController(IConfiguration configuration, ILogger<GenerationController> logger,
         IWebHostEnvironment webHostEnvironment, IGraphicRepository graphicRepository,
@@ -58,14 +57,14 @@ public class GenerationController : ControllerBase
     {
         var client = new HttpClient()
         {
-            BaseAddress = new Uri(_configuration["GenAPIUrl"])
+            BaseAddress = new Uri(_configuration.GetValue<string>("GenAPIUrl")!)
         };
         var data = new
         {
             Token = _configuration["GenAPIAuthToken"]
         };
         
-        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_configuration["GenAPIUrl"]));
+        var request = new HttpRequestMessage(HttpMethod.Post, new Uri(_configuration.GetValue<string>("GenAPIUrl")!));
         var content = new MultipartFormDataContent();
         content.Add(JsonContent.Create(data), "StartGenerationJson");
 
@@ -123,7 +122,7 @@ public class GenerationController : ControllerBase
                     });
 
                 // Check if job is the queue
-                if (jobsPending.Any())
+                if (jobsPending!.Any())
                 {
                     var pendingJob = jobsPending.Find(job => job.JobDetailsId == jobDetails.JDID);
                     if (pendingJob != null)
@@ -183,7 +182,7 @@ public class GenerationController : ControllerBase
             // Telling the job monitor there's a job pending and needs to be added to the job queue
             // DO NOT await. We don't want the api to wait for gen to complete before returning to the frontend
             // This is a fire and forget return. A background thread will do the work from here
-            _jobLoop.AssignJobWorkItem();
+            _ = _jobLoop.AssignJobWorkItem();
 
             return Ok(new { message = "Success: Job was successfully lodged and will begin generation shortly!" });
         }

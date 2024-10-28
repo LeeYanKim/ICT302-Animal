@@ -30,8 +30,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: cors, policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "http://10.51.33.50", "http://localhost:*", "http://17.19.0.1", "https://api.wildvision.co", "https://wildvision.co")
-        .AllowAnyMethod() //Is this unsafe?
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "http://10.51.33.50", "http://localhost:*", "http://17.19.0.1", "https://api.wildvision.co", "https://wildvision.co", "https://www.wildvision.co", "https://www.api.wildvision.co")
+        .AllowAnyMethod()
         .WithHeaders("Authorization", "Content-Type")
         .AllowCredentials();
     });

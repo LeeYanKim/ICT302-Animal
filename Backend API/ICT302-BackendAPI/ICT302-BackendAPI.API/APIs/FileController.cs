@@ -70,10 +70,10 @@ namespace ICT302_BackendAPI.API.APIs
             try
             {
                 string? storedFilesPath = _webHostEnvironment.IsDevelopment()
-                    ? _configuration["dev_StoredFilesPath"]
-                    : _configuration["StoredFilesPath"];
+                    ? _configuration.GetValue<string>("dev_StoredFilesPath")
+                    : _configuration.GetValue<string>("StoredFilesPath");
 
-                var filePath = Path.Combine(storedFilesPath, fileName);
+                var filePath = Path.Combine(storedFilesPath!, fileName);
 
                 if (!System.IO.File.Exists(filePath))
                 {
@@ -100,7 +100,7 @@ namespace ICT302_BackendAPI.API.APIs
             {
                 var animals = await _animalRepository.GetAnimalsAsync();
 
-                return !animals.Any() ? Ok(new { message = "No animals found" }) : Ok(animals);
+                return animals!.Any() ? Ok(new { message = "No animals found" }) : Ok(animals);
             }
             catch (Exception ex)
             {
@@ -128,7 +128,7 @@ namespace ICT302_BackendAPI.API.APIs
             try
             {
                 var animalIDs = await _animalAccessRepository.GetAnimalIDsByUserIDAsync(userID);
-                if (!animalIDs.Any())
+                if (animalIDs!.Any())
                 {
                     return NotFound(new { message = "No animals found for this user." });
                 }
@@ -165,7 +165,7 @@ namespace ICT302_BackendAPI.API.APIs
             try
             {
                 var models = await _model3DRepository.GetModel3DListFromAnimalIdAsync(animalId);
-                if(models.Count == 0)
+                if(models!.Count == 0)
                     return NotFound(new { message = "Animal model not found" });
                 
                 foreach (var model in models)

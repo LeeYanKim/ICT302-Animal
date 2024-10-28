@@ -15,7 +15,7 @@ public class FirebaseService(IOptions<FirebaseConfig> firebaseConfig)
             type = _firebaseConfig.Type,
             project_id = _firebaseConfig.ProjectId,
             private_key_id = _firebaseConfig.PrivateKeyId,
-            private_key = _firebaseConfig.PrivateKey.Replace("\\n", "\n"),
+            private_key = _firebaseConfig.PrivateKey!.Replace("\\n", "\n"),
             client_email = _firebaseConfig.ClientEmail,
             client_id = _firebaseConfig.ClientId,
             auth_uri = _firebaseConfig.AuthUri,
