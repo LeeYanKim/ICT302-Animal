@@ -55,7 +55,7 @@ const OptionsMenu: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
           },
         }}
       >
-        <MenuItem onClick={handleClose}>My account</MenuItem>
+        {/* <MenuItem onClick={handleClose}>My account</MenuItem> */}
         <Divider />
         <Button
           component={Link}
