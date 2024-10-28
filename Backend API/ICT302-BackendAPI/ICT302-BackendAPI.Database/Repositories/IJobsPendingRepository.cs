@@ -15,5 +15,6 @@ namespace ICT302_BackendAPI.Database.Repositories
         
         Task<JobsPending?> GetPendingJobByQueuePosition(int queuePosition);
         Task<JobsPending?> UpdateJobsPendingAsync(JobsPending jobsPending);
+        Task<bool?> ShuffleJobQueue();
     }
 }

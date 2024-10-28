@@ -252,7 +252,10 @@ public sealed class MonitorJobLoop(
         if (job.Status == JobStatus.Closed)
         {
             logger.LogInformation("Job {jobId} has finished", job.JobDetailsId);
+            
+            //Delete pending job from the queue and shuffle down the next pending job to position
             await jobsPendingRepository.DeleteJobsPendingAsync(job);
+            await jobsPendingRepository.ShuffleJobQueue();
         }
     }
 }

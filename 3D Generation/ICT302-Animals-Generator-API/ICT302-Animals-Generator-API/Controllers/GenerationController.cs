@@ -11,6 +11,7 @@ using Aspose.ThreeD;
 using ICT302_Animals_Generator_API.Util;
 using Microsoft.Extensions.Primitives;
 using System.Web;
+using Aspose.ThreeD.Utilities;
 
 
 namespace ICT302_Animals_Generator_API.Controllers;
@@ -282,6 +283,7 @@ public class GenerationController : ControllerBase
             
             model.StartGenerationJson.OutputPath = GetOutputPath(model.StartGenerationJson.JobID);
             var scene = Scene.FromFile(Path.Join(model!.StartGenerationJson.OutputPath + model.GenOutputLoc, "bite_output.obj"));
+            scene.RootNode.Transform.Scaling = new Vector3(10f, 10f, 10f);
             var root = model.StartGenerationJson.OutputPath;
             scene.Save(Path.Join(root, model.StartGenerationJson.JobID + ".glb"));
 
