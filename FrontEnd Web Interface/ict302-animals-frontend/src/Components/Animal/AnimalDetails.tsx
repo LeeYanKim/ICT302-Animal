@@ -3,6 +3,8 @@ import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid} fr
 import API from "../../Internals/API";
 import { useLocation, useNavigate } from 'react-router-dom';
 import ModelViewer from "../ModelViewer/ModelViewer";
+import Generation from "../Generation/Generation";
+import ReactPlayer from "react-player";
 
 interface Graphic {
   gpcid: string;
@@ -10,20 +12,6 @@ interface Graphic {
   gpcDateUpload: string;
   filePath: string;
   animalID: string;
-}
-
-interface Model3D {
-    modelID: string;
-    modelTitle: string;
-    modelDateGen: string;
-    filePath: string;
-    gpcID: string;
-    Graphic: Graphic;
-}
-
-interface AnimalModels {
-  animal: Animal;
-  models: Model3D[];
 }
 
 interface Animal {
@@ -44,20 +32,14 @@ interface AnimalDetailsProps {
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const [animalData, setAnimalData] = useState<Animal | null>(null);
-  const modelData = useRef<Model3D[]>([]);
-  const [animalModels, setAnimalModels] = useState<AnimalModels>();
   const [loading, setLoading] = useState<boolean>(true);
   const [PlayerOpen, setPlayerOpen] = useState(false);
-  const [generating, setGenerating] = useState<boolean>(false);
   const [tabValue, setTabValue] = useState(0);
-  const [progressLabel, setProgressLabel] = useState<string>("Pending");
-  const [ModelExist, setModelExist] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const animalNameFromState = location.state?.animalName;
 
-  // Ensure animalId is available before making a request
   useEffect(() => {
     const fetchAnimalData = async () => {
       if (!animalId) return;
@@ -77,27 +59,10 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     };
 
     fetchAnimalData();
-
   }, [animalId]);
 
-  useEffect(() => {
-    const fetchModelData = async () => {
-      try {
-        if(animalData !== null) {
-          const response = await fetch(API.Download() + `/animals/models/${animalId}`);
-          if (!response.ok) {
-            throw new Error("Failed to fetch model data");
-          }
-          const data = await response.json();
-          modelData.current = data;
-        }
-      } catch (error) {
-        console.error("Error fetching model data:", error);
-      }
-    };
 
-    fetchModelData();
-  }, [animalData, animalId]);
+
 
   const handleBackBtnClick = () => {
     navigate('/dashboard/animals');
@@ -126,43 +91,6 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     setPlayerOpen(!PlayerOpen);
   };
 
-  const handleModelGeneration = async (graphic: Graphic) => {
-    setGenerating(true);
-    const videoFileName = graphic?.filePath.split("/").pop();
-
-    if (!videoFileName) {
-      console.error("No video available for this animal.");
-      setGenerating(false);
-      return;
-    }
-    const res = await fetch(API.Generate(), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      }, body: JSON.stringify({
-        AnimalId: animalId,
-        AnimalGraphicFileName: videoFileName, //Graphics is now an array
-        GraphicId: graphic.gpcid,
-        GenType: "BITE",
-      }),
-    });
-
-    // Simulate the different stages of progress
-    setProgressLabel("Pending");
-    await setTimeout(() => setProgressLabel("PreProcessing"), 1000);
-    await setTimeout(() => setProgressLabel("Generating"), 3000);
-    await setTimeout(() => setProgressLabel("Converting"), 5000);
-    await setTimeout(() => setProgressLabel("Cleaning-Up"), 7000);
-    await setTimeout(() => {
-      setProgressLabel("Finished"); // Clear progress label when finished
-      setGenerating(false);
-      setModelExist(true);
-    }, 3000);
-  };
-
-  const handleViewGeneration = () => {
-    console.log("Viewing the generated model...");
-  };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -174,56 +102,60 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     return date.toLocaleDateString(); // Format the date as MM/DD/YYYY (or according to the user's locale)
   };
 
-  const MatchGraphicModel = (graphic: Graphic, index: string) => {
-    //@ts-ignore
-    let m = modelData.current.find((model, idx) => model.gpcid === graphic.gpcid);
-    if(m !== undefined) {
-      return (<Box key={graphic.gpcid}>
-        <ModelViewer modelPath={m.filePath}/>
-      </Box>);
-    }
-    else {
-      return (<Box key={index}>
-        <Button variant="contained" onClick={() => handleModelGeneration(graphic)} disabled={generating}>
-          {!generating ? (<Typography>Generate from this Video</Typography>)
-              :
-              (<Typography sx={{textColor: "white"}}>{progressLabel}</Typography>)}
-        </Button>
-      </Box>)
-    }
+  interface TabPanelProps {
+    children?: React.ReactNode;
+    index: number;
+    value: number;
   }
 
+  function CustomTabPanel(props: TabPanelProps) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+          {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+        </div>
+    );
+  }
 
   return (
     <Box sx={{width: "1000px"}}>
+
       {/* Banner with animal photo and name */}
       <Box sx={{ position: 'relative', overflow: 'hidden', mb: 2 }}>
         {photoUrl && (
           <img src={photoUrl} alt={animalData.animalName} style={{ width: '100%', height: 'auto' }} />
         )}
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: 'blue', p: 2 }}>
+        <Box sx={{}}>
           <Typography variant="h4">{animalData.animalName}</Typography>
         </Box>
       </Box>
 
       {/* Tabs for different sections */}
-      <Tabs
-        value={tabValue}
-        onChange={handleTabChange}
-        centered
-        variant='fullWidth'
-        indicatorColor='secondary'
-        aria-label="animal details tabs"
-      >
-        <Tab label="Information" />
-        <Tab label="Media Uploaded" />
-        <Tab label="Version" />
-        <Tab label="Access Granted" />
-      </Tabs>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          centered
+          variant='fullWidth'
+          indicatorColor='secondary'
+          aria-label="animal details tabs"
+        >
+          <Tab label="Information" />
+          <Tab label="Media Uploaded" />
+          <Tab label="Version" />
+          <Tab label="Access Granted" />
+        </Tabs>
+      </Box>
 
       {/* Tab Content */}
-      <Box sx={{ p: 10 }}>
-        {tabValue === 0 && (
+        <CustomTabPanel index={0} value={tabValue}>
           <Box>
             <Typography variant="h5">Animal Information:</Typography>
             <Typography variant="body1">
@@ -236,53 +168,36 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
               <strong>Date of Birth:</strong> {formatDOB(animalData.animalDOB)}
             </Typography>
           </Box>
-        )}
+        </CustomTabPanel>
 
-        {tabValue === 1 && (
-          <Box>
+        <CustomTabPanel index={1} value={tabValue}>
             <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
             {animalData.graphics && animalData.graphics.length > 0 ? (
                 animalData?.graphics.map((graphic, index) => (
-                <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
-                  <Typography variant="subtitle1">Video {index + 1}:</Typography>
-                  <Grid container>
-                    <Grid>
-                      <video
-                        controls
-                        style={{
-                          width: '600px', // Fixed width
-                          height: '340px', // Fixed height to maintain aspect ratio
-                          objectFit: 'cover', // Ensures the video covers the entire space while maintaining aspect ratio
-                          backgroundColor: 'black', // Background in case of empty space
-                        }}>
-                        {graphic.filePath.endsWith('.mp4') && <source src={graphic.filePath} type="video/mp4" />}
-                        {graphic.filePath.endsWith('.webm') && <source src={graphic.filePath} type="video/webm" />}
-                        {graphic.filePath.endsWith('.mov') && <source src={graphic.filePath} type="video/quicktime" />}
-                        {graphic.filePath.endsWith('.mkv') && <source src={graphic.filePath} type="video/x-matroska" />}
-
-                        Your browser does not support the video tag.
-                      </video>
-                    </Grid>
-                    <Grid>
-                      {MatchGraphicModel(graphic, graphic.gpcid)}
-                    </Grid>
-                  </Grid>
-                </Box>
-              ))
+                    <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
+                      <Typography variant="subtitle1">Video {index + 1}:</Typography>
+                      <Grid container spacing={2}>
+                        <Grid size={6}>
+                          <ReactPlayer key={graphic.gpcid} width={'100%'} height={'100%'} url={graphic.filePath} controls={true} />
+                        </Grid>
+                        <Grid size={6}>
+                          <Generation key={graphic.gpcid} graphicId={graphic.gpcid} animalId={animalId} graphicFileName={graphic.filePath}/>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                ))
             ) : (
-              <Typography>No video available for this animal.</Typography>
+                <Typography>No video available for this animal.</Typography>
             )}
-          </Box>
-        )}
+        </CustomTabPanel>
 
-        {tabValue === 2 && (
+        <CustomTabPanel index={2} value={tabValue}>
           <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
-        )}
+        </CustomTabPanel>
 
-        {tabValue === 3 && (
+        <CustomTabPanel index={3} value={tabValue}>
           <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
-        )}
-      </Box>
+        </CustomTabPanel>
 
       {/* Back Button */}
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>

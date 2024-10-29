@@ -28,6 +28,7 @@ class APIEndpoints {
     user: string = '/user';
     userAccess: string = '/userAccess';
     generate: string = '/generate';
+    generationStatus: string = '/generate/status';
 
     constructor(isDev: boolean, baseUrl: string) {
         this.isDev = isDev;
@@ -394,7 +395,7 @@ class API {
 
     /**
      * 
-     * @returns The base URL path for the API File controller endpoint/s
+     * @returns The base URL path for the API Generation controller endpoint
      * 
      * Example: http://localhost:5173/api/files
      */
@@ -402,6 +403,19 @@ class API {
         this.ensureInitialized();
         const base = this.endpoint?.baseUrl ?? '';
         const endpoint = this.endpoint?.generate;
+        return base + endpoint;
+    }
+
+    /**
+     *
+     * @returns The base URL path for the API Generation controller job details endpoint/s
+     *
+     * Example: http://localhost:5173/api/generate/job
+     */
+    public static GenerationStatus() {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const endpoint = this.endpoint?.generationStatus;
         return base + endpoint;
     }
 

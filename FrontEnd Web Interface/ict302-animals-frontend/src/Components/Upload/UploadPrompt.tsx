@@ -16,11 +16,7 @@ import NewUpload from './NewUpload';
 import { UploadProps } from './UploadProps'; 
 import { FrontendContext } from '../../Internals/ContextStore'; // Import your context
 
-const UploadPrompt: React.FC<UploadProps> = ({
-  alertQueue,
-  setAlertQueue,
-  onUploadSuccess,
-}) => {
+const UploadPrompt: React.FC<UploadProps> = ({onUploadSuccess}) => {
   const frontendContext = useContext(FrontendContext); // Access context if needed
 
   const [isAnimalFormOpen, setIsAnimalFormOpen] = useState(false);

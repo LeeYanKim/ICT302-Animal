@@ -16,7 +16,7 @@ import {
 
 
 interface ModelProps {
-    url: string;
+    url: string | undefined;
     isAnimating: boolean;
     wireframe: boolean;
     animationSpeed: number;
@@ -33,7 +33,7 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
     const modelRef = useRef<Group | null>(null);
     const mixerRef = useRef<AnimationMixer | null>(null);
     const { camera } = useThree();
-    const gltf = useGLTF(url);
+    const gltf = useGLTF(url ? url : '');
     //@ts-ignore
     gltf.scene.children[0].geometry.center()
     //@ts-ignore
@@ -145,7 +145,7 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
 
     return (
         <>
-        <primitive ref={modelRef} object={gltf.scene}/>
+            <primitive ref={modelRef} object={gltf.scene}/>
         </>
     );
 };

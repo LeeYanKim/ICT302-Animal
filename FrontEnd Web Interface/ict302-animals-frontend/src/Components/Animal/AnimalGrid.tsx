@@ -98,7 +98,6 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Animals:</Typography>
         <Button variant="outlined" onClick={handleFilterButtonClick}>
           Filter by Animal Type
         </Button>
@@ -119,6 +118,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
               animalDOB={animal.animalDOB || ''}
               animalType={animal.animalType}
               onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
+              onDeleteSuccess={fetchAnimalsData}
             />
           </Grid>
         ))}

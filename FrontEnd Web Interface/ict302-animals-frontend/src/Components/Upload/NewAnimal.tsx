@@ -30,7 +30,7 @@ interface NewAnimalProps {
   requireFile?: boolean; // New prop to indicate if file selection is required
 }
 
-const animalTypesList = ["Mammal", "Bird", "Reptile", "Fish"];
+const animalTypesList = ["Dog", "Cat", "Mammal", "Bird", "Reptile", "Fish"];
 
 const NewAnimal: React.FC<NewAnimalProps> = ({
   open,
@@ -38,9 +38,10 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
   addNewAnimal,
   requireFile = false, // Default to false
 }) => {
+  let currentDate = new Date();
   const [animalName, setAnimalName] = useState<string>("");
-  const [dateOfBirth, setDateOfBirth] = useState<string>("");
-  const [animalType, setAnimalType] = useState<string>("");
+  const [dateOfBirth, setDateOfBirth] = useState<string>(currentDate.toISOString().split('T')[0]);
+  const [animalType, setAnimalType] = useState<string>("Dog");
   const [animalTypes, setAnimalTypes] = useState<string[]>(animalTypesList);
   const [isAddNewTypeDialogOpen, setIsAddNewTypeDialogOpen] = useState<boolean>(false);
   const [newAnimalType, setNewAnimalType] = useState<string>("");
