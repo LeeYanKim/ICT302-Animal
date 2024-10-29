@@ -108,5 +108,24 @@ namespace ICT302_BackendAPI.Database.Repositories
 
             return true;
         }
+
+        public async Task<JobsPending?> GetJobsPendingByDetailsId(Guid detailsId)
+        {
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var jobs = await ctx.JobsPending.ToListAsync();
+            if (jobs.Any())
+            {
+                var job = jobs.Find(j => j.JobDetailsId == detailsId);
+                if (job == null)
+                    return null;
+                
+                ctx.JobsPending.Attach(job);
+                return job;
+            }
+
+            return null;
+        }
     }
 }

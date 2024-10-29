@@ -124,7 +124,7 @@ public class GenerationController : ControllerBase
                 // Check if job is the queue
                 if (jobsPending!.Any())
                 {
-                    var pendingJob = jobsPending.Find(job => job.JobDetailsId == jobDetails.JDID);
+                    var pendingJob = jobsPending!.Find(job => job.JobDetailsId == jobDetails.JDID);
                     if (pendingJob != null)
                         return BadRequest(new
                         {
@@ -184,12 +184,97 @@ public class GenerationController : ControllerBase
             // This is a fire and forget return. A background thread will do the work from here
             _ = _jobLoop.AssignJobWorkItem();
 
-            return Ok(new { message = "Success: Job was successfully lodged and will begin generation shortly!" });
+            return Ok(new
+            {
+                message = "Success: Job was successfully lodged and will begin generation shortly!",
+                jobId = newJob.JDID
+            });
         }
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
             return BadRequest();
         }
+    }
+
+    [HttpGet("status/job/{jobId}")]
+    public async Task<ActionResult> GetJobStatusFromJobId(Guid jobId)
+    {
+        if (jobId == Guid.Empty)
+        {
+            _logger.LogInformation("Error: No graphic ID provided with request");
+            return BadRequest(new { message = "Error: No graphic ID provided within request" });
+        }
+
+        var job = await _jobDetailsRepository.GetJobDetailsByIDAsync(jobId);
+        
+        if (job == null)
+        {
+            _logger.LogInformation("Error: Jobs with ID: {jobId} was not found", jobId);
+            return BadRequest(new { message = "Error: Job ID: " + jobId + " was not found" });
+        }
+        
+        var pendingJob = await _jobsPendingRepository.GetJobsPendingByDetailsId(jobId);
+        
+        if (pendingJob == null)
+        {
+            // Job has been found but is complete
+            _logger.LogInformation("Error: No pending in job queue with id {jobId} was found", job.JDID);
+            return Ok(new
+            {
+                message = "Job found",
+                jobId = job.JDID,
+                status = "Complete"
+            });
+        }
+
+        _logger.LogInformation("Success: Job: {jobId} was found with status: {status} in position: {pos}", job.JDID, pendingJob.Status.ToString(), pendingJob.QueueNumber);
+        return Ok(new
+        {
+            message = "Job found",
+            jobId = job.JDID,
+            status = pendingJob.Status.ToString(),
+            queuePos = pendingJob.QueueNumber
+        });
+    }
+    
+    [HttpGet("status/graphic/{gpcid}")]
+    public async Task<ActionResult> GetJobStatusFromGraphicsId(Guid gpcid)
+    {
+        if (gpcid == Guid.Empty)
+        {
+            _logger.LogInformation("Error: No graphic ID provided with request");
+            return BadRequest(new { message = "Error: No graphic ID provided within request" });
+        }
+
+        var job = await _jobDetailsRepository.GetJobDetailsByGraphicIdAsync(gpcid);
+
+        if (job == null)
+        {
+            _logger.LogInformation("Error: Jobs for graphic ID: {gpcid} was not found", gpcid);
+            return BadRequest(new { message = "Error: Jobs for graphic ID: " + gpcid + " was not found" });
+        }
+
+        var pendingJob = await _jobsPendingRepository.GetJobsPendingByDetailsId(job.JDID);
+
+        if (pendingJob == null)
+        {
+            _logger.LogInformation("Error: No pending in job queue with id {jobId} was found", job.JDID);
+            return Ok(new
+            {
+                message = "Job found",
+                jobId = job.JDID,
+                status = "Complete"
+            });
+        }
+
+        _logger.LogInformation("Success: Job: {jobId} was found with status: {status} in position: {pos}", job.JDID, pendingJob.Status.ToString(), pendingJob.QueueNumber);
+        return Ok(new
+        {
+            message = "Job found",
+            jobId = job.JDID,
+            status = pendingJob.Status.ToString(),
+            queuePos = pendingJob.QueueNumber
+        });
     }
 }

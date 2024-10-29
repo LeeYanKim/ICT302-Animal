@@ -21,7 +21,7 @@ public class SchemaContext : DbContext
         _connectionString = mainConnection ?? backupConnection ?? fallbackConnectionString;
         
         // Logging the server= portion of the connection string
-        _logger.LogInformation("Connection to MySQL {server}", _connectionString.Split(";")[0]);
+        //_logger.LogInformation("Connection to MySQL {server}", _connectionString.Split(";")[0]);
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -100,7 +100,7 @@ namespace ICT302_BackendAPI.API.APIs
             {
                 var animals = await _animalRepository.GetAnimalsAsync();
 
-                return animals!.Any() ? Ok(new { message = "No animals found" }) : Ok(animals);
+                return !animals!.Any() ? Ok(new { message = "No animals found" }) : Ok(animals);
             }
             catch (Exception ex)
             {
@@ -128,7 +128,7 @@ namespace ICT302_BackendAPI.API.APIs
             try
             {
                 var animalIDs = await _animalAccessRepository.GetAnimalIDsByUserIDAsync(userID);
-                if (animalIDs!.Any())
+                if (!animalIDs!.Any())
                 {
                     return NotFound(new { message = "No animals found for this user." });
                 }
@@ -149,6 +149,12 @@ namespace ICT302_BackendAPI.API.APIs
                 var model = await _model3DRepository.GetModel3DFromGraphicsIdAsync(graphicsId);
                 if(model == null)
                     return NotFound(new { message = "Animal model not found" });
+                
+                model.FilePath = _webHostEnvironment.EnvironmentName == "Development" ?
+                    $"http://{Request.Host}/api/files/animals/models/file/{model.FilePath}"
+                    :
+                    $"https://{Request.Host}/api/files/animals/models/file/{model.FilePath}";
+                
                 
                 return Ok(model);
             }
