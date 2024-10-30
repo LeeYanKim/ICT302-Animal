@@ -46,8 +46,10 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   };
 
   useEffect(() => {
-    handelDBConnectionTest();
-  }, [activeTab]);
+    if (userId) {
+      fetchAnimalsData(); // Fetch animals when userId is available
+    }
+  },[]);
 
   // Define the handleAnimalClick function
   const handleAnimalClick = (animalID: string) => {
@@ -56,51 +58,37 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
     navigate(`/dashboard/animals/${animalID}`); // Navigate to details page
   };
 
-  return (
-    <Box
-    display="flex"
-    flexDirection="column"
-    alignItems="center"
-    paddingTop={2} // Add some padding to move it down a bit from the top
-    >
-      <h1>Animals test here</h1>
-      {/* Render RecentlyUploaded to display animals */}
-      {activeTab === 0 && (
-        <AnimalsGrid triggerRefresh={true} onAnimalClick={handleAnimalClick} />
-      )}
+  const AnimalGridContent = () => {
+    return (
+        <>
+          <h1>Animals</h1>
+          {loading ? (<CircularProgress/>) : null}
+          <AnimalsGrid triggerRefresh={true} onAnimalClick={handleAnimalClick}/>
+        </>
+    );
+  }
 
-      {activeTab === 1 && selectedAnimalId && (
-        <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
-      )}
-    if (userId) {
-      fetchAnimalsData(); // Fetch animals when userId is available
-    }
-  },[]);
-
-  // Define the handleAnimalClick function here
-  const handleAnimalClick = (animalId: string , animalName : string) => {
-    console.log('Navigating to animalID:', animalId);
-    setSelectedAnimalId(animalId);
-    setActiveTab(1); // Switch to AnimalDetails view
-    navigate(`/dashboard/animals/${animalName}`, {state: { animalName}}); // Navigate to details page
-  };
+  const AnimalDetailsContent = () => {
+    return (
+        <>
+          <h1>Animals</h1>
+          {loading ? (<CircularProgress/>) : null}
+          <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
+        </>
+    );
+  }
 
   return (
-    <Box>
-        <h1>Animals</h1>
+      <Box display="flex" flexDirection="column" alignItems="center" paddingTop={2}>
 
-        {loading ? (<CircularProgress/>): null}
-        
         {(animals.length > 0 && activeTab) === 0 && (
-        <AnimalsGrid triggerRefresh={true} onAnimalClick={handleAnimalClick} />
+            <AnimalGridContent />
         )}
 
       {(animals.length > 0 && activeTab === 1 && selectedAnimalId) && (
-        <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
+        <AnimalDetailsContent />
       )}
 
-
-      
       {animals.length === 0 && (
         <Box sx={{ width: '100%'}}>
           <Typography variant="h6">No animals found</Typography>
