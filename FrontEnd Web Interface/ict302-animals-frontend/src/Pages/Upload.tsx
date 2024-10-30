@@ -5,7 +5,7 @@ import UploadPrompt from '../Components/Upload/UploadPrompt';
 import { UploadProps } from '../Components/Upload/UploadProps';
 import RecentlyUploaded from '../Components/Upload/RecentlyUploaded';
 
-const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
+const Upload: React.FC<UploadProps> = ({ onUploadSuccess }) => {
 
   const [refreshThumbnails, setRefreshThumbnails] = React.useState(false);
   const frontendContext = useContext(FrontendContext);
@@ -33,7 +33,7 @@ const Upload: React.FC<UploadProps> = ({ alertQueue, setAlertQueue }) => {
             color: '#000',
           }}
         >
-          <UploadPrompt alertQueue={alertQueue} setAlertQueue={setAlertQueue} onUploadSuccess={triggerThumbnailRefresh} />
+          <UploadPrompt onUploadSuccess={triggerThumbnailRefresh} />
         </Box>
 
         {/* Recently Uploaded Section */}

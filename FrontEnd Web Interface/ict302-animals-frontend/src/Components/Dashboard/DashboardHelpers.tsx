@@ -79,13 +79,13 @@ export function getDashboardPageFromPath(path: string): DashboardPages {
     return DashboardPages.Home;
 }
 
-export function getDashboardPageRenderFromDashboardPage(page: DashboardPages, alertQueue: React.ReactNode[], setAlertsQueue: any, onUploadSuccess?: () => void) {
+export function getDashboardPageRenderFromDashboardPage(page: DashboardPages, onUploadSuccess?: () => void) {
     const handleUploadSuccess = onUploadSuccess ?? (() => {});
     switch (page) {
         case DashboardPages.Home:
             return <MainGrid />;
         case DashboardPages.Upload:
-            return <Upload alertQueue={alertQueue} setAlertQueue={setAlertsQueue} onUploadSuccess={handleUploadSuccess}/>;
+            return <Upload onUploadSuccess={handleUploadSuccess}/>;
         case DashboardPages.Settings:
             return <Settings />;
         case DashboardPages.About:

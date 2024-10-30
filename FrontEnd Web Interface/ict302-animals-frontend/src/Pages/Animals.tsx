@@ -6,7 +6,7 @@ import API from "../Internals/API";
 
 import AnimalCard from "../Components/Animal/AnimalCard";
 import CompletedCard from "../Components/Completed/CompletedCard";
-import {Grid2 as Grid, Box, Typography, Button} from "@mui/material";
+import {Grid2 as Grid, Box, Typography, Button, CircularProgress} from "@mui/material";
 import AnimalsGrid from '../Components/Animal/AnimalGrid';
 import AnimalDetails from "../Components/Animal/AnimalDetails"; // Adjust import based on your structure
 
@@ -21,7 +21,7 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(actTab); // 0 for AnimalGrid, 1 for AnimalDetails
   const userId = frontendContext.user.contextRef.current.userId; // Get userId from context
-
+  const [loading, setLoading] = useState<boolean>(true);
 
 
 
@@ -31,17 +31,15 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
       const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
       if (animalAccessResponse.ok) {
         const animalIDs = await animalAccessResponse.json();
-        console.log(animalIDs);
-        // Fetch details for each animal ID
-        const animalDetailsPromises = animalIDs.map((animalID: string) =>
-          fetch(API.Download() + `/animals/details/${animalID}`)
+        const animalDetailsPromises = animalIDs.map(async (animalID: string) =>
+          await fetch(API.Download() + `/animals/details/${animalID}`)
         );
-        const animalDetailsResponses = await Promise.all(animalDetailsPromises);
-        const animalsData = await Promise.all(
-          animalDetailsResponses.map(response => response.json())
-        );
-        
-        setAnimals(animalsData);
+        const animalDetailsResponses: any[] = [];
+        for (const animalID of animalIDs) {
+            animalDetailsResponses.push(await fetch(API.Download() + `/animals/details/${animalID}`).then(response => response.json()));
+        }
+        setAnimals(animalDetailsResponses);
+        setLoading(false);
       } else {
         console.error('Failed to fetch animals data');
       }
@@ -54,7 +52,7 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
     if (userId) {
       fetchAnimalsData(); // Fetch animals when userId is available
     }
-  }, [activeTab, userId]);
+  },[]);
 
   // Define the handleAnimalClick function here
   const handleAnimalClick = (animalId: string , animalName : string) => {
@@ -67,17 +65,21 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   return (
     <Box>
         <h1>Animals</h1>
-        
-        {animals.length > 0 && activeTab === 0 && (
-        <AnimalsGrid triggerRefresh={true} onAnimalClick={handleAnimalClick} />
-      )}
 
-      {animals.length > 0 && activeTab === 1 && selectedAnimalId && (
+        {loading ? (<CircularProgress/>): null}
+        
+        {(animals.length > 0 && activeTab) === 0 && (
+        <AnimalsGrid triggerRefresh={true} onAnimalClick={handleAnimalClick} />
+        )}
+
+      {(animals.length > 0 && activeTab === 1 && selectedAnimalId) && (
         <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
       )}
+
+
       
       {animals.length === 0 && (
-        <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+        <Box sx={{ width: '100%'}}>
           <Typography variant="h6">No animals found</Typography>
           <Button variant="contained" color="secondary" onClick={fetchAnimalsData}>Reload</Button>
         </Box>

@@ -9,7 +9,7 @@ import { OrbitControls, CameraControls, ContactShadows, PerspectiveCamera } from
 import {Stack} from '@mui/material';
 
 interface ModelRendererProps {
-    modelPath: string;
+    modelPath: string | undefined;
 }
 
 const ModelRenderer: React.FC<ModelRendererProps> = ({ modelPath }) => {
@@ -25,32 +25,31 @@ const ModelRenderer: React.FC<ModelRendererProps> = ({ modelPath }) => {
 
 
     return (
-        <div>
-            <Stack direction="column" spacing={2}>
-                <Scene>
-                    <Model url={modelPath} isAnimating={isAnimating} wireframe={isWireframe}
-                           animationSpeed={animationSpeed} isLooping={isLooping} isRotating={isRotating}
-                           isSkeleton={isSkeleton} animationPosition={animationPosition} setAnimationPosition={setAnimationPosition} animationMaxPos={animationMaxPos} setAnimationMaxPos={setAnimationMaxPos}/>
-                </Scene>
-                
-                <Controls
-                    isAnimating={isAnimating}
-                    setIsAnimating={setIsAnimating}
-                    toggleWireframe={isWireframe}
-                    setToggleWireframe={setIsWireframe}
-                    isSkeleton={isSkeleton}
-                    isRotating={isRotating}
-                    animationSpeed={animationSpeed}
-                    isLooping={isLooping}
-                    setAnimationSpeed={setAnimationSpeed}
-                    setIsLooping={setIsLooping}
-                    setIsRotating={setIsRotating}
-                    setIsSkeleton={setIsSkeleton}
-                    animationPosition={animationPosition}
-                    animationMaxPos={animationMaxPos}
-                />
-            </Stack>
-        </div>
+        <Stack>
+            <Scene>
+                <Model url={modelPath} isAnimating={isAnimating} wireframe={isWireframe}
+                       animationSpeed={animationSpeed} isLooping={isLooping} isRotating={isRotating}
+                       isSkeleton={isSkeleton} animationPosition={animationPosition}
+                       setAnimationPosition={setAnimationPosition} animationMaxPos={animationMaxPos}
+                       setAnimationMaxPos={setAnimationMaxPos}/>
+            </Scene>
+            <Controls
+                isAnimating={isAnimating}
+                setIsAnimating={setIsAnimating}
+                toggleWireframe={isWireframe}
+                setToggleWireframe={setIsWireframe}
+                isSkeleton={isSkeleton}
+                isRotating={isRotating}
+                animationSpeed={animationSpeed}
+                isLooping={isLooping}
+                setAnimationSpeed={setAnimationSpeed}
+                setIsLooping={setIsLooping}
+                setIsRotating={setIsRotating}
+                setIsSkeleton={setIsSkeleton}
+                animationPosition={animationPosition}
+                animationMaxPos={animationMaxPos}
+            />
+        </Stack>
     );
 }
 
