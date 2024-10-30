@@ -51,28 +51,7 @@ const App: React.FC = () => {
         currentHash = currentLocation.hash;
     }, [currentLocation]);
 
-    const [showCustomTheme, setShowCustomTheme] = React.useState(true);
-    const defaultTheme = createTheme({ palette: { mode } });
-    // This code only runs on the client side, to determine the system color preference
-    React.useEffect(() => {
-      // Check if there is a preferred mode in localStorage
-      const savedMode = localStorage.getItem('themeMode') as PaletteMode | null;
-      if (savedMode) {
-        setMode(savedMode);
-      } else {
-        // If no preference is found, it uses system preference
-        const systemPrefersDark = window.matchMedia(
-          '(prefers-color-scheme: dark)',
-        ).matches;
-        setMode(systemPrefersDark ? 'dark' : 'light');
-      }
-    }, []);
 
-    const toggleColorMode = () => {
-        const newMode = mode === 'dark' ? 'light' : 'dark';
-        setMode(newMode);
-        localStorage.setItem('themeMode', newMode); // Save the selected mode to localStorage
-    };
 
     const frontendContext = useContext(FrontendContext);
 
@@ -96,7 +75,6 @@ const App: React.FC = () => {
             <main>
                 <div className="d-flex flex-row">
                     {!currentPath.includes("dashboard") && <LandingNav />}
-                    <Button onClick={toggleColorMode}>Toggle Color Mode</Button>
                     <div className="d-flex flex-column content" id="page-wrap">
                         <Routes> {/* This is where the routes are defined */}
 
@@ -104,8 +82,8 @@ const App: React.FC = () => {
                             <Route path="/about" element={<About />} /> {/* This is the about page */}
                             <Route path="/enterprise" element={<Enterprise/>} /> {/* This is the enterprise page */}
                             <Route path="/signin" element={<SignIn />} /> {/* This is the sign in page */}
-                            <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
-                            <Route path="/signout" element={<SignOut />} /> {/* This is the sign in page */}
+                            <Route path="/signup" element={<SignUp />} /> {/* This is the sign up page */}
+                            <Route path="/signout" element={<SignOut />} /> {/* This is the sign out page */}
                             {dashboardPagePaths.map((dashboardPath, index) => (
                                 <Route key={index} path={dashboardPath} element={frontendContext.user.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};

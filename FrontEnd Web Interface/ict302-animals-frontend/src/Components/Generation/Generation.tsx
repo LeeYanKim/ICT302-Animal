@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback, useContext, useMemo} from "react";
-import { Button, Box, Typography, CircularProgress, Grid2 as Grid, Chip} from "@mui/material";
+import { Button, Box, Typography, CircularProgress, LinearProgress, Grid2 as Grid, Chip} from "@mui/material";
 import API from "../../Internals/API";
 import { FrontendContext} from "../../Internals/ContextStore";
 import ModelViewer from "../ModelViewer/ModelViewer";
@@ -167,8 +167,18 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
                         <Typography variant={'h4'}>Job Processing</Typography>
                     </Grid>
                     <Grid>
-                        {jobProcessing ? <CircularProgress/> : null}
+                        {/** TODO: Decide on circular progress or linear progress */}
+                        {jobProcessing ? (
+                            <Box sx={{ width: '100%' }}>
+                                <CircularProgress color="success" size={'30px'}/>
+                            </Box>
+                        ) : null}
                     </Grid>
+                        {jobProcessing ? (
+                            <Box sx={{ width: '100%' }}>
+                                <LinearProgress color="success"/>
+                            </Box>
+                        ) : null}
                 </Grid>
                 <Typography>Queue Position: {jobData?.queuePos}</Typography>
                 <Chip label={jobData?.status} color={jobData ? GetStatusColor(jobData.status) : "default"}/>

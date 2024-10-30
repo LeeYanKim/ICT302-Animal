@@ -71,15 +71,17 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   const AnimalDetailsContent = () => {
     return (
         <>
-          <h1>Animals</h1>
-          {loading ? (<CircularProgress/>) : null}
+
           <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
         </>
     );
   }
 
+  //TODO: Reset selected tab when navigating to animals page from animal details
   return (
       <Box display="flex" flexDirection="column" alignItems="center" paddingTop={2}>
+
+        {loading ? (<CircularProgress/>) : null}
 
         {(animals.length > 0 && activeTab) === 0 && (
             <AnimalGridContent />
