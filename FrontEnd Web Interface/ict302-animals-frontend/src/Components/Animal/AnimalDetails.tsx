@@ -1,5 +1,6 @@
 import { styled } from '@mui/material/styles';
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useContext} from "react";
+import {FrontendContext} from "../../Internals/ContextStore";
 import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid, Paper, MenuList, MenuItem, ListItemText, ListItemIcon, Divider} from "@mui/material";
 import API from "../../Internals/API";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -11,9 +12,12 @@ import DataGridDemo from './History';
 import DeleteGraphicButton from "./DeleteGraphicButton";
 import {Graphic, Animal, AnimalDetailsProps} from './AnimalInterfaces';
 import GraphicOptionsMenu from "./GraphicOptionsMenu";
+import { ErrorBoundary } from "react-error-boundary";
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
-  const [animalData, setAnimalData] = useState<Animal | null>(null);
+  const frontendContext = useContext(FrontendContext);
+  const selectedAnimal = frontendContext.user.contextRef.current.userAnimals.find(a => a.animalID === animalId);
+  const [animalData, setAnimalData] = useState<Animal | null>(selectedAnimal ? selectedAnimal : null);
   const [loading, setLoading] = useState<boolean>(true);
   const [tabValue, setTabValue] = useState(0);
 
@@ -34,7 +38,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
           throw new Error("Failed to fetch animal data");
         }
         const data = await response.json();
-        setAnimalData(data);
+        //setAnimalData(data);
       } catch (error) {
         console.error("Error fetching animal data:", error);
       } finally {
@@ -175,10 +179,14 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
                       <GraphicOptionsMenu graphic={graphic}/>
                         <Grid container spacing={2}>
                           <Grid size={6}>
-                            <ReactPlayer key={graphic.gpcid} width={'100%'} height={'100%'} url={graphic.filePath} controls={true} />
+                            <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
+                              <ReactPlayer key={graphic.gpcid} width={'100%'} height={'100%'} url={graphic.filePath} controls={true} />
+                            </ErrorBoundary>
                           </Grid>
                           <Grid size={6}>
-                            <Generation key={graphic.gpcid} graphicId={graphic.gpcid} animalId={animalId!} graphicFileName={graphic.filePath}/>
+                            <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
+                              <Generation key={graphic.gpcid} graphicId={graphic.gpcid} animalId={animalId!} graphicFileName={graphic.filePath}/>
+                            </ErrorBoundary>
                           </Grid>
                         </Grid>
                     </Box>

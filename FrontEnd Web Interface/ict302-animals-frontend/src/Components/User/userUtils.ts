@@ -45,6 +45,27 @@ export const storeUserInBackend = async (
     }
   };
 
+const fetchUserAnimals = async (userId: string) => {
+  try {
+    const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
+    if (animalAccessResponse.ok) {
+      const animalIDs = await animalAccessResponse.json();
+      const animalDetailsPromises = animalIDs.map(async (animalID: string) =>
+          await fetch(API.Download() + `/animals/details/${animalID}`)
+      );
+      const animalDetailsResponses: any[] = [];
+      for (const animalID of animalIDs) {
+        animalDetailsResponses.push(await fetch(API.Download() + `/animals/details/${animalID}`).then(response => response.json()));
+      }
+      return animalDetailsResponses;
+    } else {
+      console.error('Failed to fetch animals data');
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
  // Utility function to update frontend context
 export const updateFrontendContext = async (frontendContext: any, user: { uid: string; displayName: string | null; email: string | null }) => {
     frontendContext.user.valid = true;
@@ -56,7 +77,7 @@ export const updateFrontendContext = async (frontendContext: any, user: { uid: s
       ? user.displayName.split(' ').map(name => name[0]).join('')
       : '';
     frontendContext.user.contextRef.current.loggedInState = true;
-
+    frontendContext.user.contextRef.current.userAnimals = await fetchUserAnimals(frontendContext.user.contextRef.current.userId);
   };
 
   /**
