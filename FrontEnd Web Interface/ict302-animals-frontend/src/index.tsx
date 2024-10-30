@@ -31,4 +31,4 @@ root.render(
 );
 
 // General React code to track vitals the app
-reportWebVitals();
+//reportWebVitals();

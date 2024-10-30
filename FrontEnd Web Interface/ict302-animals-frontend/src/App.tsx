@@ -1,4 +1,4 @@
-import React, {useEffect, useContext} from 'react';
+import React, {useEffect, useContext, useState, useRef} from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 
@@ -17,6 +17,7 @@ import SignUp from './Pages/SignUp';
 import SignOut from './Pages/SignOut';
 import Dashboard from './Pages/Dashboard';
 import AnimalDetails from './Components/Animal/AnimalDetails';  // Import the AnimalDetails component for animal page
+import AnimalDetailsWrapper from './Components/Animal/AnimalDetailsWrapper'; 
 
 import UserProfile from './Internals/UserProfile';
 import {FrontendContext} from './Internals/ContextStore';
@@ -27,27 +28,23 @@ import AppTheme from "./Components/UI/Theme";
 import {createTheme, PaletteMode, ThemeProvider, Button, CssBaseline} from "@mui/material";
 
 import getDashboardTheme from './Theme/getDashboardTheme';
-
+import Animals from './Pages/Animals'; // Import Animals page here
 import DashboardPage from './Components/Dashboard/DashboardHelpers';
 import DashboardPageDisplay from './Components/Dashboard/DashboardPageDisplay';
 
 const App: React.FC = () => {
 
-    // These are the media queries that will be used to determine the screen size
-    const isDesktopOrLaptop = useMediaQuery({query: '(min-width: 1224px)'})
-    const isBigScreen = useMediaQuery({ query: '(min-width: 1824px)' })
-    const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1224px)' })
-    const isPortrait = useMediaQuery({ query: '(orientation: portrait)' })
-    const isRetina = useMediaQuery({ query: '(min-resolution: 2dppx)' })
-
     const [mode, setMode] = React.useState<PaletteMode>('light');
     const dashboardTheme = createTheme(getDashboardTheme(mode));
 
+    const [activeTab, setActiveTab] = useState(0);
 
-    let currentLocation = useLocation();
-    let currentPath = currentLocation.pathname;
-    let currentSearch = currentLocation.search;
-    let currentHash = currentLocation.hash;
+
+    var currentLocation = useLocation();
+    var currentPath = currentLocation.pathname;
+    var currentSearch = currentLocation.search;
+    var currentHash = currentLocation.hash;
+
     useEffect(() => {
         currentPath = currentLocation.pathname;
         currentSearch = currentLocation.search;
@@ -79,16 +76,13 @@ const App: React.FC = () => {
 
     const frontendContext = useContext(FrontendContext);
 
-
-    const dashboardPaghPaths = [
+    const dashboardPagePaths = [
         "/dashboard",
         "/dashboard/home",
         "/dashboard/upload",
-        "/dashboard/queue",
         "/dashboard/completed",
         "/dashboard/settings",
         "/dashboard/about",
-        "/dashboard/feedback",
         "/dashboard/help",
         "/dashboard/account",
         "/dashboard/animals",
@@ -101,8 +95,7 @@ const App: React.FC = () => {
         <CssBaseline enableColorScheme />
             <main>
                 <div className="d-flex flex-row">
-                    {!currentPath.includes("dashboard") && isTabletOrMobile && <LandingNav />} {/* TODO Add a mobile/tabled variation of the nav bar*/}
-                    {!currentPath.includes("dashboard") && isDesktopOrLaptop && <LandingNav />}
+                    {!currentPath.includes("dashboard") && <LandingNav />}
                     <Button onClick={toggleColorMode}>Toggle Color Mode</Button>
                     <div className="d-flex flex-column content" id="page-wrap">
                         <Routes> {/* This is where the routes are defined */}
@@ -113,11 +106,9 @@ const App: React.FC = () => {
                             <Route path="/signin" element={<SignIn />} /> {/* This is the sign in page */}
                             <Route path="/signup" element={<SignUp />} /> {/* This is the sign in page */}
                             <Route path="/signout" element={<SignOut />} /> {/* This is the sign in page */}
-                            {dashboardPaghPaths.map((dashboardPath, index) => (
+                            {dashboardPagePaths.map((dashboardPath, index) => (
                                 <Route key={index} path={dashboardPath} element={frontendContext.user.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
-
-
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
 
                         </Routes>

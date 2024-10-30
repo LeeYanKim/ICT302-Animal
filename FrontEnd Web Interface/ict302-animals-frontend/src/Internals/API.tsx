@@ -27,6 +27,8 @@ class APIEndpoints {
     transactionType: string = '/transactionType';
     user: string = '/user';
     userAccess: string = '/userAccess';
+    generate: string = '/generate';
+    generationStatus: string = '/generate/status';
 
     constructor(isDev: boolean, baseUrl: string) {
         this.isDev = isDev;
@@ -54,11 +56,11 @@ class API {
      */
     public static init() {
         if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-            console.log('Development Mode');
+            console.log('API calls are in: Development Mode');
             this.endpoint = new APIEndpoints(true, this.devEndpointAddress);
         }
         else {
-            console.log('Production Mode');
+            console.log('API calls are in: Production Mode');
             this.endpoint = new APIEndpoints(false, this.prodEndpointAddress);
         }
     }
@@ -295,6 +297,21 @@ class API {
 
     /**
      * 
+     * @param userId The unique identifier for the user
+     * @returns The URL for fetching a user by ID
+     * 
+     * Example: http://localhost:5173/api/db/user/{userId}
+     */
+    public static GetUserByID(userId: string) {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const db = this.endpoint?.dbEndpoint ?? '';
+        const endpoint = this.endpoint?.user;
+        return `${base}${db}${endpoint}/${userId}`;
+    }
+
+    /**
+     * 
      * @returns The base URL path for the API UserAccess controller endpoint/s
      * 
      * Example: http://localhost:5173/api/db/userAccess
@@ -305,6 +322,21 @@ class API {
         const db = this.endpoint?.dbEndpoint ?? '';
         const endpoint = this.endpoint?.userAccess;
         return base + db + endpoint;
+    }
+
+    /**
+     * 
+     * @param userId The unique identifier for the user
+     * @returns The URL for deleting a user by ID
+     * 
+     * Example: http://localhost:5173/api/db/user/{userId}
+     */
+    public static DeleteUserByID(userId: string) {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const db = this.endpoint?.dbEndpoint ?? '';
+        const endpoint = this.endpoint?.user;
+        return `${base}${db}${endpoint}/${userId}`;
     }
 
 
@@ -333,6 +365,7 @@ class API {
         const endpoint = this.endpoint?.download;
         return base + endpoint;
     }
+
     /**
      * 
      * @returns The base URL path for the API File Upload controller endpoint/s
@@ -360,6 +393,31 @@ class API {
         return `${base}${endpoint}/animal/${animalId}/graphic/${graphicId}`;
     }
 
+    /**
+     * 
+     * @returns The base URL path for the API Generation controller endpoint
+     * 
+     * Example: http://localhost:5173/api/files
+     */
+    public static Generate() {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const endpoint = this.endpoint?.generate;
+        return base + endpoint;
+    }
+
+    /**
+     *
+     * @returns The base URL path for the API Generation controller job details endpoint/s
+     *
+     * Example: http://localhost:5173/api/generate/job
+     */
+    public static GenerationStatus() {
+        this.ensureInitialized();
+        const base = this.endpoint?.baseUrl ?? '';
+        const endpoint = this.endpoint?.generationStatus;
+        return base + endpoint;
+    }
 
 }
 

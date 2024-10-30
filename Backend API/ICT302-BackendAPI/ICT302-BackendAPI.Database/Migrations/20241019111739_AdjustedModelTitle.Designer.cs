@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ICT302_BackendAPI.Database.Migrations
 {
     [DbContext(typeof(SchemaContext))]
-    [Migration("20241014104402_InitCreate")]
-    partial class InitCreate
+    [Migration("20241019111739_AdjustedModelTitle")]
+    partial class AdjustedModelTitle
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -62,16 +62,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasMaxLength(45)
                         .HasColumnType("varchar(45)")
                         .HasColumnName("Animal_Type");
-
-                    b.Property<string>("VideoFileName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("Video_File_Name");
-
-                    b.Property<DateTime?>("VideoUploadDate")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Video_Upload_Date");
 
                     b.HasKey("AnimalID");
 
@@ -143,8 +133,7 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.HasKey("BillingID");
 
-                    b.HasIndex("GPCID")
-                        .IsUnique();
+                    b.HasIndex("GPCID");
 
                     b.HasIndex("JobID");
 
@@ -167,11 +156,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                         .HasColumnType("binary(16)")
                         .HasColumnName("Animal_ID");
 
-                    b.Property<byte[]>("BillingID")
-                        .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("Billing_ID");
-
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasMaxLength(45)
@@ -184,8 +168,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("GPCName")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("GPC_Name");
 
                     b.Property<int>("GPCSize")
@@ -195,8 +179,6 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.HasKey("GPCID");
 
                     b.HasIndex("AnimalID");
-
-                    b.HasIndex("BillingID");
 
                     b.ToTable("graphic");
                 });
@@ -272,19 +254,23 @@ namespace ICT302_BackendAPI.Database.Migrations
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobsPending", b =>
                 {
-                    b.Property<byte[]>("QueueNumber")
+                    b.Property<int>("QueueNumber")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("binary(16)")
+                        .HasColumnType("int")
                         .HasColumnName("Queue_Number");
 
                     b.Property<byte[]>("JDID")
                         .IsRequired()
-                        .HasColumnType("binary(16)")
-                        .HasColumnName("JD_ID");
+                        .HasColumnType("binary(16)");
 
                     b.Property<DateTime>("JobAdded")
                         .HasColumnType("date")
                         .HasColumnName("Job_Added");
+
+                    b.Property<byte[]>("JobDetailsId")
+                        .IsRequired()
+                        .HasColumnType("binary(16)")
+                        .HasColumnName("JD_ID");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -323,8 +309,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("ModelTitle")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Model_Title");
 
                     b.HasKey("ModelID");
@@ -605,8 +591,8 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Billing", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Graphic", "Graphic")
-                        .WithOne()
-                        .HasForeignKey("ICT302_BackendAPI.Database.Models.Billing", "GPCID")
+                        .WithMany()
+                        .HasForeignKey("GPCID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -640,20 +626,12 @@ namespace ICT302_BackendAPI.Database.Migrations
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Graphic", b =>
                 {
                     b.HasOne("ICT302_BackendAPI.Database.Models.Animal", "Animal")
-                        .WithMany()
+                        .WithMany("Graphics")
                         .HasForeignKey("AnimalID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ICT302_BackendAPI.Database.Models.Billing", "Billing")
-                        .WithMany()
-                        .HasForeignKey("BillingID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Animal");
-
-                    b.Navigation("Billing");
                 });
 
             modelBuilder.Entity("ICT302_BackendAPI.Database.Models.JobDetails", b =>
@@ -809,6 +787,11 @@ namespace ICT302_BackendAPI.Database.Migrations
                     b.Navigation("Organisation");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ICT302_BackendAPI.Database.Models.Animal", b =>
+                {
+                    b.Navigation("Graphics");
                 });
 #pragma warning restore 612, 618
         }

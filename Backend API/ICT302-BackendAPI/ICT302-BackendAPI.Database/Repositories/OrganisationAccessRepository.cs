@@ -6,46 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class OrganisationAccessRepository : IOrganisationAccessRepository
+    public class OrganisationAccessRepository(SchemaContext ctx) : IOrganisationAccessRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public OrganisationAccessRepository(SchemaContext ctx)
+        public async Task<IEnumerable<OrganisationAccess>?> GetOrganisationAccessesAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<OrganisationAccess>> GetOrganisationAccessesAsync()
-        {
-            var organisationAccesses = await _ctx.OrganisationAccesses.ToListAsync();
+            var organisationAccesses = await ctx.OrganisationAccesses.ToListAsync();
+            organisationAccesses.ForEach(a => ctx.OrganisationAccesses.Attach(a));
             return organisationAccesses;
         }
 
         public async Task<OrganisationAccess?> GetOrganisationAccessByIDAsync(Guid id)
         {
-            var organisationAccess = await _ctx.OrganisationAccesses.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var organisationAccess = await ctx.OrganisationAccesses.FindAsync(id);
             return organisationAccess;
         }
 
-        public async Task<OrganisationAccess> CreateOrganisationAccessAsync(OrganisationAccess organisationAccess)
+        public async Task<OrganisationAccess?> CreateOrganisationAccessAsync(OrganisationAccess organisationAccess)
         {
-            _ctx.OrganisationAccesses.Attach(organisationAccess);
-            _ctx.OrganisationAccesses.Add(organisationAccess);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.OrganisationAccesses.Attach(organisationAccess);
+            ctx.OrganisationAccesses.Add(organisationAccess);
+            await ctx.SaveChangesAsync();
             return organisationAccess;
         }
 
-        public async Task<OrganisationAccess> UpdateOrganisationAccessAsync(OrganisationAccess organisationAccess)
+        public async Task<OrganisationAccess?> UpdateOrganisationAccessAsync(OrganisationAccess organisationAccess)
         {
-            _ctx.OrganisationAccesses.Update(organisationAccess);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.OrganisationAccesses.Update(organisationAccess);
+            await ctx.SaveChangesAsync();
             return organisationAccess;
         }
 
-        public async Task<int> DeleteOrganisationAccessAsync(OrganisationAccess organisationAccess)
+        public async Task<int?> DeleteOrganisationAccessAsync(OrganisationAccess organisationAccess)
         {
-            _ctx.OrganisationAccesses.Remove(organisationAccess);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.OrganisationAccesses.Remove(organisationAccess);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

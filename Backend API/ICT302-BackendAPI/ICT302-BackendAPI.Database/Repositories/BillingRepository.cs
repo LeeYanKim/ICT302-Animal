@@ -6,46 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class BillingRepository : IBillingRepository
+    public class BillingRepository(SchemaContext ctx) : IBillingRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public BillingRepository(SchemaContext ctx)
+        public async Task<IEnumerable<Billing>?> GetBillingsAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<Billing>> GetBillingsAsync()
-        {
-            var billings = await _ctx.Billings.ToListAsync();
+            var billings = await ctx.Billings.ToListAsync();
+            billings.ForEach(a => ctx.Billings.Attach(a));
             return billings;
         }
 
         public async Task<Billing?> GetBillingByIDAsync(Guid id)
         {
-            var billing = await _ctx.Billings.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var billing = await ctx.Billings.FindAsync(id);
             return billing;
         }
 
-        public async Task<Billing> CreateBillingAsync(Billing billing)
+        public async Task<Billing?> CreateBillingAsync(Billing billing)
         {
-            _ctx.Billings.Attach(billing);
-            _ctx.Billings.Add(billing);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Billings.Attach(billing);
+            ctx.Billings.Add(billing);
+            await ctx.SaveChangesAsync();
             return billing;
         }
 
-        public async Task<Billing> UpdateBillingAsync(Billing billing)
+        public async Task<Billing?> UpdateBillingAsync(Billing billing)
         {
-            _ctx.Billings.Update(billing);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Billings.Update(billing);
+            await ctx.SaveChangesAsync();
             return billing;
         }
 
-        public async Task<int> DeleteBillingAsync(Billing billing)
+        public async Task<int?> DeleteBillingAsync(Billing billing)
         {
-            _ctx.Billings.Remove(billing);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Billings.Remove(billing);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

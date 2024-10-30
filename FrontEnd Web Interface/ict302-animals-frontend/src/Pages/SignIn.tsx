@@ -4,18 +4,20 @@ import {Link, useNavigate} from 'react-router-dom';
 
 import ForgotPassword from '../Components/SignIn/ForgotPassword';
 import getSignInTheme from '../Components/SignIn/theme/getSignInTheme';
+import CircularProgressWithLabel from '../Components/User/CircularProgressWithLabel';
 
-import { GoogleIcon, FacebookIcon } from '../Components/SignUp/CustomIcons';
+import { GoogleIcon } from '../Components/SignUp/CustomIcons';
 
 import { ProjectLogoMin } from '../Components/UI/ProjectLogo';
 import UserProfile from '../Internals/UserProfile';
-import { FrontendContext } from "../Internals/ContextStore";
+import { FrontendContext} from "../Internals/ContextStore";
 
 import { getAnalytics } from "firebase/analytics";
 
 import { signInWithEmailAndPassword, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
 
 import API from '../Internals/API';
+import { storeUserInBackend, updateFrontendContext, validateInput, sanitizeInput } from '../Components/User/userUtils';
 
 // Dynamically import the SignUp component
 const SignUp = React.lazy(() => import('../Pages/SignUp'));
@@ -58,6 +60,8 @@ const SignIn: React.FC = () => {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false); 
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
@@ -76,53 +80,49 @@ const SignIn: React.FC = () => {
   const HandleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    const email = data.get('email') as string;
+    const password = data.get('password') as string;
+  
+    // Define whitelist characters (e.g., alphanumeric and basic symbols)
+    const emailWhitelist = 'a-zA-Z0-9@._-';
+    const passwordWhitelist = 'a-zA-Z0-9!@#$%^&*()_+-=';
+  
+    // Validate email and password
+    if (!validateInput(email, emailWhitelist)) {
+      setEmailError(true);
+      setEmailErrorMessage('Invalid characters in email.');
+      return;
+    }
+  
+    if (!validateInput(password, passwordWhitelist)) {
+      setPasswordError(true);
+      setPasswordErrorMessage('Invalid characters in password.');
+      return;
+    }
 
-    // TODO: Fetch the user from the database and validate the password
-    frontendContext.user.valid = true;
-    CreatefrontendContext();
-
-    //Example of how to sign in with Firebase Auth
-    // Note this would replace the user state handeling within the frontendContext
-    await signInWithEmailAndPassword(frontendContext.firebaseAuth.current, data.get('email') as string, data.get('password') as string)
-    .then((userCredential) => {
-      // Signed in
+    setLoading(true);
+    setProgress(10); // Start progress
+  
+    // Continue with authentication logic
+    try {
+      const userCredential = await signInWithEmailAndPassword(frontendContext.firebaseAuth.current, email, password);
       const user = userCredential.user;
-      console.log(user);
 
-      updateContextAndNavigate(user);
-      //..
-    }).catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-    });
-
-  };
-
-  const CreatefrontendContext = () => {
-    // TODO: Add authentication logic here, This just uses a dummy user object for now to show logging in and user state change
-    frontendContext.user.contextRef.current.username = 'No Username';
-    frontendContext.user.contextRef.current.email = 'Null Email';
-    frontendContext.user.contextRef.current.initials = 'Null';
-    frontendContext.user.contextRef.current.loggedInState = true;
-  }
-
-  // Helper function to update frontend context
-  const updateContextAndNavigate = (user: { displayName?: string | null, email?: string | null }) => {
-    frontendContext.user.valid = true;
-    frontendContext.user.contextRef.current.username = user.displayName || '';
-    frontendContext.user.contextRef.current.email = user.email || '';
-    frontendContext.user.contextRef.current.initials = user.displayName
-      ? user.displayName.split(' ').map(name => name[0]).join('')
-      : '';
-    frontendContext.user.contextRef.current.loggedInState = true;
+      setProgress(50);
   
-    nav('/dashboard');
-  };
+      const idToken = await user.getIdToken();
   
+      await storeUserInBackend(frontendContext, user, idToken);
+      setProgress(75);
+      updateFrontendContext(frontendContext, user);
+      setProgress(100);
+      
+      nav('/dashboard');
+      
+    } catch (error) {
+      console.error("Error signing in with email and password:", error);
+    }
+  };
 
   const validateInputs = () => {
     const email = document.getElementById('email') as HTMLInputElement;
@@ -151,96 +151,40 @@ const SignIn: React.FC = () => {
     return isValid;
   };
 
-  const storeUserInBackend = async (user: { uid: string; displayName: string | null; email: string | null }, idToken: string) => {
-    try {
-        const payload = {
-            userName: user.displayName || "Anonymous", // Only allow the frontend to set this
-            userEmail: user.email, // Set the user's email
-            permissionLevel: "user", // Permission level (can be adjusted later)
-            // No need to send userID, userPassword, userDateJoin, or subscription fields
-        };
-
-        const response = await fetch(API.User(), {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${idToken}`, // Send Firebase token
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to store user in the backend");
-        }
-
-        console.log("User stored/updated successfully in backend");
-    } catch (error) {
-        console.error("Error storing user in backend:", error);
-    }
-};
-
-
   const handleGoogleSignIn = async () => {
     const googleProvider = new GoogleAuthProvider();
-  
+    setLoading(true);
+    setProgress(10);
+
     try {
       // Sign in with Google
       const result = await signInWithPopup(frontendContext.firebaseAuth.current, googleProvider);
+      setProgress(40);
       const user = result.user; // This is the authenticated user
   
-      console.log('Google sign-in successful:', user);
+      //console.log('Google sign-in successful:', user);
   
       // Retrieve the ID token
       const idToken = await user.getIdToken();
-  
+      setProgress(60);
       // Store the user in the backend
-      await storeUserInBackend(user, idToken);
-  
-      // Update the frontend context with the logged-in user details
-      updateContextAndNavigate(user);
-  
+      await storeUserInBackend(frontendContext, user, idToken);
+      setProgress(80);
+
+      updateFrontendContext(frontendContext, user);
+      setProgress(100);
+
       // Navigate to the dashboard
       nav('/dashboard');
     } catch (error) {
       console.error("Error signing in with Google:", error);
-    }
-  };
-  
-  
-  
-  const handleFacebookSignIn = async () => {
-    const facebookProvider = new FacebookAuthProvider();
-  
-    try {
-      const result = await signInWithPopup(frontendContext.firebaseAuth.current, facebookProvider);
-  
-      // This gives you a Facebook Access Token. You can use it to access Facebook APIs.
-      const credential = FacebookAuthProvider.credentialFromResult(result);
-      const token = credential?.accessToken;
-  
-      // The signed-in user info.
-      const user = result.user;
-      console.log('User signed in with Facebook:', user);
-  
-      // Update the frontendContext with the logged-in user details
-      updateContextAndNavigate(user);
-
-      // Navigate to the dashboard after successful sign-in
-      nav('/dashboard');
-  
-    } catch (error) {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      const email = error.customData?.email;
-      const credential = FacebookAuthProvider.credentialFromError(error);
-      console.error("Error signing in with Facebook:", errorCode, errorMessage, email, credential);
+      setLoading(false); //Hides loading symbol
     }
   };
 
-  console.log(process.env);
+  //console.log(process.env);
   const analytics = getAnalytics(frontendContext.firebaseRef.current);
-  console.log(analytics);
+  //console.log(analytics);
 
   return (
         <SignInContainer direction="column" justifyContent="space-between">
@@ -249,6 +193,11 @@ const SignIn: React.FC = () => {
             <Typography component="h1" variant="h4">
               {isSignUp ? 'Sign up' : 'Sign in'}
             </Typography>
+            {loading && (
+                <Box sx={{ my: 2, display: 'flex', justifyContent: 'center' }}>
+                  <CircularProgressWithLabel value={progress} />
+                </Box>
+            )}
 
             {isSignUp ? (
               // Render SignUp Form (loaded lazily)
@@ -260,11 +209,11 @@ const SignIn: React.FC = () => {
               <Box component="form" onSubmit={HandleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 2 }}>
                 <FormControl>
                   <FormLabel htmlFor="email">Email</FormLabel>
-                  <TextField id="email" type="email" name="email" placeholder="your@email.com" required fullWidth />
+                  <TextField id="email" type="email" name="email" placeholder="your@email.com" required fullWidth error={emailError} helperText={emailError ? emailErrorMessage : ''} />
                 </FormControl>
                 <FormControl>
                   <FormLabel htmlFor="password">Password</FormLabel>
-                  <TextField id="password" type="password" name="password" placeholder="••••••" required fullWidth />
+                  <TextField id="password" type="password" name="password" placeholder="••••••" required fullWidth error={passwordError} helperText={passwordError ? passwordErrorMessage : ''} />
                 </FormControl>
                 <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
                 <Button type="submit" fullWidth variant="contained">Sign in</Button>
@@ -285,15 +234,6 @@ const SignIn: React.FC = () => {
                 >
                   Sign In with Google
                 </Button>
-                {/* <Button
-                  type="submit"
-                  fullWidth
-                  variant="outlined"
-                  onClick={handleFacebookSignIn}
-                  startIcon={<FacebookIcon />}
-                >
-                  Sign In with Facebook
-                </Button> */}
               </Box>
 
               <Typography sx={{ textAlign: 'center', mt: 2 }}>
@@ -313,6 +253,8 @@ const SignIn: React.FC = () => {
                   </>
                 )}
               </Typography>
+              
+              
 
           </Card>
         </SignInContainer>

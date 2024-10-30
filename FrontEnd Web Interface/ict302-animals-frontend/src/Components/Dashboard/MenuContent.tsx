@@ -18,7 +18,7 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
   const frontendContext = useContext(FrontendContext);
 
   const mainListItems = [
-    { text: 'Home', icon: <HomeRoundedIcon /> },
+    //{ text: 'Home', icon: <HomeRoundedIcon /> },
     { text: 'Upload', icon: <CloudUploadIcon /> },
     { text: 'Animals', icon: <PetsIcon /> },
   ];
@@ -40,7 +40,6 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
       <List dense>
         {mainListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            {item.text === 'Queue' ? <Badge badgeContent={frontendContext.user.contextRef?.current.currentItemsInQueue} color='secondary' variant='dot' anchorOrigin={{vertical: 'top', horizontal: 'right'}}>
             <Button
                 onClick={() => menuItemClicked(item.text.toLowerCase())}
                 >
@@ -49,15 +48,6 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
                 <ListItemText primary={item.text} />
               </ListItemButton>
             </Button>
-            </Badge> : 
-            <Button
-                onClick={() => menuItemClicked(item.text.toLowerCase())}
-                >
-              <ListItemButton selected={item.text.toLowerCase() === getNameFromDashboardPage(currentDashboardPage)}>
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </Button>}
           </ListItem>
         ))}
       </List>
@@ -66,7 +56,7 @@ const MenuContent: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
             <Button
-                onClick={() => setCurrentDashboardPage(getDashboardPageFromName(item.text.toLowerCase()))}
+                onClick={() => menuItemClicked(item.text.toLowerCase())}
                 >
               <ListItemButton selected={item.text.toLowerCase() === getNameFromDashboardPage(currentDashboardPage)}>
                 <ListItemIcon>{item.icon}</ListItemIcon>

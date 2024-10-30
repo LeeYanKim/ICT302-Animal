@@ -26,8 +26,7 @@ const NavbarBreadcrumbs: React.FC<DashboardMenuProps> = ({currentDashboardPage, 
   if(currentPath.includes('/dashboard/animals/')) {
     animalIDInPath = true;
     animalID = currentPath.split('/').pop() || '';
-}
-  
+  }
   
 
   return (

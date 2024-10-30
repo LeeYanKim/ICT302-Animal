@@ -6,46 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class UserAccessRepository : IUserAccessRepository
+    public class UserAccessRepository(SchemaContext ctx) : IUserAccessRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public UserAccessRepository(SchemaContext ctx)
+        public async Task<IEnumerable<UserAccess>?> GetUserAccessesAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<UserAccess>> GetUserAccessesAsync()
-        {
-            var userAccesses = await _ctx.UserAccess.ToListAsync();
+            var userAccesses = await ctx.UserAccess.ToListAsync();
+            userAccesses.ForEach(a => ctx.UserAccess.Attach(a));
             return userAccesses;
         }
 
         public async Task<UserAccess?> GetUserAccessByKeysAsync(Guid orgId, Guid userId)
         {
-            var userAccess = await _ctx.UserAccess.FindAsync(orgId, userId);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var userAccess = await ctx.UserAccess.FindAsync(orgId, userId);
             return userAccess;
         }
 
-        public async Task<UserAccess> CreateUserAccessAsync(UserAccess userAccess)
+        public async Task<UserAccess?> CreateUserAccessAsync(UserAccess userAccess)
         {
-            _ctx.UserAccess.Attach(userAccess);
-            _ctx.UserAccess.Add(userAccess);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.UserAccess.Attach(userAccess);
+            ctx.UserAccess.Add(userAccess);
+            await ctx.SaveChangesAsync();
             return userAccess;
         }
 
-        public async Task<UserAccess> UpdateUserAccessAsync(UserAccess userAccess)
+        public async Task<UserAccess?> UpdateUserAccessAsync(UserAccess userAccess)
         {
-            _ctx.UserAccess.Update(userAccess);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.UserAccess.Update(userAccess);
+            await ctx.SaveChangesAsync();
             return userAccess;
         }
 
-        public async Task<int> DeleteUserAccessAsync(UserAccess userAccess)
+        public async Task<int?> DeleteUserAccessAsync(UserAccess userAccess)
         {
-            _ctx.UserAccess.Remove(userAccess);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.UserAccess.Remove(userAccess);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

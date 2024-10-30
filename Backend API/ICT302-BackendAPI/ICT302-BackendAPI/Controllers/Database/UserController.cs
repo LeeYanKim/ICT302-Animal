@@ -10,9 +10,9 @@ namespace ICT302_BackendAPI.Controllers.Database
 {
     public class AddUserRequest
     {
-        public string userName { get; set; }
-        public string userEmail { get; set; }
-        public string permissionLevel { get; set; }
+        public string? userName { get; set; }
+        public string? userEmail { get; set; }
+        public string? permissionLevel { get; set; }
     }
     
     [Route("api/db")]
@@ -79,12 +79,13 @@ namespace ICT302_BackendAPI.Controllers.Database
                         user.PermissionLevel =
                             userRequested.permissionLevel ?? "user"; // Default permission level if not provided
 
-                        user.SubscriptionID = new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa6"); // Generate a new subscription ID if not provided
-                        user.Subscription = await _userRepo.GetSubscriptionByIDAsync(user.SubscriptionID);
-
+                        
+                        user.Subscription = (await _userRepo.GetDefaultSubscriptionAsync())!;
+                        user.SubscriptionID = user.Subscription!.SubscriptionID;
+                        
                         user.UserPassword = "";
-                        user.UserEmail = userRequested.userEmail;
-                        user.UserName = userRequested.userName;
+                        user.UserEmail = userRequested.userEmail!;
+                        user.UserName = userRequested.userName!;
 
                         var createdUser = await _userRepo.CreateUserAsync(user);
 
@@ -92,7 +93,7 @@ namespace ICT302_BackendAPI.Controllers.Database
                         {
                             statusCode = 200,
                             message = "User created successfully",
-                            userId = createdUser.UserID
+                            userId = createdUser!.UserID
                         });
                     }
 
@@ -108,7 +109,7 @@ namespace ICT302_BackendAPI.Controllers.Database
                     {
                         statusCode = 200,
                         message = "User updated successfully",
-                        userId = existingUser.UserID
+                        userId = existingUser.UserID.ToString()
                     });
                     
                 }
@@ -188,18 +189,96 @@ namespace ICT302_BackendAPI.Controllers.Database
         {
             try
             {
+                // Retrieve the user's email from the local database
+                var email = await _userRepo.GetEmailByIDAsync(id);
+                if (string.IsNullOrEmpty(email))
+                {
+                    return NotFound(new
+                    {
+                        statusCode = 404,
+                        message = "Email not found for this user"
+                    });
+                }
+
+                // Use the Firebase Admin SDK to get the user by email
+                var firebaseAuth = FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance;
+                UserRecord userRecord;
+                try
+                {
+                    userRecord = await firebaseAuth.GetUserByEmailAsync(email);
+                }
+                catch (FirebaseAdmin.Auth.FirebaseAuthException firebaseEx)
+                {
+                    _logger.LogError(firebaseEx, "Error occurred while retrieving user from Firebase.");
+                    return StatusCode(StatusCodes.Status500InternalServerError, new
+                    {
+                        statusCode = 500,
+                        message = "Firebase user retrieval failed"
+                    });
+                }
+
+                // Delete the user from Firebase using the Firebase UID
+                try
+                {
+                    await firebaseAuth.DeleteUserAsync(userRecord.Uid);
+                }
+                catch (FirebaseAdmin.Auth.FirebaseAuthException firebaseEx)
+                {
+                    _logger.LogError(firebaseEx, "Error occurred while deleting user from Firebase.");
+                    return StatusCode(StatusCodes.Status500InternalServerError, new
+                    {
+                        statusCode = 500,
+                        message = $"Firebase deletion failed: {firebaseEx.Message}"
+                    });
+                }
+
+                // Perform any local database deletion
                 var existingUser = await _userRepo.GetUserByIDAsync(id);
                 if (existingUser == null)
                 {
                     return NotFound(new
                     {
                         statusCode = 404,
-                        message = "Record not found"
+                        message = "Record not found in the local database"
                     });
                 }
 
                 await _userRepo.DeleteUserAsync(existingUser);
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, "Error occurred while processing the delete request.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    statusCode = 500,
+                    message = ex.Message
+                });
+            }
+        }
+        
+        [HttpGet("user/{id}/email")]
+        public async Task<IActionResult> GetEmailById(Guid id)
+        {
+            try
+            {
+                // Call the repository method to get the email by the userID
+                var email = await _userRepo.GetEmailByIDAsync(id);
+        
+                if (string.IsNullOrEmpty(email))
+                {
+                    return NotFound(new
+                    {
+                        statusCode = 404,
+                        message = "Email not found for this user"
+                    });
+                }
+
+                return Ok(new
+                {
+                    statusCode = 200,
+                    email = email
+                });
             }
             catch (Exception ex)
             {

@@ -6,45 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class AccessTypeRepository : IAccessTypeRepository
+    public class AccessTypeRepository(SchemaContext ctx) : IAccessTypeRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public AccessTypeRepository(SchemaContext ctx)
+        public async Task<IEnumerable<AccessType>?> GetAccessTypesAsync()
         {
-            _ctx = ctx;
-        }
-
-        public async Task<IEnumerable<AccessType>> GetAccessTypesAsync()
-        {
-            return await _ctx.AccessTypes.ToListAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var at =  await ctx.AccessTypes.ToListAsync();
+            at.ForEach(a => ctx.AccessTypes.Attach(a));
+            return at;
         }
 
         public async Task<AccessType?> GetAccessTypeByIDAsync(Guid id)
         {
-            return await _ctx.AccessTypes.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            return await ctx.AccessTypes.FindAsync(id);
         }
 
-        public async Task<AccessType> CreateAccessTypeAsync(AccessType accessType)
+        public async Task<AccessType?> CreateAccessTypeAsync(AccessType accessType)
         {
-            _ctx.AccessTypes.Attach(accessType);
-            _ctx.AccessTypes.Add(accessType);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.AccessTypes.Attach(accessType);
+            ctx.AccessTypes.Add(accessType);
+            await ctx.SaveChangesAsync();
             return accessType;
         }
 
-        public async Task<AccessType> UpdateAccessTypeAsync(AccessType accessType)
+        public async Task<AccessType?> UpdateAccessTypeAsync(AccessType accessType)
         {
-            _ctx.AccessTypes.Attach(accessType);
-            _ctx.AccessTypes.Update(accessType);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.AccessTypes.Attach(accessType);
+            ctx.AccessTypes.Update(accessType);
+            await ctx.SaveChangesAsync();
             return accessType;
         }
 
-        public async Task<int> DeleteAccessTypeAsync(AccessType accessType)
+        public async Task<int?> DeleteAccessTypeAsync(AccessType accessType)
         {
-            _ctx.AccessTypes.Remove(accessType);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.AccessTypes.Remove(accessType);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

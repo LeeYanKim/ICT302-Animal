@@ -165,8 +165,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("GPCName")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("GPC_Name");
 
                     b.Property<int>("GPCSize")
@@ -306,8 +306,8 @@ namespace ICT302_BackendAPI.Database.Migrations
 
                     b.Property<string>("ModelTitle")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Model_Title");
 
                     b.HasKey("ModelID");

@@ -6,47 +6,68 @@ using ICT302_BackendAPI.Database.Models;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class AnimalAccessRepository : IAnimalAccessRepository
+    public class AnimalAccessRepository(SchemaContext ctx) : IAnimalAccessRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public AnimalAccessRepository(SchemaContext ctx)
+        public async Task<IEnumerable<AnimalAccess>?> GetAnimalAccessesAsync()
         {
-            _ctx = ctx;
-        }
-
-        public async Task<IEnumerable<AnimalAccess>> GetAnimalAccessesAsync()
-        {
-            var animalAccesses = await _ctx.AnimalAccesses.ToListAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var animalAccesses = await ctx.AnimalAccesses.ToListAsync();
+            animalAccesses.ForEach(a => ctx.AnimalAccesses.Attach(a));
             return animalAccesses;
         }
 
         public async Task<AnimalAccess?> GetAnimalAccessByIDAsync(Guid id)
         {
-            var animalAccess = await _ctx.AnimalAccesses.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var animalAccess = await ctx.AnimalAccesses.FindAsync(id);
             return animalAccess;
         }
 
-        public async Task<AnimalAccess> CreateAnimalAccessAsync(AnimalAccess animalAccess)
+        public async Task<AnimalAccess?> CreateAnimalAccessAsync(AnimalAccess animalAccess)
         {
-            _ctx.AnimalAccesses.Attach(animalAccess);
-            _ctx.AnimalAccesses.Add(animalAccess);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.AnimalAccesses.Attach(animalAccess);
+            ctx.AnimalAccesses.Add(animalAccess);
+            await ctx.SaveChangesAsync();
             return animalAccess;
         }
 
-        public async Task<AnimalAccess> UpdateAnimalAccessAsync(AnimalAccess animalAccess)
+        public async Task<AnimalAccess?> UpdateAnimalAccessAsync(AnimalAccess animalAccess)
         {
-            _ctx.AnimalAccesses.Attach(animalAccess);
-            _ctx.AnimalAccesses.Update(animalAccess);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.AnimalAccesses.Attach(animalAccess);
+            ctx.AnimalAccesses.Update(animalAccess);
+            await ctx.SaveChangesAsync();
             return animalAccess;
         }
 
-        public async Task<int> DeleteAnimalAccessAsync(AnimalAccess animalAccess)
+        public async Task<int?> DeleteAnimalAccessAsync(AnimalAccess animalAccess)
         {
-            _ctx.AnimalAccesses.Remove(animalAccess);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.AnimalAccesses.Remove(animalAccess);
+            return await ctx.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Guid>?> GetAnimalIDsByUserIDAsync(Guid userId)
+        {
+            
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            return await ctx.AnimalAccesses
+                .Where(a => a.UserID == userId)
+                .Select(a => a.AnimalID)
+                .ToListAsync();
         }
     }
 }

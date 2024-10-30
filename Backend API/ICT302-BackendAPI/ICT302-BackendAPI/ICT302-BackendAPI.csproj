@@ -15,16 +15,13 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="NReco.Logging.File" Version="1.2.1" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\ICT302-BackendAPI.API\ICT302-BackendAPI.API.csproj" />
       <ProjectReference Include="..\ICT302-BackendAPI.Database\ICT302-BackendAPI.Database.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Controllers\Backend\" />
     </ItemGroup>
 
 </Project>

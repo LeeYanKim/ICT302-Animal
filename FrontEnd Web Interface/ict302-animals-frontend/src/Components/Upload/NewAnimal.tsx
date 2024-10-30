@@ -30,7 +30,7 @@ interface NewAnimalProps {
   requireFile?: boolean; // New prop to indicate if file selection is required
 }
 
-const animalTypesList = ["Mammal", "Bird", "Reptile", "Fish"];
+const animalTypesList = ["Dog", "Cat", "Mammal", "Bird", "Reptile", "Fish"];
 
 const NewAnimal: React.FC<NewAnimalProps> = ({
   open,
@@ -38,9 +38,10 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
   addNewAnimal,
   requireFile = false, // Default to false
 }) => {
+  let currentDate = new Date();
   const [animalName, setAnimalName] = useState<string>("");
-  const [dateOfBirth, setDateOfBirth] = useState<string>("");
-  const [animalType, setAnimalType] = useState<string>("");
+  const [dateOfBirth, setDateOfBirth] = useState<string>(currentDate.toISOString().split('T')[0]);
+  const [animalType, setAnimalType] = useState<string>("Dog");
   const [animalTypes, setAnimalTypes] = useState<string[]>(animalTypesList);
   const [isAddNewTypeDialogOpen, setIsAddNewTypeDialogOpen] = useState<boolean>(false);
   const [newAnimalType, setNewAnimalType] = useState<string>("");
@@ -99,7 +100,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
           <Box mt={2}>
             <TextField
               label="Animal Name"
-              variant="outlined"
+              variant="standard"
               fullWidth
               value={animalName}
               onChange={(e) => setAnimalName(e.target.value)}
@@ -109,7 +110,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
 
             <TextField
               label="Date of Birth"
-              variant="outlined"
+              variant="standard"
               fullWidth
               type="date"
               InputLabelProps={{
@@ -122,10 +123,11 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
             />
 
             <FormControl fullWidth margin="normal">
-              <InputLabel id="animal-type-label">Animal Type</InputLabel>
+              <br></br>
+              <InputLabel id="animal-type-label" variant="standard" shrink={true} margin="dense">Animal Type</InputLabel>
               <Select
                 labelId="animal-type-label"
-                value={animalType[0]}
+                value={animalType || ''}
                 onChange={handleAnimalTypeChange}
                 label="Animal Type"
                 required={requireFile} // Required only if file is required
@@ -170,7 +172,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
 
         <DialogActions>
           <Button onClick={handleGenerate} color="primary" variant="contained">
-            Add
+            Submit
           </Button>
           <Button onClick={handleClose} color="primary" variant="outlined">
             Close
@@ -183,7 +185,7 @@ const NewAnimal: React.FC<NewAnimalProps> = ({
         <DialogContent>
           <TextField
             label="New Animal Type"
-            variant="outlined"
+            variant="standard"
             fullWidth
             value={newAnimalType}
             onChange={(e) => setNewAnimalType(e.target.value)}

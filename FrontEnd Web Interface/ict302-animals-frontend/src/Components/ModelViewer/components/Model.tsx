@@ -1,11 +1,22 @@
 import React, { useRef, useEffect, createRef, useState } from 'react';
 import { useLoader, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Wireframe, useAnimations } from '@react-three/drei';
-import {AnimationMixer, Group, Box3, SkinnedMesh, Vector3, MeshStandardMaterial, Mesh, BufferGeometry, Object3DEventMap} from 'three';
+import {
+    AnimationMixer,
+    Group,
+    Box3,
+    SkinnedMesh,
+    Vector3,
+    MeshStandardMaterial,
+    Mesh,
+    BufferGeometry,
+    Object3DEventMap,
+    Material
+} from 'three';
 
 
 interface ModelProps {
-    url: string;
+    url: string | undefined;
     isAnimating: boolean;
     wireframe: boolean;
     animationSpeed: number;
@@ -22,7 +33,18 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
     const modelRef = useRef<Group | null>(null);
     const mixerRef = useRef<AnimationMixer | null>(null);
     const { camera } = useThree();
-    const gltf = useGLTF(url);
+    const gltf = useGLTF(url ? url : '');
+    //@ts-ignore
+    gltf.scene.children[0].geometry.center()
+    //@ts-ignore
+    //gltf.scene.children[0].geometry.scale(2,2,2)
+    //gltf.scene.scale.set(10,10,10);
+    //gltf.scene.scale.set(100,100,100);
+    //const bx = new Box3().setFromObject(gltf.scene);
+    //const center = bx.getCenter(new Vector3());
+    //gltf.scene.position.sub(center)
+    gltf.scene.rotation.set(90,0,0);
+
 
     let animPos = 0;
 
@@ -123,7 +145,7 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
 
     return (
         <>
-        <primitive ref={modelRef} object={gltf.scene}/>
+            <primitive ref={modelRef} object={gltf.scene}/>
         </>
     );
 };

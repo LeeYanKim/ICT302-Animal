@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Card, CardContent, Chip, Stack, Typography } from '@mui/material';
+import { Card, CardContent, Chip, Stack, Typography, Grid2 as Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
 import DeleteAnimalButton from './DeleteAnimalButton';
@@ -11,9 +11,10 @@ export type AnimalCardProps = {
   animalDOB: string; // animalDOB will be passed as a string
   animalType: string;
   onClick: () => void; // Add onClick prop
+  onDeleteSuccess: () => void; // Add onDeleteSuccess prop
 };
 
-const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB, animalType, onClick }) => {
+const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB, animalType, onClick, onDeleteSuccess }) => {
   const navigate = useNavigate();
   const [animalImage, setAnimalImage] = useState<string>('');
 
@@ -36,38 +37,42 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
 
   const handleDeleteSuccess = () => {
     // Refresh the page or go backwards
-    console.log('Animal deleted successfully');
+    onDeleteSuccess();
   };
 
 
   return (
     <Card
       variant="outlined"
-      sx={{ height: '100%', minWidth: 450, flexGrow: 1, cursor: 'pointer' }}
+      sx={{ height: '100%', flexGrow: 1, cursor: 'pointer' }}
       onClick={onClick} 
     >
       <CardContent>
-        <DeleteAnimalButton animalToDeleteId = {animalID}  onDeleteSuccess={handleDeleteSuccess}/>
-        <Typography component="h2" variant="subtitle2" gutterBottom>
-          Name: {animalName}
-        </Typography>
-        <Typography component="p" variant="body2" color="textSecondary">
-          Date of Birth: {formattedDOB}
-        </Typography>
-        <Stack direction="column" sx={{ justifyContent: 'space-between', flexGrow: 1, gap: 1 }}>
-          <Stack sx={{ justifyContent: 'space-between' }}>
+        <Grid container spacing={2}>
+          <Grid>
             {animalImage && (
-              <img
-                src={animalImage}
-                alt={animalName}
-                style={{ width: '100px', height: '100px', borderRadius: '50%' }}
-              />
+                <img
+                    src={animalImage}
+                    alt={animalName}
+                    style={{ width: '60px', height: '60px', borderRadius: '50%' }}
+                />
             )}
-            <Stack direction="row" sx={{ justifyContent: 'center' }}>
-              <Chip label={animalType} />
-            </Stack>
-          </Stack>
-        </Stack>
+          </Grid>
+          <Grid>
+            <Typography component="h2" variant="subtitle2" gutterBottom>
+              Name: {animalName}
+            </Typography>
+            <Typography component="p" variant="body2" color="textSecondary">
+              Date of Birth: {formattedDOB}
+            </Typography>
+            <Chip label={animalType} />
+          </Grid>
+          <Grid>
+            {// TODO: Maybe change this to be 3 dots menu with delete option rather than delete button directly
+            }
+            <DeleteAnimalButton animalToDeleteId = {animalID}  onDeleteSuccess={handleDeleteSuccess}/>
+          </Grid>
+        </Grid>
       </CardContent>
     </Card>
   );

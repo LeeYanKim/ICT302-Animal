@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// NewUpload.tsx
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Button,
   Dialog,
@@ -13,6 +14,7 @@ import {
 } from '@mui/material';
 
 import API from '../../Internals/API';
+import { FrontendContext } from '../../Internals/ContextStore';
 
 interface NewUploadProps {
   open: boolean;
@@ -22,21 +24,23 @@ interface NewUploadProps {
     animalType: string;
     dateOfBirth: string;
   };
-  fileToUpload: File | null;
+  filesToUpload: File[] | null;
   onUploadSuccess?: () => void;
 }
 
-export default function NewUpload({ open, handleClose, animalDetails, fileToUpload, onUploadSuccess  }: NewUploadProps) {
+export default function NewUpload({ open, handleClose, animalDetails, filesToUpload, onUploadSuccess  }: NewUploadProps) {
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null); // To track upload status
+  const frontendContext = useContext(FrontendContext);  // Access the frontend context
+  const userid = frontendContext.user.contextRef.current.userId;
 
 
   // Handle File Upload
   const handleFileUpload = async () => {
-    if (!fileToUpload) {
-      setErrorMessage('No file selected for upload.');
+    if (!filesToUpload || filesToUpload.length === 0) {
+      setErrorMessage('No files selected for upload.');
       setIsSnackbarOpen(true);
       return;
     }
@@ -52,13 +56,18 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
 
     // Prepare form data for the upload
     const formData = new FormData();
-    formData.append('file', fileToUpload); // Ensure the key is 'file' to match the backend
+
+    // Append animal details
     formData.append('animalName', animalDetails.animalName);
     formData.append('animalType', animalDetails.animalType);
+    const formattedDOB = animalDetails.dateOfBirth;
+    formData.append('dateOfBirth', formattedDOB);
+    formData.append('userId' , userid);
 
-    // Ensure the date is formatted as 'yyyy-MM-dd'
-    const formattedDOB = animalDetails.dateOfBirth; // Assuming dateOfBirth is already in 'yyyy-MM-dd' format
-    formData.append('dateOfBirth', formattedDOB); // Changed from 'animalDOB' to 'dateOfBirth'
+    // Append each file
+    filesToUpload.forEach((file) => {
+      formData.append('files', file); // Ensure the key is 'files' to match the backend
+    });
 
     try {
       const response = await fetch(API.Upload(), { 
@@ -97,13 +106,13 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
     }
   };
 
-  // Automatically initiate the file upload if open is true and file is selected
+  // Automatically initiate the file upload if open is true and files are selected
   useEffect(() => {
-    if (open && fileToUpload) {
+    if (open && filesToUpload && filesToUpload.length > 0) {
       handleFileUpload();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, fileToUpload]);
+  }, [open, filesToUpload]);
 
   const handleSnackbarClose = () => {
     setIsSnackbarOpen(false);
@@ -112,7 +121,7 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
   return (
     <>
       <Dialog open={open} onClose={() => handleClose(true)}>
-        <DialogTitle>{isUploading ? 'Uploading...' : 'Upload Video'}</DialogTitle>
+        <DialogTitle>{isUploading ? 'Uploading...' : 'Upload Videos'}</DialogTitle>
         <DialogContent>
           {isUploading ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -127,7 +136,7 @@ export default function NewUpload({ open, handleClose, animalDetails, fileToUplo
             )}
           </Box>
           ) : (
-            <Typography variant="body1">Preparing to upload your video...</Typography>
+            <Typography variant="body1">Preparing to upload your videos...</Typography>
           )}
         </DialogContent>
         <DialogActions>

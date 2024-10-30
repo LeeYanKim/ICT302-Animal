@@ -6,46 +6,55 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class SubscriptionRepository : ISubscriptionRepository
+    public class SubscriptionRepository(SchemaContext ctx) : ISubscriptionRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public SubscriptionRepository(SchemaContext ctx)
+        public async Task<IEnumerable<Subscription>?> GetSubscriptionsAsync()
         {
-            _ctx = ctx;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<IEnumerable<Subscription>> GetSubscriptionsAsync()
-        {
-            var subscriptions = await _ctx.Subscriptions.ToListAsync();
+            var subscriptions = await ctx.Subscriptions.ToListAsync();
+            subscriptions.ForEach(a => ctx.Subscriptions.Attach(a));
             return subscriptions;
         }
 
         public async Task<Subscription?> GetSubscriptionByIDAsync(Guid id)
         {
-            var subscription = await _ctx.Subscriptions.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var subscription = await ctx.Subscriptions.FindAsync(id);
             return subscription;
         }
 
-        public async Task<Subscription> CreateSubscriptionAsync(Subscription subscription)
+        public async Task<Subscription?> CreateSubscriptionAsync(Subscription subscription)
         {
-            _ctx.Subscriptions.Attach(subscription);
-            _ctx.Subscriptions.Add(subscription);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Subscriptions.Attach(subscription);
+            ctx.Subscriptions.Add(subscription);
+            await ctx.SaveChangesAsync();
             return subscription;
         }
 
-        public async Task<Subscription> UpdateSubscriptionAsync(Subscription subscription)
+        public async Task<Subscription?> UpdateSubscriptionAsync(Subscription subscription)
         {
-            _ctx.Subscriptions.Update(subscription);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Subscriptions.Update(subscription);
+            await ctx.SaveChangesAsync();
             return subscription;
         }
 
-        public async Task<int> DeleteSubscriptionAsync(Subscription subscription)
+        public async Task<int?> DeleteSubscriptionAsync(Subscription subscription)
         {
-            _ctx.Subscriptions.Remove(subscription);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Subscriptions.Remove(subscription);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

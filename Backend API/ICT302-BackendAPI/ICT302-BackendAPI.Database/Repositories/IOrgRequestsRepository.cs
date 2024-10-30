@@ -7,10 +7,10 @@ namespace ICT302_BackendAPI.Database.Repositories
 {
     public interface IOrgRequestsRepository
     {
-        Task<OrgRequests> CreateOrgRequestsAsync(OrgRequests orgRequests);
-        Task<int> DeleteOrgRequestsAsync(OrgRequests orgRequests);
+        Task<OrgRequests?> CreateOrgRequestsAsync(OrgRequests orgRequests);
+        Task<int?> DeleteOrgRequestsAsync(OrgRequests orgRequests);
         Task<OrgRequests?> GetOrgRequestsByIDAsync(Guid id);
-        Task<IEnumerable<OrgRequests>> GetOrgRequestsAsync();
-        Task<OrgRequests> UpdateOrgRequestsAsync(OrgRequests orgRequests);
+        Task<IEnumerable<OrgRequests>?> GetOrgRequestsAsync();
+        Task<OrgRequests?> UpdateOrgRequestsAsync(OrgRequests orgRequests);
     }
 }

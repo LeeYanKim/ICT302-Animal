@@ -1,21 +1,18 @@
 import React from "react";
 
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import {Card, CardContent} from '@mui/material';
 
 import ModelRenderer from "./components/ModelRenderer";
 
 interface ModelViewerProps {
-    modelPath: string;
+    modelPath: string | undefined;
 }
 
 const ModelViewer: React.FC<ModelViewerProps> = ( {modelPath} ) => {
 
     return (
-        <Card variant="outlined" sx={{ minWidth: 400, height: '100%'}}>
-            <CardContent>
-                <ModelRenderer modelPath={modelPath}/>
-            </CardContent>
+        <Card variant="outlined">
+            <ModelRenderer modelPath={modelPath}/>
         </Card>
     );
 }

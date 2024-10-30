@@ -111,28 +111,25 @@ const LandingPage: React.FC = () => {
                         }}>Explore the possibilities of animal modelling using AI
                     </Typography>
                 </Box>
-                <Typography
-                sx={{fontFamily : 'Kanit , sans-serif',
-                    fontWeight : '250',
-                    fontSize : '1rem'
-                }}>
-                    <p>
+                    <Typography sx={{fontFamily : 'Kanit , sans-serif', fontWeight : '250', fontSize : '1rem'}}>
                         Imagine a world where the transformation of simple animal videos into detailed, lifelike 3D models is as effortless as the click of a button. Our cutting-edge application leverages the power of AI to revolutionize how we capture and visualize animals, making advanced 3D modeling accessible to everyone, from veterinary professionals to passionate animal enthusiasts.
-                    </p>
-                    <p>
+                    </Typography>
+                    <br/>
+                    <Typography sx={{fontFamily : 'Kanit , sans-serif', fontWeight : '250', fontSize : '1rem'}}>
                         In animal hospitals, our technology offers a breakthrough: the ability to generate precise 3D scans without the need for invasive procedures, sedatives, or expensive machinery. Vets can now quickly and accurately assess an animal’s physical condition, monitor their posture, and detect abnormalities like limps, all while ensuring the animal remains stress-free and comfortable. With our application, even the most modest veterinary practice can access tools that once required state-of-the-art equipment.
-                    </p>
-                    <p>
+                    </Typography>
+                    <br/>
+                    <Typography sx={{fontFamily : 'Kanit , sans-serif', fontWeight : '250', fontSize : '1rem'}}>
                         But the possibilities extend beyond medical applications. Farmers and animal carers can use our platform to track the development of livestock over time, gaining insights into their health and physical progress with unparalleled precision. Imagine being able to observe a horse’s gait or a cow’s mobility issues through a series of consistent 3D models—enabling early intervention and improving the well-being of animals under their care.
-                    </p>
-                    <p>
+                    </Typography>
+                    <br/>
+                    <Typography sx={{fontFamily : 'Kanit , sans-serif', fontWeight : '250', fontSize : '1rem'}}>
                         Our technology also finds a place in the world of entertainment. Whether you’re an animator, game developer, or digital artist, our solution provides a fast and affordable way to bring animals to life in 3D. No more waiting for costly and time-consuming modeling processes—just upload your video, and our AI does the rest, delivering a fully interactive model in no time.
-                    </p>
-                    <p>
+                    </Typography>
+                    <br/>
+                    <Typography sx={{fontFamily : 'Kanit , sans-serif', fontWeight : '250', fontSize : '1rem'}}>
                         We’re just getting started. Our mission is to expand the horizons of animal modeling by incorporating even more advanced AI capabilities. As we evolve, we aim to scan a broader range of animals—and perhaps even humans—bringing our transformative technology to new domains and applications. Join us on this exciting journey as we redefine the future of 3D modeling, making it faster, more affordable, and accessible to all.
-                    </p>
-
-                </Typography>
+                    </Typography>
 
             </Container>
             <Container

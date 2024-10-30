@@ -6,65 +6,91 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class JobsCompletedRepository : IJobsCompletedRepository
+    public class JobsCompletedRepository(SchemaContext ctx) : IJobsCompletedRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public JobsCompletedRepository(SchemaContext ctx)
-        {
-            _ctx = ctx;
-        }
-
         public async Task<JobsCompleted?> GetCompletedJobsFromJobDetailsIdAsync(Guid? jobDetailsId)
         {
             if(jobDetailsId == null || jobDetailsId == Guid.Empty) return null;
             
-            var jobs = await _ctx.JobsCompleted.ToListAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            
+            var jobs = await ctx.JobsCompleted.ToListAsync();
             var job = jobs.Find(jd => jd.JDID == jobDetailsId);
 
             if (job != null)
             {
-                _ctx.JobsCompleted.Attach(job);
+                ctx.JobsCompleted.Attach(job);
             }
             
             return job;
         }
 
-        public async Task<IEnumerable<JobsCompleted>> GetJobsCompletedAsync()
+        public async Task<IEnumerable<JobsCompleted>?> GetJobsCompletedAsync()
         {
-            var jobs = await _ctx.JobsCompleted.ToListAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var jobs = await ctx.JobsCompleted.ToListAsync();
             return jobs;
         }
 
         public async Task<JobsCompleted?> GetCompletedJobsByIdAsync(Guid id)
         {
-            var job = await _ctx.JobsCompleted.FindAsync(id);
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            var job = await ctx.JobsCompleted.FindAsync(id);
             if (job != null)
             {
-                _ctx.JobsCompleted.Attach(job);
+                ctx.JobsCompleted.Attach(job);
             }
             return job;
         }
 
-        public async Task<JobsCompleted> CreateJobsCompletedAsync(JobsCompleted job)
+        public async Task<JobsCompleted?> CreateJobsCompletedAsync(JobsCompleted job)
         {
-            _ctx.JobsCompleted.Attach(job);
-            _ctx.JobsCompleted.Add(job);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Entry<JobsCompleted>(job).State = EntityState.Added;
+            ctx.JobsCompleted.Attach(job);
+            ctx.JobsCompleted.Add(job);
+            await ctx.SaveChangesAsync();
+            return job;
+        }
+        
+        public async Task<JobsCompleted?> CreateJobsCompletedAsync(JobsCompleted job, bool attach)
+        {
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.Entry<JobsCompleted>(job).State = EntityState.Added;
+            if (attach)
+                ctx.JobsCompleted.Attach(job);
+            ctx.JobsCompleted.Add(job);
+            await ctx.SaveChangesAsync();
+            return null;
+        }
+
+        public async Task<JobsCompleted?> UpdateJobsCompletedAsync(JobsCompleted job)
+        {
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+
+            ctx.JobsCompleted.Update(job);
+            await ctx.SaveChangesAsync();
             return job;
         }
 
-        public async Task<JobsCompleted> UpdateJobsCompletedAsync(JobsCompleted job)
+        public async Task<int?> DeleteJobsCompletedAsync(JobsCompleted job)
         {
-            _ctx.JobsCompleted.Update(job);
-            await _ctx.SaveChangesAsync();
-            return job;
-        }
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
 
-        public async Task<int> DeleteJobsCompletedAsync(JobsCompleted job)
-        {
-            _ctx.JobsCompleted.Remove(job);
-            return await _ctx.SaveChangesAsync();
+            ctx.JobsCompleted.Remove(job);
+            return await ctx.SaveChangesAsync();
         }
     }
 }

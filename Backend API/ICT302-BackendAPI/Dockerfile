@@ -9,19 +9,19 @@ WORKDIR /src
 COPY . .
 
 # Restore as distinct layers
-RUN dotnet restore
+RUN dotnet restore ICT302-BackendAPI/ICT302-BackendAPI.csproj
 
 # Build a release
-RUN dotnet build -c Release -o /out
+RUN dotnet build ICT302-BackendAPI/ICT302-BackendAPI.csproj -c Release -o /out
 
 # Build runtime image
 #FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 FROM build AS publish
 
-RUN dotnet publish -c Release -o /out
+RUN dotnet publish ICT302-BackendAPI/ICT302-BackendAPI.csproj -c Release -o /out
 
-FROM base as final
+FROM base AS final
 
 WORKDIR /App
 COPY --from=publish /out .

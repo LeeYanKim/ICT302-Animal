@@ -6,53 +6,61 @@ using System.Threading.Tasks;
 
 namespace ICT302_BackendAPI.Database.Repositories
 {
-    public class JobsPendingRepository : IJobsPendingRepository
+    public class JobsPendingRepository(SchemaContext ctx) : IJobsPendingRepository
     {
-        private readonly SchemaContext _ctx;
-
-        public JobsPendingRepository(SchemaContext ctx)
+        public async Task<List<JobsPending>?> GetJobsPendingAsync()
         {
-            _ctx = ctx;
-        }
-
-        public async Task<List<JobsPending>> GetJobsPendingAsync()
-        {
-            var jobsPending = await _ctx.JobsPending.ToListAsync();
-            if(jobsPending.Any())
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var jobsPending = await ctx.JobsPending.ToListAsync();
+            if(jobsPending.Count != 0)
             {
-                jobsPending.ForEach(j => _ctx.JobsPending.Attach(j));
+                jobsPending.ForEach(j => ctx.JobsPending.Attach(j));
             }
             return jobsPending;
         }
 
         public async Task<JobsPending?> GetPendingJobByQueuePosition(int queuePosition)
         {
-            var jobs = await _ctx.JobsPending.ToListAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var jobs = await ctx.JobsPending.ToListAsync();
             var job = jobs.Find(j => j.QueueNumber == queuePosition);
-            if (job != null)
-            {
-                await _ctx.Entry(job).Reference(j => j.JobDetails).LoadAsync();
-                await _ctx.Entry(job.JobDetails).Reference(j => j.Graphic).LoadAsync();
-                await _ctx.Entry(job.JobDetails.Graphic).Reference(j => j.Animal).LoadAsync();
-                await _ctx.Entry(job.JobDetails).Reference(j => j.Model3D).LoadAsync();
-            }
+            
+            if (job == null) return null;
+            
+            await ctx.Entry(job).Reference(j => j.JobDetails).LoadAsync();
+            await ctx.Entry(job.JobDetails).Reference(j => j.Graphic).LoadAsync();
+            await ctx.Entry(job.JobDetails.Graphic!).Reference(j => j!.Animal).LoadAsync();
+            await ctx.Entry(job.JobDetails).Reference(j => j.Model3D).LoadAsync();
+            
 
             return job;
         }
 
         public async Task<JobsPending?> GetJobsPendingByIDAsync(int id)
         {
-            var job = await _ctx.JobsPending.FindAsync(id);
+            var job = await ctx.JobsPending.FindAsync(id);
             if(job != null)
-                _ctx.JobsPending.Attach(job);
+                ctx.JobsPending.Attach(job);
             return job;
         }
 
-        public async Task<JobsPending> CreateJobsPendingAsync(JobsPending jobsPending)
+        public async Task<bool> CheckDbAvailability()
         {
+            return await ctx.CheckDbIsAvailable();
+        }
+
+        public async Task<JobsPending?> CreateJobsPendingAsync(JobsPending jobsPending)
+        {
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
             // New pending jobs objects will default to -1 queue number until created
             var currentPendingJobs = await GetJobsPendingAsync();
-            if (currentPendingJobs.Any())
+            if (currentPendingJobs != null && currentPendingJobs.Any())
             {
                 jobsPending.QueueNumber = currentPendingJobs.Count + 1;
             }
@@ -60,23 +68,64 @@ namespace ICT302_BackendAPI.Database.Repositories
             {
                 jobsPending.QueueNumber = 1;
             }
-            _ctx.JobsPending.Attach(jobsPending);
-            _ctx.JobsPending.Add(jobsPending);
-            await _ctx.SaveChangesAsync();
+            ctx.JobsPending.Attach(jobsPending);
+            ctx.JobsPending.Add(jobsPending);
+            await ctx.SaveChangesAsync();
             return jobsPending;
         }
 
-        public async Task<JobsPending> UpdateJobsPendingAsync(JobsPending jobsPending)
+        public async Task<JobsPending?> UpdateJobsPendingAsync(JobsPending jobsPending)
         {
-            _ctx.JobsPending.Update(jobsPending);
-            await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.JobsPending.Update(jobsPending);
+            await ctx.SaveChangesAsync();
             return jobsPending;
         }
 
-        public async Task<int> DeleteJobsPendingAsync(JobsPending jobsPending)
+        public async Task<int?> DeleteJobsPendingAsync(JobsPending jobsPending)
         {
-            _ctx.JobsPending.Remove(jobsPending);
-            return await _ctx.SaveChangesAsync();
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            ctx.JobsPending.Remove(jobsPending);
+            return await ctx.SaveChangesAsync();
+        }
+
+        public async Task<bool?> ShuffleJobQueue()
+        {
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var pendingJobs = await ctx.JobsPending.ToListAsync();
+            foreach (var job in pendingJobs)
+            {
+                job.QueueNumber -= 1;
+                ctx.JobsPending.Update(job);
+                await ctx.SaveChangesAsync();
+            }
+
+            return true;
+        }
+
+        public async Task<JobsPending?> GetJobsPendingByDetailsId(Guid detailsId)
+        {
+            if (!await ctx.CheckDbIsAvailable())
+                return null;
+            
+            var jobs = await ctx.JobsPending.ToListAsync();
+            if (jobs.Any())
+            {
+                var job = jobs.Find(j => j.JobDetailsId == detailsId);
+                if (job == null)
+                    return null;
+                
+                ctx.JobsPending.Attach(job);
+                return job;
+            }
+
+            return null;
         }
     }
 }

@@ -26,9 +26,9 @@ namespace ICT302_BackendAPI.Controllers.Database
             try
             {
                 var currentPendingJobs = await _jobsPendingRepo.GetJobsPendingAsync();
-                if (currentPendingJobs.Any())
+                if (currentPendingJobs!.Any())
                 {
-                    jobsPending.QueueNumber = currentPendingJobs.Count + 1;
+                    jobsPending.QueueNumber = currentPendingJobs!.Count + 1;
                 }
                 else
                 {

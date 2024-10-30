@@ -1,9 +1,12 @@
+// GraphicController.cs
 using ICT302_BackendAPI.Database.Models;
 using ICT302_BackendAPI.Database.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace ICT302_BackendAPI.Controllers.Database
 {
@@ -28,14 +31,13 @@ namespace ICT302_BackendAPI.Controllers.Database
             try
             {
                 graphic.GPCID = Guid.NewGuid();
-                graphic.Animal = await _animalRepo.GetAnimalByIDAsync(graphic.GPCID) ?? new Animal();
+                graphic.Animal = await _animalRepo.GetAnimalByIdAsync(graphic.AnimalID) ?? new Animal();
                 var g = await _graphicRepo.CreateGraphicAsync(graphic);
                 return Ok(g);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-
+                _logger.LogError(ex, "Error adding graphic.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     statusCode = 500,
@@ -54,8 +56,7 @@ namespace ICT302_BackendAPI.Controllers.Database
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-
+                _logger.LogError(ex, "Error retrieving graphics.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     statusCode = 500,
@@ -82,7 +83,7 @@ namespace ICT302_BackendAPI.Controllers.Database
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error retrieving graphic.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     statusCode = 500,
@@ -111,7 +112,7 @@ namespace ICT302_BackendAPI.Controllers.Database
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error deleting graphic.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     statusCode = 500,
@@ -146,7 +147,7 @@ namespace ICT302_BackendAPI.Controllers.Database
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error updating graphic.");
                 return StatusCode(StatusCodes.Status500InternalServerError, new
                 {
                     statusCode = 500,
@@ -154,5 +155,51 @@ namespace ICT302_BackendAPI.Controllers.Database
                 });
             }
         }
+    // Endpoint to get a video by GPCID
+        [HttpGet("graphics/videos/{gpcID}")]
+        public async Task<IActionResult> GetVideo(Guid gpcID)
+        {
+            try
+            {
+                var graphic = await _graphicRepo.GetGraphicByIDAsync(gpcID);
+                if (graphic == null)
+                {
+                    return NotFound(new { message = "Video not found" });
+                }
+
+                var videoPath = graphic.FilePath;
+                if (!System.IO.File.Exists(videoPath))
+                {
+                    return NotFound(new { message = "Video file not found on server." });
+                }
+
+                var videoStream = new FileStream(videoPath, FileMode.Open, FileAccess.Read);
+                string mimeType = GetMimeType(videoPath);
+                return File(videoStream, mimeType, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving video.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    statusCode = 500,
+                    message = ex.Message
+                });
+            }
+        }
+
+        private string GetMimeType(string filePath)
+        {
+            string extension = Path.GetExtension(filePath).ToLowerInvariant();
+            return extension switch
+            {
+                ".mp4" => "video/mp4",
+                ".mov" => "video/quicktime",
+                ".webm" => "video/webm",
+                ".mkv" => "video/x-matroska",
+                _ => "application/octet-stream",
+            };
+        }
+
     }
 }
