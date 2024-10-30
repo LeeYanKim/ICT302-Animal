@@ -31,16 +31,13 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
 
   // Fetch animal IDs and details for the user
   const fetchAnimalsData = async () => {
-
     if(animals !== null) {
       // Filter out duplicate animals by checking their IDs
       const uniqueAnimals = animals.filter(
           (animal, index, self) => index === self.findIndex((a) => a.animalID === animal.animalID)
       );
+      setFilteredAnimals(uniqueAnimals);
 
-      setFilteredAnimals(uniqueAnimals); // Initially show all animals
-
-      // Extract unique animal types for the filter dropdown
       const types = Array.from(new Set(uniqueAnimals.map((animal) => animal.animalType)));
       setAnimalTypes(types);
     }

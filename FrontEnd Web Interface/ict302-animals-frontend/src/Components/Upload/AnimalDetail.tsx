@@ -1,17 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import API from '../../Internals/API';
-
-interface Animal {
-  animalID: string;
-  animalName: string;
-  animalType: string;
-  animalDOB: string;
-  videoFileName?: string;
-}
+import { Animal } from '../Animal/AnimalInterfaces';
+import {FrontendContext} from "../../Internals/ContextStore";
 
 const AnimalDetails: React.FC = () => {
+  const frontendContext = useContext(FrontendContext);
+  const userAnimals = frontendContext.user.contextRef.current.userAnimals;
   const { animalId } = useParams<{ animalId: string }>(); // Extract animalId from the URL
   const [animalData, setAnimalData] = useState<Animal | null>(null);
 
@@ -20,16 +16,9 @@ const AnimalDetails: React.FC = () => {
     if (!animalId) return;
 
     const fetchAnimalData = async () => {
-      try {
-        // Use the correct endpoint for fetching animal details
-        const response = await fetch(API.Download() + `animals/details/${animalId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch animal data");
-        }
-        const data = await response.json();
-        setAnimalData(data);
-      } catch (error) {
-        console.error("Error fetching animal data:", error);
+      if(userAnimals !== null) {
+        const animal = userAnimals.find((a) => a.animalID === animalId);
+        setAnimalData(animal ? animal : null);
       }
     };
 
@@ -37,11 +26,11 @@ const AnimalDetails: React.FC = () => {
   }, [animalId]);
 
   if (!animalData) {
-    return <div>Loading...</div>;
+    return (<CircularProgress />);
   }
 
-  const videoUrl = animalData.videoFileName
-    ? API.Download() + `/animals/videos/${animalData.videoFileName}`
+  const videoUrl = animalData.graphics.length > 0
+    ? API.Download() + `/animals/videos/${animalData.graphics[0].filePath}`
     : null;
 
   return (

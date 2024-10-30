@@ -7,6 +7,7 @@ import CompletedCard from "../Components/Completed/CompletedCard";
 import {Grid2 as Grid, Box, Typography, Button, CircularProgress} from "@mui/material";
 import AnimalsGrid from '../Components/Animal/AnimalGrid';
 import AnimalDetails from "../Components/Animal/AnimalDetails"; // Adjust import based on your structure
+import {Animal} from "../Components/Animal/AnimalInterfaces";
 
 interface AnimalProps {
   actTab: number; // Tab index
@@ -14,40 +15,25 @@ interface AnimalProps {
 
 const Animals: React.FC<AnimalProps> = ({actTab}) => {
   const frontendContext = useContext(FrontendContext);
+  const userAnimals = frontendContext.user.contextRef.current.userAnimals;
+  const userId = frontendContext.user.contextRef.current.userId; // Get userId from context
   const navigate = useNavigate();
-  const [animals, setAnimals] = useState<any[]>([]);
+  const [animals, setAnimals] = useState<Animal[] >(userAnimals);
   const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(actTab); // 0 for AnimalGrid, 1 for AnimalDetails
-  const userId = frontendContext.user.contextRef.current.userId; // Get userId from context
   const [loading, setLoading] = useState<boolean>(true);
 
-
-  // Fetch animal IDs and details for the user
+  // Get current animal data from the context
   const fetchAnimalsData = async () => {
-    try {
-      const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
-      if (animalAccessResponse.ok) {
-        const animalIDs = await animalAccessResponse.json();
-        const animalDetailsPromises = animalIDs.map(async (animalID: string) =>
-          await fetch(API.Download() + `/animals/details/${animalID}`)
-        );
-        const animalDetailsResponses: any[] = [];
-        for (const animalID of animalIDs) {
-            animalDetailsResponses.push(await fetch(API.Download() + `/animals/details/${animalID}`).then(response => response.json()));
-        }
-        setAnimals(animalDetailsResponses);
-        setLoading(false);
-      } else {
-        console.error('Failed to fetch animals data');
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    const animalData = frontendContext.user.contextRef.current.userAnimals;
+    setAnimals(animalData);
+    setLoading(false);
   };
 
   useEffect(() => {
-    if (userId) {
-      fetchAnimalsData(); // Fetch animals when userId is available
+    if (userId)
+    {
+      fetchAnimalsData();
     }
   },[]);
 
@@ -69,12 +55,7 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
   }
 
   const AnimalDetailsContent = () => {
-    return (
-        <>
-
-          <AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>
-        </>
-    );
+    return (<AnimalDetails animalId={selectedAnimalId} activeTab={activeTab} setActiveTab={setActiveTab} setSelectedAnimalId={setSelectedAnimalId}/>);
   }
 
   //TODO: Reset selected tab when navigating to animals page from animal details

@@ -13,6 +13,7 @@ import DeleteGraphicButton from "./DeleteGraphicButton";
 import {Graphic, Animal, AnimalDetailsProps} from './AnimalInterfaces';
 import GraphicOptionsMenu from "./GraphicOptionsMenu";
 import { ErrorBoundary } from "react-error-boundary";
+import {AccessTime, Folder} from "@mui/icons-material";
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
   const frontendContext = useContext(FrontendContext);
@@ -106,6 +107,14 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     );
   }
 
+
+  const convertBytes = (bytes: number) => {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 Byte';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+  }
+
   return (
     <Box sx={{ flex: 1, width: '1100px', display: 'flex', flexDirection: 'column', gap: 3 }}>
 
@@ -182,6 +191,18 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
                             <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
                               <ReactPlayer key={graphic.gpcid} width={'100%'} height={'100%'} url={graphic.filePath} controls={true} />
                             </ErrorBoundary>
+                            <Grid container spacing={4} sx={{margin: '5px'}}>
+                              <Grid size={6}>
+                                  <Typography variant="body2" display={'inline'} sx={{ color: 'text.secondary' }}>
+                                    <AccessTime /> Uploaded: {graphic.gpcDateUpload.split('T')[0]}
+                                  </Typography>
+                              </Grid>
+                                <Grid size={6}>
+                                  <Typography variant="body2" display={'inline'} sx={{ color: 'text.secondary' }}>
+                                    <Folder /> Size: {convertBytes(graphic.gpcSize)}
+                                  </Typography>
+                                </Grid>
+                              </Grid>
                           </Grid>
                           <Grid size={6}>
                             <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
