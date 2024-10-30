@@ -29,7 +29,7 @@ const History : React.FC<HistoryContentProps> = (triggerRefresh) => {
       const fetchAnimalData = async () => {
         try {
           // Use the correct endpoint for fetching animal details
-          const response = await fetch(API.Download() + `animals/details/${animalId}`);
+          const response = await fetch(API.Download() + `/animals/details/${animalId}`);
           if (!response.ok) {
             throw new Error("Failed to fetch animal data");
           }

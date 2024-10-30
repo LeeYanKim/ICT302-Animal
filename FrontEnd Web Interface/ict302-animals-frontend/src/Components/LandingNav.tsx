@@ -1,9 +1,25 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { Link } from 'react-router-dom';
 
-import {AppBar, Box, Toolbar, IconButton, Typography, Menu, MenuItem, Avatar, Button, Tooltip, Container} from "@mui/material";
+import {
+    AppBar,
+    Box,
+    Toolbar,
+    IconButton,
+    Typography,
+    Menu,
+    MenuItem,
+    Avatar,
+    Button,
+    Tooltip,
+    Container,
+    PaletteMode, createTheme,
+    Grid2 as Grid
+} from "@mui/material";
 import MenuIcon from '@mui/icons-material/Menu';
 import PetsIcon from '@mui/icons-material/Pets';
+import TungstenIcon from '@mui/icons-material/Tungsten';
+import TungstenOutlinedIcon from '@mui/icons-material/TungstenOutlined';
 
 import {ThemeProvider} from "@mui/material/styles";
 import AppTheme  from "./UI/Theme";
@@ -18,8 +34,6 @@ const settings = ['Dashboard', 'SignOut']; // TODO Add any other settings here
 
 const LandingNav: React.FC= () => {
     const frontendContext = useContext(FrontendContext);
-
-    const [mode, setMode] = useState('light');
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -38,6 +52,30 @@ const LandingNav: React.FC= () => {
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
+    };
+
+    const [mode, setMode] = useState<PaletteMode>('light');
+    const [showCustomTheme, setShowCustomTheme] = useState(true);
+    const defaultTheme = createTheme({ palette: { mode } });
+    useEffect(() => {
+        // Check if there is a preferred mode in localStorage
+        const savedMode = localStorage.getItem('themeMode') as PaletteMode | null;
+        if (savedMode) {
+            setMode(savedMode);
+        } else {
+            // If no preference is found, it uses system preference
+            const systemPrefersDark = window.matchMedia(
+                '(prefers-color-scheme: dark)',
+            ).matches;
+            setMode(systemPrefersDark ? 'dark' : 'light');
+        }
+    }, []);
+
+    //TODO: Fix theme toggle with app
+    const toggleColorMode = () => {
+        const newMode = mode === 'dark' ? 'light' : 'dark';
+        setMode(newMode);
+        localStorage.setItem('themeMode', newMode); // Save the selected mode to localStorage
     };
 
     return (
@@ -166,13 +204,23 @@ const LandingNav: React.FC= () => {
                         </Box>
                         : 
                         <Box sx={{ flexGrow: 0 }}>
-                            <Button
-                            component={Link}
-                            sx={{ my: 2, color: 'white', display: 'block' }}
-                            to={'/signin'}
-                            >
-                                Sign-In
-                            </Button>
+                            <Grid container spacing={4}>
+                                <Grid>
+                                    <IconButton
+                                    onClick={toggleColorMode}>
+                                        {mode === 'dark' ? <TungstenIcon/> : <TungstenOutlinedIcon/>}
+                                    </IconButton>
+                                </Grid>
+                                <Grid>
+                                    <Button
+                                    component={Link}
+                                    sx={{ color: 'white'}}
+                                    to={'/signin'}
+                                    >
+                                        Sign-In
+                                    </Button>
+                                </Grid>
+                            </Grid>
                         </Box>
                         }
                     </Toolbar>

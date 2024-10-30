@@ -35,6 +35,7 @@ const Settings: React.FC = () => {
       setExpanded(isExpanded ? panel : false);
     };
 
+  //TODO: Add light/dark mode toggle
   return (
     <div>
       <h1>Settings</h1>

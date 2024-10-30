@@ -40,7 +40,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
       const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
       if (animalAccessResponse.ok) {
         const animalIDs = await animalAccessResponse.json();
-        console.log("Fetched animal IDs:", animalIDs);
+        //console.log("Fetched animal IDs:", animalIDs);
   
         // Filter out duplicate IDs
         const uniqueAnimalIDs = Array.from(new Set(animalIDs));
@@ -53,9 +53,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
         const animalsData = await Promise.all(
           animalDetailsResponses.map(response => response.json())
         );
-  
-        // Log the fetched animal data for debugging
-        console.log("Fetched animals data:", animalsData);
+
   
         // Filter out duplicate animals by checking their IDs
         const uniqueAnimals = animalsData.filter(
@@ -98,7 +96,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+    <Box display="flex" flexDirection="column" alignItems="center" sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
 
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
         <Button variant="outlined" onClick={handleFilterButtonClick}>
@@ -112,9 +110,9 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
         </Menu>
       </Box>
 
-      <Grid container spacing={2} columns={12} sx={{ mb: (theme: Theme) => theme.spacing(2) }}>
+      <Grid container spacing={2} display="flex" alignItems="center">
         {filteredAnimals.length > 0 && filteredAnimals.map((animal) => (
-          <Grid sx={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
+          <Grid size={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
             <AnimalCard
               animalID={animal.animalID}
               animalName={animal.animalName}
@@ -126,7 +124,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
           </Grid>
         ))}
         {filteredAnimals.length === 0 && (
-          <Grid sx={{xs: 12, sm: 6, md: 4}}>
+          <Grid size={{xs: 12, sm: 6, md: 4}}>
             <Typography variant="h6">No animals found.</Typography>
           </Grid>
         )}
