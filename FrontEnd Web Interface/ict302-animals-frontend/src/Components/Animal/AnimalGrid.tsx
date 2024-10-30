@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Grid2 as Grid, Box, Typography, Button, Menu, MenuItem } from '@mui/material';
+
 import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
 import { Theme } from '@mui/material/styles';
@@ -10,6 +11,7 @@ import { FrontendContext } from '../../Internals/ContextStore';
 interface AnimalsGridProps {
   triggerRefresh: boolean;
   onAnimalClick: (animalID: string, animalName: string) => void;
+
 }
 
 interface AnimalData {
@@ -97,6 +99,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
 
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
         <Button variant="outlined" onClick={handleFilterButtonClick}>
           Filter by Animal Type

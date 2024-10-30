@@ -208,6 +208,7 @@ namespace ICT302_BackendAPI.API.Controllers
         private async Task<bool> DeleteAnimal(Guid animalId)
         {
             var animal = await _animalRepository.GetAnimalByIdAsync(animalId);
+
             if (animal == null)
             {
                 return false; // Animal not found
@@ -217,6 +218,7 @@ namespace ICT302_BackendAPI.API.Controllers
             string storedFilesPath = GetStoredFilesPath();
 
             //DeleteFile(storedFilesPath, animal.VideoFileName); This needs to be looked at
+
 
             // Delete the animal record from the database
             await _animalRepository.DeleteAnimalAsync(animal);
@@ -256,6 +258,7 @@ namespace ICT302_BackendAPI.API.Controllers
 
         [HttpDelete("animal/{animalId}/graphic/{graphicId}")]
         public async Task<IActionResult> DeleteGraphicAsync(Guid animalId, string graphicId)
+
         {
             try
             {

@@ -109,8 +109,6 @@ const App: React.FC = () => {
                             {dashboardPagePaths.map((dashboardPath, index) => (
                                 <Route key={index} path={dashboardPath} element={frontendContext.user.valid ? <Dashboard renderedPage={dashboardPath}/> : <Navigate to="/" />} />
                             ))};
-
-                            
                             <Route path="*" element={<Navigate to="/" />} /> {/* This will redirect to the landing page if the route is not found */}
 
                         </Routes>
