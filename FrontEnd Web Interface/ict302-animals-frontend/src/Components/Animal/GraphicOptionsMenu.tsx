@@ -15,12 +15,7 @@ const GraphicOptionsMenu: React.FC<GraphicsOptionMenuProps> = ({graphic}) => {
         setAnchorEl(null);
     };
 
-    const convertBytes = (bytes: number) => {
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-        if (bytes === 0) return '0 Byte';
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
-    }
+
 
     const handleDownload = () => {
         window.location.href = graphic.filePath;
@@ -68,18 +63,6 @@ const GraphicOptionsMenu: React.FC<GraphicsOptionMenuProps> = ({graphic}) => {
                 anchorEl={anchorEl}
                 open={showGraphicSettings}
                 onClose={handleMenuClose}>
-                <MenuItem disableRipple disabled>
-                    <AccessTime />
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Uploaded: {graphic.gpcDateUpload.split('T')[0]}
-                    </Typography>
-                </MenuItem>
-                <MenuItem disableRipple disabled>
-                    <Folder />
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Size: {convertBytes(graphic.gpcSize)}
-                    </Typography>
-                </MenuItem>
                 <MenuItem onClick={handleDownload} disableRipple>
                     <Download />
                     Download

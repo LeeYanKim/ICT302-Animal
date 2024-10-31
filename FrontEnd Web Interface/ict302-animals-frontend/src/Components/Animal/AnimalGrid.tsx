@@ -6,6 +6,7 @@ import API from '../../Internals/API';
 import { Theme } from '@mui/material/styles';
 import AnimalCard from './AnimalCard';
 import { FrontendContext } from '../../Internals/ContextStore';
+import {Animal} from './AnimalInterfaces'
 
 // Props interface for AnimalsGrid
 interface AnimalsGridProps {
@@ -14,63 +15,31 @@ interface AnimalsGridProps {
 
 }
 
-interface AnimalData {
-  animalID: string;
-  animalName: string;
-  animalType: string;
-  animalDOB: string | null;
-  videoUploadDate: string | null;
-}
-
 const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick }) => {
-  const [animals, setAnimals] = useState<AnimalData[]>([]);
-  const [filteredAnimals, setFilteredAnimals] = useState<AnimalData[]>([]); // For filtered animals
+  const frontendContext = useContext(FrontendContext);
+  const userAnimals = frontendContext.user.contextRef.current.userAnimals;
+  const [animals, setAnimals] = useState<Animal[]>(userAnimals);
+  const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]); // For filtered animals
   const [animalTypes, setAnimalTypes] = useState<string[]>([]); // For animal types
   const [selectedAnimalType, setSelectedAnimalType] = useState<string>('All'); // Default filter
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State for filter menu
 
   const navigate = useNavigate();
   
-  const frontendContext = useContext(FrontendContext);
+
   const userId = frontendContext.user.contextRef.current.userId; // Get userId from context
 
   // Fetch animal IDs and details for the user
   const fetchAnimalsData = async () => {
-    try {
-      const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
-      if (animalAccessResponse.ok) {
-        const animalIDs = await animalAccessResponse.json();
-        //console.log("Fetched animal IDs:", animalIDs);
-  
-        // Filter out duplicate IDs
-        const uniqueAnimalIDs = Array.from(new Set(animalIDs));
-  
-        // Fetch details for each unique animal ID
-        const animalDetailsPromises = uniqueAnimalIDs.map((animalID: string) =>
-          fetch(API.Download() + `/animals/details/${animalID}`)
-        );
-        const animalDetailsResponses = await Promise.all(animalDetailsPromises);
-        const animalsData = await Promise.all(
-          animalDetailsResponses.map(response => response.json())
-        );
-
-  
-        // Filter out duplicate animals by checking their IDs
-        const uniqueAnimals = animalsData.filter(
+    if(animals !== null) {
+      // Filter out duplicate animals by checking their IDs
+      const uniqueAnimals = animals.filter(
           (animal, index, self) => index === self.findIndex((a) => a.animalID === animal.animalID)
-        );
-  
-        setAnimals(uniqueAnimals);
-        setFilteredAnimals(uniqueAnimals); // Initially show all animals
+      );
+      setFilteredAnimals(uniqueAnimals);
 
-        // Extract unique animal types for the filter dropdown
-        const types = Array.from(new Set(uniqueAnimals.map((animal) => animal.animalType)));
-        setAnimalTypes(types);
-      } else {
-        console.error('Failed to fetch animals data');
-      }
-    } catch (error) {
-      console.error(error);
+      const types = Array.from(new Set(uniqueAnimals.map((animal) => animal.animalType)));
+      setAnimalTypes(types);
     }
   };
   

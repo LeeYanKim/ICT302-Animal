@@ -34,7 +34,6 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
     const fetchJob = async () => {
         const response = await fetch(API.GenerationStatus() + "/graphic/" + graphicId);
         if (!response.ok) {
-            console.log("Failed to fetch job data, there probably isnt one yet");
             return;
         }
         await response.json().then((job) => setJobData({jobId: job.jobID, status: job.status, queuePos: job.queuePos? job.queuePos : 0}));
@@ -186,13 +185,30 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
         );
     }
 
+    const prefetchModel = async () => {
+        const res = await fetch(modelData?.filePath ? modelData.filePath : "");
+        if(!res.ok)
+        {
+            throw new Error("Failed to load model file")
+        }
+
+    }
     // View Generation Component
     const ViewGeneration = () =>{
-        //
-        return (
-                <ModelViewer modelPath={modelData?.filePath} />
+        if(modelData && modelData.filePath !== "" ) {
+            const pf = async () =>{
+                await prefetchModel();
+            }
+            pf();
+            return (
+                <ModelViewer modelPath={modelData?.filePath}/>
             );
-        };
+        }
+        else
+        {
+            throw new Error("Failed to load model data");
+        }
+    };
 
     return (
         <div key={graphicId}>
