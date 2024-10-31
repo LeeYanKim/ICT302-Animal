@@ -1,7 +1,7 @@
 import { styled } from '@mui/material/styles';
 import React, { useEffect, useState, useContext} from "react";
 import {FrontendContext} from "../../Internals/ContextStore";
-import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid, Paper, MenuList, MenuItem, ListItemText, ListItemIcon, Divider} from "@mui/material";
+import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid, Paper, MenuList, MenuItem, ListItemText, ListItemIcon, Divider } from "@mui/material";
 import API from "../../Internals/API";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ModelViewer from "../ModelViewer/ModelViewer";
@@ -154,22 +154,22 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         <CustomTabPanel index={0} value={tabValue}>
           <Box sx={{ flex: 1 ,width: '100%'}}>
             <Grid container spacing={0.5} rowSpacing={0.5} columns={15} columnSpacing={{ xs: 0.5, sm: 1, md: 2 }}>
-              <Grid size={5}>
+              <Grid item xs={5}>
                 <Typography variant="body1">
                   <strong>Type:</strong>
                 </Typography>
               </Grid>
-              <Grid size={10}>
+              <Grid item xs={10}>
                 <Typography variant="body1">
                   {animalData.animalType}
                 </Typography>
               </Grid>
-              <Grid size={5}>
+              <Grid item xs={5}>
                 <Typography variant="body1">
                   <strong>Date of Birth:</strong>
                 </Typography>
               </Grid>
-              <Grid size={10}>
+              <Grid item xs={10}>
                 <Typography variant="body1">
                   {formatDOB(animalData.animalDOB)}
                 </Typography>
@@ -180,43 +180,62 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
         </CustomTabPanel>
 
         <CustomTabPanel index={1} value={tabValue}>
-          <Box sx={{ flex: 1,width: '100%' }}>
-            {animalData.graphics && animalData.graphics.length > 0 ? (
-                animalData?.graphics.map((graphic, index) => (
-                    <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
-                      <Typography variant="subtitle1">Video {index + 1}:</Typography>
-                      <GraphicOptionsMenu graphic={graphic}/>
-                        <Grid container spacing={2}>
-                          <Grid size={6}>
-                            <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
-                              <ReactPlayer key={graphic.gpcid} width={'100%'} height={'100%'} url={graphic.filePath} controls={true} />
-                            </ErrorBoundary>
-                            <Grid container spacing={4} sx={{margin: '5px'}}>
-                              <Grid size={6}>
-                                  <Typography variant="body2" display={'inline'} sx={{ color: 'text.secondary' }}>
-                                    <AccessTime /> Uploaded: {graphic.gpcDateUpload.split('T')[0]}
-                                  </Typography>
-                              </Grid>
-                                <Grid size={6}>
-                                  <Typography variant="body2" display={'inline'} sx={{ color: 'text.secondary' }}>
-                                    <Folder /> Size: {convertBytes(graphic.gpcSize)}
-                                  </Typography>
-                                </Grid>
-                              </Grid>
-                          </Grid>
-                          <Grid size={6}>
-                            <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
-                              <Generation key={graphic.gpcid} graphicId={graphic.gpcid} animalId={animalId!} graphicFileName={graphic.filePath}/>
-                            </ErrorBoundary>
-                          </Grid>
-                        </Grid>
-                    </Box>
-                ))
-            ) : (
-                <Typography>No media available for this animal.</Typography>
-            )}
+  <Box sx={{ flex: 1, width: '100%' }}>
+    {animalData.graphics && animalData.graphics.length > 0 ? (
+      animalData.graphics.map((graphic, index) => {
+        const isImage = /\.(jpg|jpeg|png|gif|bmp|tiff)$/i.test(graphic.filePath); // Check if file is an image
+
+        return (
+          <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
+            <Typography variant="subtitle1">Media {index + 1}:</Typography>
+            <GraphicOptionsMenu graphic={graphic} />
+            <Grid container spacing={2}>
+              <Grid item xs={6} component="div">
+                <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
+                  {isImage ? (
+                    <Box
+                      component="img"
+                      src={graphic.filePath}
+                      alt={`Media ${index + 1}`}
+                      sx={{ width: '100%', height: 'auto' }}
+                    />
+                  ) : (
+                    <ReactPlayer
+                      key={graphic.gpcid}
+                      width="100%"
+                      height="100%"
+                      url={graphic.filePath}
+                      controls
+                    />
+                  )}
+                </ErrorBoundary>
+                <Grid container spacing={4} sx={{ margin: '5px' }}>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" display="inline" sx={{ color: 'text.secondary' }}>
+                      <AccessTime /> Uploaded: {graphic.gpcDateUpload.split('T')[0]}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography variant="body2" display="inline" sx={{ color: 'text.secondary' }}>
+                      <Folder /> Size: {convertBytes(graphic.gpcSize)}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={6} component="div">
+                <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
+                  <Generation key={graphic.gpcid} graphicId={graphic.gpcid} animalId={animalId!} graphicFileName={graphic.filePath} />
+                </ErrorBoundary>
+              </Grid>
+            </Grid>
           </Box>
-          </CustomTabPanel>
+        );
+      })
+    ) : (
+      <Typography>No media available for this animal.</Typography>
+    )}
+  </Box>
+</CustomTabPanel>
 
 
         <CustomTabPanel index={2} value={tabValue}>
