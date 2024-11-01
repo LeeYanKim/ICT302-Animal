@@ -45,7 +45,7 @@ const GraphicOptionsMenu: React.FC<GraphicsOptionMenuProps> = ({graphic}) => {
     }
 
     return(
-        <div>
+        <div style={{display: 'inline', paddingLeft: '20px'}}>
             <Button
                 aria-controls={showGraphicSettings ? 'graphic details menu' : undefined}
                 aria-haspopup="true"
@@ -54,7 +54,7 @@ const GraphicOptionsMenu: React.FC<GraphicsOptionMenuProps> = ({graphic}) => {
                 disableElevation
                 onClick={handleMenuOpen}
                 endIcon={<KeyboardArrowDown />}>
-                Media Options
+                Options
             </Button>
             <StyledMenu
                 key={graphic.gpcid}

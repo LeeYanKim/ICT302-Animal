@@ -7,6 +7,7 @@ import { Theme } from '@mui/material/styles';
 import AnimalCard from './AnimalCard';
 import { FrontendContext } from '../../Internals/ContextStore';
 import {Animal} from './AnimalInterfaces'
+import {updateLoggedInUserAnimals} from "../User/userUtils";
 
 // Props interface for AnimalsGrid
 interface AnimalsGridProps {
@@ -31,7 +32,11 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
 
   // Fetch animal IDs and details for the user
   const fetchAnimalsData = async () => {
-    if(animals !== null) {
+    await updateLoggedInUserAnimals(frontendContext); // Update userAnimals in the context
+    const a = frontendContext.user.contextRef.current.userAnimals;
+    setAnimals(a);
+
+    if(animals !== null && animals.length > 0) {
       // Filter out duplicate animals by checking their IDs
       const uniqueAnimals = animals.filter(
           (animal, index, self) => index === self.findIndex((a) => a.animalID === animal.animalID)
@@ -40,6 +45,9 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
 
       const types = Array.from(new Set(uniqueAnimals.map((animal) => animal.animalType)));
       setAnimalTypes(types);
+    }
+    else{
+        setFilteredAnimals([]);
     }
   };
   
@@ -64,6 +72,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
     setAnchorEl(null); // Close the filter menu
   };
 
+  //display="flex" alignItems="center"
   return (
     <Box display="flex" flexDirection="column" alignItems="center" sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
 
@@ -79,16 +88,17 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
         </Menu>
       </Box>
 
-      <Grid container spacing={2} display="flex" alignItems="center">
-        {filteredAnimals.length > 0 && filteredAnimals.map((animal) => (
-          <Grid size={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
+      <Grid container spacing={2} sx={{width: '100%'}}>
+        {filteredAnimals.length > 0 && filteredAnimals.map((animal, index) => (
+          <Grid size={{xs: 12, sm: 6, md: 4}} key={index} >
             <AnimalCard
-              animalID={animal.animalID}
-              animalName={animal.animalName}
-              animalDOB={animal.animalDOB || ''}
-              animalType={animal.animalType}
-              onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
-              onDeleteSuccess={fetchAnimalsData}
+                key={animal.animalID}
+                animalID={animal.animalID}
+                animalName={animal.animalName}
+                animalDOB={animal.animalDOB || ''}
+                animalType={animal.animalType}
+                onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
+                onDeleteSuccess={fetchAnimalsData}
             />
           </Grid>
         ))}

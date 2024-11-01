@@ -59,10 +59,12 @@ const fetchUserAnimals = async (userId: string) => {
       }
       return animalDetailsResponses;
     } else {
-      console.error('Failed to fetch animals data');
+      console.warn('Failed to fetch animals data');
+      return null;
     }
   } catch (error) {
-    console.error(error);
+    console.warn(error);
+    return null;
   }
 }
 
@@ -77,8 +79,14 @@ export const updateFrontendContext = async (frontendContext: any, user: { uid: s
       ? user.displayName.split(' ').map(name => name[0]).join('')
       : '';
     frontendContext.user.contextRef.current.loggedInState = true;
-    frontendContext.user.contextRef.current.userAnimals = await fetchUserAnimals(frontendContext.user.contextRef.current.userId);
+    let animals = await fetchUserAnimals(frontendContext.user.contextRef.current.userId);
+    frontendContext.user.contextRef.current.userAnimals = animals ? animals : [];
   };
+
+export const updateLoggedInUserAnimals = async (frontendContext: any) => {
+  let animals = await fetchUserAnimals(frontendContext.user.contextRef.current.userId);
+  frontendContext.user.contextRef.current.userAnimals = animals ? animals : [];
+}
 
   /**
  * Validates if the input contains only whitelisted characters.

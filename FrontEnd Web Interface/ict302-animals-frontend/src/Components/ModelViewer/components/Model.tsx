@@ -105,7 +105,7 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
             //modelRef.current.scale.set(1, 1, 1);
             const distance = Math.max(size.x, size.y, size.z);
             //camera.position.set(distance, distance/2, distance);
-            camera.position.set(3,1,-0.5);
+            camera.position.set(3.5,1,-0.5);
             //console.log(camera.position)
             //camera.lookAt(modelRef.current.position);
 
