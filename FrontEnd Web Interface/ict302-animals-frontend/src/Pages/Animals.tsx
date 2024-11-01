@@ -60,25 +60,27 @@ const Animals: React.FC<AnimalProps> = ({actTab}) => {
 
   //TODO: Reset selected tab when navigating to animals page from animal details
   return (
-      <Box display="flex" flexDirection="column" alignItems="center" paddingTop={2}>
+      <div style={{width: '100%'}}>
+        <Box display="flex" flexDirection="column" alignItems="center" paddingTop={2}>
 
-        {loading ? (<CircularProgress/>) : null}
+          {loading ? (<CircularProgress/>) : null}
 
-        {(animals.length > 0 && activeTab) === 0 && (
-            <AnimalGridContent />
+          {(animals.length > 0 && activeTab) === 0 && (
+              <AnimalGridContent />
+          )}
+
+        {(animals.length > 0 && activeTab === 1 && selectedAnimalId) && (
+          <AnimalDetailsContent />
         )}
 
-      {(animals.length > 0 && activeTab === 1 && selectedAnimalId) && (
-        <AnimalDetailsContent />
-      )}
-
-      {animals.length === 0 && (
-        <Box sx={{ width: '100%'}}>
-          <Typography variant="h6">No animals found</Typography>
-          <Button variant="contained" color="secondary" onClick={fetchAnimalsData}>Reload</Button>
+        {animals.length === 0 && (
+          <Box sx={{ width: '100%'}}>
+            <Typography variant="h6">No animals found</Typography>
+            <Button variant="contained" color="secondary" onClick={fetchAnimalsData}>Reload</Button>
+          </Box>
+          )}
         </Box>
-        )}
-    </Box>
+      </div>
   );
 }
 

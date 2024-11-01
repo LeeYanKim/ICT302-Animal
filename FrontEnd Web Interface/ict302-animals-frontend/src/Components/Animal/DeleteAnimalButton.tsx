@@ -1,7 +1,9 @@
-import React, {MouseEventHandler} from 'react';
+import React, {MouseEventHandler, useContext} from 'react';
 import API from '../../Internals/API';
 import { IconButton, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import {FrontendContext} from "../../Internals/ContextStore";
+import {updateLoggedInUserAnimals} from "../User/userUtils";
 
 interface DeleteAnimalButtonProps {
     animalToDeleteId: string;  // The ID of the animal to delete
@@ -9,6 +11,7 @@ interface DeleteAnimalButtonProps {
 }
 
 const DeleteAnimalButton: React.FC<DeleteAnimalButtonProps> = ({ animalToDeleteId, onDeleteSuccess }) => {
+  const frontendContext = useContext(FrontendContext);
   //@ts-ignore
   const handleDelete = (e) => {
     async function deleteAnimal() {

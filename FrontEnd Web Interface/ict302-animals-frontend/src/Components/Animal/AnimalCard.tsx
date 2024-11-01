@@ -42,12 +42,12 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
   return (
     <Card
       variant="outlined"
-      sx={{ height: '100%', width: '300px', flexGrow: 1, cursor: 'pointer' }}
-      onClick={onClick} 
+      sx={{ height: '100%', cursor: 'pointer', ':hover': {backgroundColor: 'whiteSmoke'} }}
+      onClick={onClick}
     >
-      <CardContent>
-        <Grid container spacing={2}>
-          <Grid size={4}>
+      <CardContent sx={{padding: '10px', width: '100%'}}>
+        <Grid container sx={{width: '100%'}}>
+          <Grid size={3}>
             {animalImage && (
                 <img
                     src={animalImage}
@@ -56,16 +56,16 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
                 />
             )}
           </Grid>
-          <Grid size={6}>
-            <Typography component="h2" variant="subtitle2" gutterBottom fontWeight={'bold'}>
+          <Grid size={6} >
+            <Typography variant="subtitle2" gutterBottom fontWeight={'bold'}>
               {animalName}
             </Typography>
-            <Typography component="p" variant="body2" color="textSecondary">
+            <Typography variant="body2" color="textSecondary">
               DoB: {formattedDOB}
             </Typography>
             <Chip label={animalType} />
           </Grid>
-          <Grid size={2}>
+          <Grid size={3}>
             <AnimalCardOptionsMenu animalId={animalID} onDeleteSuccess={handleDeleteSuccess} />
           </Grid>
         </Grid>

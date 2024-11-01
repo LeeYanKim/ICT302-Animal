@@ -68,7 +68,7 @@ const Settings: React.FC = () => {
           <Typography>
             Do you want to log out of your account?
           </Typography>
-          <Button variant="text" color="primary" onClick={HandleLogOut}>
+          <Button variant="contained" color="warning" onClick={HandleLogOut}>
             Log Out
           </Button>
         </AccordionDetails>

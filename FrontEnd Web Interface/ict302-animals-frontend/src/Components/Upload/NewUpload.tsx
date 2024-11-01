@@ -15,6 +15,7 @@ import {
 
 import API from '../../Internals/API';
 import { FrontendContext } from '../../Internals/ContextStore';
+import {updateLoggedInUserAnimals} from "../User/userUtils";
 
 interface NewUploadProps {
   open: boolean;
@@ -83,11 +84,12 @@ export default function NewUpload({ open, handleClose, animalDetails, filesToUpl
         const data = await response.json();
         console.log('Upload success:', data);
 
+        await updateLoggedInUserAnimals(frontendContext);
 
         if (onUploadSuccess) {
           onUploadSuccess();
         }
-        
+
         // Stall for a few moments and show a progress circle
         setUploadSuccess(true); // Set success state
         setTimeout(() => {
