@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, Chip, Stack, Typography, Grid2 as Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import API from '../../Internals/API';
-import DeleteAnimalButton from './DeleteAnimalButton';
+import AnimalCardOptionsMenu from "./AnimalCardOptionsMenu";
 
 // Define AnimalCardProps for the component
 export type AnimalCardProps = {
@@ -19,7 +18,6 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
   const [animalImage, setAnimalImage] = useState<string>('');
 
   const handleGetAnimalImage = useCallback(async () => {
-
     try {// Use local fallback images rather than fetching missing images from the API
       const fallbackImage = `/assets/images/fallback/${animalType.toLowerCase()}.png`;
       setAnimalImage(fallbackImage);
@@ -44,12 +42,12 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
   return (
     <Card
       variant="outlined"
-      sx={{ height: '100%', flexGrow: 1, cursor: 'pointer' }}
-      onClick={onClick} 
+      sx={{ height: '100%', cursor: 'pointer', ':hover': {backgroundColor: 'whiteSmoke'} }}
+      onClick={onClick}
     >
-      <CardContent>
-        <Grid container spacing={2}>
-          <Grid>
+      <CardContent sx={{padding: '10px', width: '100%'}}>
+        <Grid container sx={{width: '100%'}}>
+          <Grid size={3}>
             {animalImage && (
                 <img
                     src={animalImage}
@@ -58,19 +56,17 @@ const AnimalCard: React.FC<AnimalCardProps> = ({ animalID, animalName, animalDOB
                 />
             )}
           </Grid>
-          <Grid>
-            <Typography component="h2" variant="subtitle2" gutterBottom>
-              Name: {animalName}
+          <Grid size={6} >
+            <Typography variant="subtitle2" gutterBottom fontWeight={'bold'}>
+              {animalName}
             </Typography>
-            <Typography component="p" variant="body2" color="textSecondary">
-              Date of Birth: {formattedDOB}
+            <Typography variant="body2" color="textSecondary">
+              DoB: {formattedDOB}
             </Typography>
             <Chip label={animalType} />
           </Grid>
-          <Grid>
-            {// TODO: Maybe change this to be 3 dots menu with delete option rather than delete button directly
-            }
-            <DeleteAnimalButton animalToDeleteId = {animalID}  onDeleteSuccess={handleDeleteSuccess}/>
+          <Grid size={3}>
+            <AnimalCardOptionsMenu animalId={animalID} onDeleteSuccess={handleDeleteSuccess} />
           </Grid>
         </Grid>
       </CardContent>

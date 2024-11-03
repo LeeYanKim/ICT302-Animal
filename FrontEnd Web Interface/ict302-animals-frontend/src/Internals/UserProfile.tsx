@@ -1,6 +1,6 @@
-/* This is a temporary user profile object for testing purposes */
 import QueueItem  from './data/QueueItem';
 import CompletedItem from './data/CompletedItem';
+import {Animal} from '../Components/Animal/AnimalInterfaces';
 
 export default class UserProfile {
     userId : string
@@ -12,6 +12,7 @@ export default class UserProfile {
     currentItemsInProcessQueue: QueueItem[] = [];
     currentCompletedItems: number = 0;
     completedItems: CompletedItem[] = [];
+    userAnimals: Animal[] = [];
 
     constructor(username: string = 'No Username', email: string = 'No Email', initials: string = 'NN', loggedInState: boolean = false) {
         this.username = username ;

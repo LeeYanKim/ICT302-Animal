@@ -1,76 +1,53 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Grid2 as Grid, Box, Typography, Button, Menu, MenuItem } from '@mui/material';
+
 import { useNavigate } from 'react-router-dom';
 import API from '../../Internals/API';
 import { Theme } from '@mui/material/styles';
 import AnimalCard from './AnimalCard';
 import { FrontendContext } from '../../Internals/ContextStore';
+import {Animal} from './AnimalInterfaces'
+import {updateLoggedInUserAnimals} from "../User/userUtils";
 
 // Props interface for AnimalsGrid
 interface AnimalsGridProps {
   triggerRefresh: boolean;
   onAnimalClick: (animalID: string, animalName: string) => void;
-}
 
-interface AnimalData {
-  animalID: string;
-  animalName: string;
-  animalType: string;
-  animalDOB: string | null;
-  videoUploadDate: string | null;
 }
 
 const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick }) => {
-  const [animals, setAnimals] = useState<AnimalData[]>([]);
-  const [filteredAnimals, setFilteredAnimals] = useState<AnimalData[]>([]); // For filtered animals
+  const frontendContext = useContext(FrontendContext);
+  const userAnimals = frontendContext.user.contextRef.current.userAnimals;
+  const [animals, setAnimals] = useState<Animal[]>(userAnimals);
+  const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]); // For filtered animals
   const [animalTypes, setAnimalTypes] = useState<string[]>([]); // For animal types
   const [selectedAnimalType, setSelectedAnimalType] = useState<string>('All'); // Default filter
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // State for filter menu
 
   const navigate = useNavigate();
   
-  const frontendContext = useContext(FrontendContext);
+
   const userId = frontendContext.user.contextRef.current.userId; // Get userId from context
 
   // Fetch animal IDs and details for the user
   const fetchAnimalsData = async () => {
-    try {
-      const animalAccessResponse = await fetch(API.Download() + `/user/${userId}/animalIDs`);
-      if (animalAccessResponse.ok) {
-        const animalIDs = await animalAccessResponse.json();
-        console.log("Fetched animal IDs:", animalIDs);
-  
-        // Filter out duplicate IDs
-        const uniqueAnimalIDs = Array.from(new Set(animalIDs));
-  
-        // Fetch details for each unique animal ID
-        const animalDetailsPromises = uniqueAnimalIDs.map((animalID: string) =>
-          fetch(API.Download() + `/animals/details/${animalID}`)
-        );
-        const animalDetailsResponses = await Promise.all(animalDetailsPromises);
-        const animalsData = await Promise.all(
-          animalDetailsResponses.map(response => response.json())
-        );
-  
-        // Log the fetched animal data for debugging
-        console.log("Fetched animals data:", animalsData);
-  
-        // Filter out duplicate animals by checking their IDs
-        const uniqueAnimals = animalsData.filter(
-          (animal, index, self) => index === self.findIndex((a) => a.animalID === animal.animalID)
-        );
-  
-        setAnimals(uniqueAnimals);
-        setFilteredAnimals(uniqueAnimals); // Initially show all animals
+    await updateLoggedInUserAnimals(frontendContext); // Update userAnimals in the context
+    const a = frontendContext.user.contextRef.current.userAnimals;
+    setAnimals(a);
 
-        // Extract unique animal types for the filter dropdown
-        const types = Array.from(new Set(uniqueAnimals.map((animal) => animal.animalType)));
-        setAnimalTypes(types);
-      } else {
-        console.error('Failed to fetch animals data');
-      }
-    } catch (error) {
-      console.error(error);
+    if(animals !== null && animals.length > 0) {
+      // Filter out duplicate animals by checking their IDs
+      const uniqueAnimals = animals.filter(
+          (animal, index, self) => index === self.findIndex((a) => a.animalID === animal.animalID)
+      );
+      setFilteredAnimals(uniqueAnimals);
+
+      const types = Array.from(new Set(uniqueAnimals.map((animal) => animal.animalType)));
+      setAnimalTypes(types);
+    }
+    else{
+        setFilteredAnimals([]);
     }
   };
   
@@ -78,7 +55,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
     if (userId) {
       fetchAnimalsData(); // Fetch animals when userId is available
     }
-  }, [userId]);
+  }, [userId, animals]);
 
   // Handle filter change
   const handleFilterSelect = (type: string) => {
@@ -95,8 +72,10 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
     setAnchorEl(null); // Close the filter menu
   };
 
+  //display="flex" alignItems="center"
   return (
-    <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+    <Box display="flex" flexDirection="column" alignItems="center" sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+
       <Box sx={{ marginBottom: '20px', textAlign: 'left' }}>
         <Button variant="outlined" onClick={handleFilterButtonClick}>
           Filter by Animal Type
@@ -109,21 +88,22 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
         </Menu>
       </Box>
 
-      <Grid container spacing={2} columns={12} sx={{ mb: (theme: Theme) => theme.spacing(2) }}>
-        {filteredAnimals.length > 0 && filteredAnimals.map((animal) => (
-          <Grid sx={{xs: 12, sm: 6, md: 4}} key={animal.animalID}>
+      <Grid container spacing={2} sx={{width: '100%'}}>
+        {filteredAnimals.length > 0 && filteredAnimals.map((animal, index) => (
+          <Grid size={{xs: 12, sm: 6, md: 4}} key={index} >
             <AnimalCard
-              animalID={animal.animalID}
-              animalName={animal.animalName}
-              animalDOB={animal.animalDOB || ''}
-              animalType={animal.animalType}
-              onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
-              onDeleteSuccess={fetchAnimalsData}
+                key={animal.animalID}
+                animalID={animal.animalID}
+                animalName={animal.animalName}
+                animalDOB={animal.animalDOB || ''}
+                animalType={animal.animalType}
+                onClick={() => onAnimalClick(animal.animalID , animal.animalName)}
+                onDeleteSuccess={fetchAnimalsData}
             />
           </Grid>
         ))}
         {filteredAnimals.length === 0 && (
-          <Grid sx={{xs: 12, sm: 6, md: 4}}>
+          <Grid size={{xs: 12, sm: 6, md: 4}}>
             <Typography variant="h6">No animals found.</Typography>
           </Grid>
         )}

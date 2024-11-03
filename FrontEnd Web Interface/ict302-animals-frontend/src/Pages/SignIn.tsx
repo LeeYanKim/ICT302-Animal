@@ -112,12 +112,18 @@ const SignIn: React.FC = () => {
   
       const idToken = await user.getIdToken();
   
-      await storeUserInBackend(frontendContext, user, idToken);
-      setProgress(75);
-      updateFrontendContext(frontendContext, user);
-      setProgress(100);
+      await storeUserInBackend(frontendContext, user, idToken).then(
+          async () => {
+            setProgress(75);
+            await updateFrontendContext(frontendContext, user).then(() => {
+              setProgress(100);
+            })
+          })
+
+
+
       
-      nav('/dashboard');
+      nav('/dashboard/upload');
       
     } catch (error) {
       console.error("Error signing in with email and password:", error);
@@ -175,7 +181,7 @@ const SignIn: React.FC = () => {
       setProgress(100);
 
       // Navigate to the dashboard
-      nav('/dashboard');
+      nav('/dashboard/upload');
     } catch (error) {
       console.error("Error signing in with Google:", error);
       setLoading(false); //Hides loading symbol

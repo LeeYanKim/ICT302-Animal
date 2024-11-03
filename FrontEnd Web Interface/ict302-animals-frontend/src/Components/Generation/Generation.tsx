@@ -1,8 +1,11 @@
 import React, {useState, useEffect, useCallback, useContext, useMemo} from "react";
-import { Button, Box, Typography, CircularProgress, Grid2 as Grid, Chip} from "@mui/material";
+import { Button, Box, Typography, CircularProgress, LinearProgress, Grid2 as Grid, Chip, Card, CardContent, CardMedia} from "@mui/material";
 import API from "../../Internals/API";
 import { FrontendContext} from "../../Internals/ContextStore";
 import ModelViewer from "../ModelViewer/ModelViewer";
+import {AccessTime, Folder} from "@mui/icons-material";
+import moment from "moment/moment";
+import Stack from "@mui/material/Stack";
 
 interface GenerationProps {
     graphicId: string;
@@ -27,14 +30,53 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
     const frontendContext = useContext(FrontendContext);
     const [jobData, setJobData] = useState<JobData | null>(null);
     const [jobRequested, setJobRequested] = useState<boolean>(false);
-    const [jobProcessing, setJobProcessing] = useState<boolean>(false);
+    const [jobProcessing, setJobProcessing] = useState<boolean>(true);
     const [modelData, setModelData] = useState<JobModel | null>(null);
     const jobStatusRefreshInterval = 1000; // This is in milliseconds
+
+    const [genProgress, setGenProgress] = useState<number>(0);
+
+    const getProgressFromStatus = (status: string) => {
+        switch(status) {
+            case "Submitted":
+                return 0;
+            case "Validating":
+                return 10;
+            case "PreProcessing":
+                return 20;
+            case "Evaluating":
+                return 30;
+            case "Masking":
+                return 40;
+            case "Generating":
+                return 50;
+            case "Converting":
+                return 60;
+            case "CleaningUp":
+                return 70;
+            case "Finished":
+                return 80;
+            case "Fetching":
+                return 90;
+            case "Closing":
+                return 95;
+            case "Closed":
+                return 100;
+            case "Complete":
+                return 100;
+            default:
+                return 0;
+        }
+    }
+
+    const formatUploadedDate = (date : string) => {
+        let d = moment(date, 'YYYY-MM-DDTHH:mm:ss');
+        return d.format('DD/MM/YYYY');
+    }
 
     const fetchJob = async () => {
         const response = await fetch(API.GenerationStatus() + "/graphic/" + graphicId);
         if (!response.ok) {
-            console.log("Failed to fetch job data, there probably isnt one yet");
             return;
         }
         await response.json().then((job) => setJobData({jobId: job.jobID, status: job.status, queuePos: job.queuePos? job.queuePos : 0}));
@@ -49,7 +91,7 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
 
     // Check job status
     async function checkJobStatus() {
-        if (jobData && jobData.status !== "Complete" && jobData.status !== "Failed") {
+        if (jobData && jobData.status !== "Complete" && jobData.status !== "Failed" && jobData.jobId !== "") {
             try{
                 await fetchJob();
             }
@@ -61,16 +103,16 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
 
     // Update job data when it changes
     useEffect(() => {
-        if(jobData && jobData.status !== "Complete" && jobData.status !== "Failed")
+        if(jobData && jobData.jobId !== "" && jobData.status !== "Complete" && jobData.status !== "Failed")
             setTimeout(checkJobStatus, jobStatusRefreshInterval);
 
-        if(jobData && jobData.status === "Complete")
+        if(jobData && jobData.jobId !== ""&& jobData.status === "Complete")
             fetchModelData();
     },[jobData]);
 
     // Fetch model data
     async function fetchModelData() {
-        if(jobData && jobData.status === "Complete") {
+        if(jobData && jobData.jobId !== "" && jobData.status === "Complete") {
             const fetchModel = async () => {
                 const response = await fetch(API.Download() + '/animals/models/graphics/' + graphicId);
                 if (!response.ok) {
@@ -118,7 +160,9 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
     const GenerationRequestBtn = () =>{
         // TODO: add hook to handle generation request loading state
         return (
-            <Button onClick={requestGeneration} variant="contained" color="primary">Generate</Button>
+            <Box sx={{display: 'flex', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+                <Button onClick={requestGeneration} variant="contained" color="primary">Generate</Button>
+            </Box>
         );
     }
 
@@ -161,32 +205,66 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
     // Generation Status Component
     const GenerationStatus = () => {
         return (
-            <Box>
-                <Grid container>
-                    <Grid>
-                        <Typography variant={'h4'}>Job Processing</Typography>
-                    </Grid>
-                    <Grid>
-                        {jobProcessing ? <CircularProgress/> : null}
-                    </Grid>
-                </Grid>
-                <Typography>Queue Position: {jobData?.queuePos}</Typography>
-                <Chip label={jobData?.status} color={jobData ? GetStatusColor(jobData.status) : "default"}/>
+            <Box sx={{height: '100%'}}>
+                <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <Typography variant={'h4'}>Job Processing</Typography>
+                </Box>
+                {jobProcessing ? (
+                    <Box sx={{ width: '100%' }}>
+                        <LinearProgress color="success"/>
+                    </Box>
+                ) : null}
+                <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <Stack>
+                        <Typography>Queue Position: {jobData?.queuePos ? jobData?.queuePos : '...'}</Typography>
+                        <Typography>Status: <Chip label={jobData?.status ? jobData?.status : 'Submitted'} color={jobData ? GetStatusColor(jobData.status ? jobData.status : 'Submitted') : "default"}/></Typography>
+                    </Stack>
+                </Box>
             </Box>
         );
     }
 
+    const prefetchModel = async () => {
+        const res = await fetch(modelData?.filePath ? modelData.filePath : "");
+        if(!res.ok)
+        {
+            throw new Error("Failed to load model file")
+        }
+
+    }
     // View Generation Component
     const ViewGeneration = () =>{
-        //
-        return (
-                <ModelViewer modelPath={modelData?.filePath} />
+        if(modelData && modelData.filePath !== "" ) {
+            const pf = async () =>{
+                await prefetchModel();
+            }
+            pf();
+            return (
+                <Card sx={{height: 'auto'}}>
+                    <CardMedia>
+                        <ModelViewer modelPath={modelData?.filePath}/>
+                    </CardMedia>
+                    <CardContent>
+                        <Grid container spacing={4} >
+                            <Grid size={6}>
+                                <Typography variant="subtitle1" sx={{ color: 'text.secondary', textAlign: 'center'}}>
+                                    <AccessTime sx={{paddingTop: '6px'}}/>Generated: {formatUploadedDate(modelData?.modelDateGen)}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
             );
-        };
+        }
+        else
+        {
+            throw new Error("Failed to load model data");
+        }
+    };
 
     return (
-        <div key={graphicId}>
-            {jobData ? (modelData ? <ViewGeneration/> : <GenerationStatus/>) : <GenerationRequestBtn/>}
+        <div key={graphicId} style={{width: '100%', height: '100%'}}>
+            {jobData && jobData.jobId !== "" ? (modelData ? <ViewGeneration/> : <GenerationStatus/>) : <GenerationRequestBtn/>}
         </div>
         );
     }

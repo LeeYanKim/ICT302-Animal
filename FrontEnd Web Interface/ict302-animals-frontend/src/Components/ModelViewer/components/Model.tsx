@@ -11,7 +11,7 @@ import {
     Mesh,
     BufferGeometry,
     Object3DEventMap,
-    Material
+    Material, PlaneGeometry, BoxHelper, Scene
 } from 'three';
 
 
@@ -29,13 +29,40 @@ interface ModelProps {
     setAnimationMaxPos: any;
 }
 
+const GroundPlane = ({ position, rotation }: { position: Vector3; rotation: Vector3 }) => {
+    const geometry = new PlaneGeometry(20, 20);
+    const material = new MeshStandardMaterial({ color: 'white' });
+
+    const planeMesh = new Mesh(geometry, material);
+    planeMesh.position.set(position.x, position.y, position.z);
+    planeMesh.rotation.set(rotation.x, rotation.y, rotation.z);
+
+    /**
+     * <mesh position={position} rotation={rotation}>
+     *             <planeBufferGeometry attach="geometry" args={[1000, 1000]} />
+     *             <meshStandardMaterial attach="material" color="white" />
+     *         </mesh>
+     */
+    return (planeMesh);
+}
+
 const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpeed, isSkeleton, isRotating, isLooping, animationPosition, animationMaxPos, setAnimationMaxPos, setAnimationPosition}) => {
     const modelRef = useRef<Group | null>(null);
     const mixerRef = useRef<AnimationMixer | null>(null);
     const { camera } = useThree();
     const gltf = useGLTF(url ? url : '');
+
+    const scene = new Scene();
+    //const grondPlane = GroundPlane({ position: new Vector3(0, -1, 0), rotation: new Vector3(90, 0, 0) });
+
+
+
     //@ts-ignore
     gltf.scene.children[0].geometry.center()
+    gltf.scene.position.set(0,0.5,0);
+
+    //@ts-ignore
+    //gltf.scene.children[0].geometry.rotation = new Vector3(90,90,0);
     //@ts-ignore
     //gltf.scene.children[0].geometry.scale(2,2,2)
     //gltf.scene.scale.set(10,10,10);
@@ -43,7 +70,11 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
     //const bx = new Box3().setFromObject(gltf.scene);
     //const center = bx.getCenter(new Vector3());
     //gltf.scene.position.sub(center)
-    gltf.scene.rotation.set(90,0,0);
+    // @ts-ignore
+
+    gltf.scene.rotation.set(0,-20,135);
+    scene.add(gltf.scene);
+
 
 
     let animPos = 0;
@@ -70,11 +101,12 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
             const box = new Box3().setFromObject(gltf.scene);
             const size = new Vector3();
             box.getSize(size);
-
-            modelRef.current.position.set(0, -size.y / 2, 0);
-            modelRef.current.scale.set(1, 1, 1);
+            //modelRef.current.position.set(0, -size.y / 2, 0);
+            //modelRef.current.scale.set(1, 1, 1);
             const distance = Math.max(size.x, size.y, size.z);
-            camera.position.set(distance, distance/2, distance);
+            //camera.position.set(distance, distance/2, distance);
+            camera.position.set(3.5,1,-0.5);
+            //console.log(camera.position)
             //camera.lookAt(modelRef.current.position);
 
         }
@@ -145,7 +177,7 @@ const Model: React.FC<ModelProps> = ({ url, isAnimating, wireframe, animationSpe
 
     return (
         <>
-            <primitive ref={modelRef} object={gltf.scene}/>
+            <primitive ref={modelRef} object={scene}/>
         </>
     );
 };

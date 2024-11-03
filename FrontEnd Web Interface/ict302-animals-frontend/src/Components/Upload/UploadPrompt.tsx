@@ -102,10 +102,15 @@ const UploadPrompt: React.FC<UploadProps> = ({onUploadSuccess}) => {
             This application is a work in progress.
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Chip label="mp4" />
-            <Chip label="mkv" />
-            <Chip label="mov" />
-            <Chip label="webm" />
+            <Chip sx={{margin: '5px'}} label="mp4" />
+            <Chip sx={{margin: '5px'}} label="mkv" />
+            <Chip sx={{margin: '5px'}} label="mov" />
+            <Chip sx={{margin: '5px'}} label="webm" />
+            <Chip sx={{margin: '5px'}} label="jpg" />
+            <Chip sx={{margin: '5px'}} label="png" />
+            <Chip sx={{margin: '5px'}} label="gif" />
+            <Chip sx={{margin: '5px'}} label="tiff" />
+            <Chip sx={{margin: '5px'}} label="bmp" />
           </Box>
 
           {/* Drag-and-Drop Zone */}

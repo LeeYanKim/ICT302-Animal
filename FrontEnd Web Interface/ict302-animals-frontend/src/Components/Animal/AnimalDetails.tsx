@@ -1,44 +1,35 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid} from "@mui/material";
+import { styled } from '@mui/material/styles';
+import React, { useEffect, useState, useContext} from "react";
+import {FrontendContext} from "../../Internals/ContextStore";
+import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid, Paper, MenuList, MenuItem, ListItemText, ListItemIcon, Divider, Alert } from "@mui/material";
 import API from "../../Internals/API";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ModelViewer from "../ModelViewer/ModelViewer";
 import Generation from "../Generation/Generation";
 import ReactPlayer from "react-player";
-
-interface Graphic {
-  gpcid: string;
-  gpcName: string;
-  gpcDateUpload: string;
-  filePath: string;
-  animalID: string;
-}
-
-interface Animal {
-  animalID: string;
-  animalName: string;
-  animalType: string;
-  animalDOB: string;
-  graphics: Graphic[]; // Updated to include media files as graphics array
-  photoFileName?: string;
-}
-
-interface AnimalDetailsProps {
-  animalId: string;
-  activeTab: number;
-  setActiveTab: React.Dispatch<React.SetStateAction<number>>;
-  setSelectedAnimalId: React.Dispatch<React.SetStateAction<string | null>>;
-}
+import FullFeaturedCrudGrid from './FullFeaturedCrudGrid'; 
+import DataGridDemo from './History';
+import DeleteGraphicButton from "./DeleteGraphicButton";
+import {Graphic, Animal, AnimalDetailsProps} from './AnimalInterfaces';
+import GraphicOptionsMenu from "./GraphicOptionsMenu";
+import { ErrorBoundary } from "react-error-boundary";
+import {AccessTime, Folder} from "@mui/icons-material";
+import AnimalMediaViewer from "./AnimalMediaViewer";
 
 const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setActiveTab, setSelectedAnimalId }) => {
-  const [animalData, setAnimalData] = useState<Animal | null>(null);
+  const frontendContext = useContext(FrontendContext);
+  const selectedAnimal = frontendContext.user.contextRef.current.userAnimals.find(a => a.animalID === animalId);
+  const [animalData, setAnimalData] = useState<Animal | null>(selectedAnimal ? selectedAnimal : null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [PlayerOpen, setPlayerOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
 
   const navigate = useNavigate();
   const location = useLocation();
   const animalNameFromState = location.state?.animalName;
+
+  const [backBtnClicked, setBackBtnClicked] = useState(false);
+  const [refreshThumbnails, setRefreshThumbnails] = React.useState(false);
+
 
   useEffect(() => {
     const fetchAnimalData = async () => {
@@ -49,7 +40,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
           throw new Error("Failed to fetch animal data");
         }
         const data = await response.json();
-        setAnimalData(data);
+        //setAnimalData(data);
       } catch (error) {
         console.error("Error fetching animal data:", error);
       } finally {
@@ -60,9 +51,6 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
 
     fetchAnimalData();
   }, [animalId]);
-
-
-
 
   const handleBackBtnClick = () => {
     navigate('/dashboard/animals');
@@ -85,12 +73,7 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   // URLs for photo
   const photoUrl = animalData.photoFileName
     ? API.Download() + `/animals/photos/${animalData.photoFileName}`
-    : null;
-
-  const togglePlayerClose = () => {
-    setPlayerOpen(!PlayerOpen);
-  };
-
+    : `/assets/images/fallback/${animalData.animalType.toLowerCase()}.png`;
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -99,8 +82,9 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
   // Format date of birth (DoB)
   const formatDOB = (dob: string) => {
     const date = new Date(dob);
-    return date.toLocaleDateString(); // Format the date as MM/DD/YYYY (or according to the user's locale)
+    return date.toLocaleDateString(); // Format the date as DD/MM/YYYY (or according to the user's locale)
   };
+
 
   interface TabPanelProps {
     children?: React.ReactNode;
@@ -124,89 +108,135 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
     );
   }
 
+
+  const convertBytes = (bytes: number) => {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    if (bytes === 0) return '0 Byte';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+  }
+
+  //flex: 1,  display: 'flex', flexDirection: 'column', gap: 3
   return (
-    <Box sx={{width: "1000px"}}>
+        <Box sx={{width: '100%'}}>
 
-      {/* Banner with animal photo and name */}
-      <Box sx={{ position: 'relative', overflow: 'hidden', mb: 2 }}>
-        {photoUrl && (
-          <img src={photoUrl} alt={animalData.animalName} style={{ width: '100%', height: 'auto' }} />
-        )}
-        <Box sx={{}}>
-          <Typography variant="h4">{animalData.animalName}</Typography>
-        </Box>
-      </Box>
+          {/* Banner with animal photo and name */}
+          <Grid container spacing={2} sx={{ flexGrow: 1,  position: 'relative', overflow: 'hidden', mb: 2 }}>
+            <Grid>
+              {photoUrl && (
+                  <img src={photoUrl} alt={animalData.animalName} style={{ width: '60px', height: '60px', borderRadius: '6px' }} />
+              )}
+            </Grid>
+            <Grid sx={{height: '60px'}} display={'inline'}>
+              <Typography variant="h4">{animalData.animalName}</Typography>
+            </Grid>
+          </Grid>
 
-      {/* Tabs for different sections */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          centered
-          variant='fullWidth'
-          indicatorColor='secondary'
-          aria-label="animal details tabs"
-        >
-          <Tab label="Information" />
-          <Tab label="Media Uploaded" />
-          <Tab label="Version" />
-          <Tab label="Access Granted" />
-        </Tabs>
-      </Box>
-
-      {/* Tab Content */}
-        <CustomTabPanel index={0} value={tabValue}>
-          <Box>
-            <Typography variant="h5">Animal Information:</Typography>
-            <Typography variant="body1">
-              <strong>Name:</strong> {animalData.animalName}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Type:</strong> {animalData.animalType}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Date of Birth:</strong> {formatDOB(animalData.animalDOB)}
-            </Typography>
+          {/* Tabs for different sections */}
+          <Box sx={{flexGrow: 1, borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              centered
+              variant='fullWidth'
+              indicatorColor='secondary'
+              aria-label="animal details tabs"
+              textColor="inherit"
+              sx={{ display: 'flex', flexGrow: 1 }}
+            >
+              <Tab label="Information" sx={{ flex: 1 }}/>
+              <Tab label="Media Uploaded" sx={{ flex: 1 }}/>
+              <Tab label="History" sx={{ flex: 1 }}/>
+              <Tab label="Access Granted" sx={{ flex: 1 }}/>
+            </Tabs>
           </Box>
-        </CustomTabPanel>
 
-        <CustomTabPanel index={1} value={tabValue}>
-            <Typography variant="body1">Media uploaded for {animalData.animalName}:</Typography>
-            {animalData.graphics && animalData.graphics.length > 0 ? (
-                animalData?.graphics.map((graphic, index) => (
-                    <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
-                      <Typography variant="subtitle1">Video {index + 1}:</Typography>
-                      <Grid container spacing={2}>
-                        <Grid size={6}>
-                          <ReactPlayer key={graphic.gpcid} width={'100%'} height={'100%'} url={graphic.filePath} controls={true} />
+          <Box sx={{ p: 5, width: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Tab Content */}
+            <CustomTabPanel index={0} value={tabValue}>
+              <Box sx={{ flex: 1 ,width: '100%'}}>
+                <Grid container spacing={0.5} rowSpacing={0.5} columns={15} columnSpacing={{ xs: 0.5, sm: 1, md: 2 }}>
+                  <Grid size={{xs: 5}}>
+                    <Typography variant="body1">
+                      <strong>Type:</strong>
+                    </Typography>
+                  </Grid>
+                  <Grid size={{xs: 10}}>
+                    <Typography variant="body1">
+                      {animalData.animalType}
+                    </Typography>
+                  </Grid>
+                  <Grid size={{xs: 5}}>
+                    <Typography variant="body1">
+                      <strong>Date of Birth:</strong>
+                    </Typography>
+                  </Grid>
+                  <Grid size={{xs: 10}}>
+                    <Typography variant="body1">
+                      {formatDOB(animalData.animalDOB)}
+                    </Typography>
+                  </Grid>
+                </Grid>
+
+              </Box>
+            </CustomTabPanel>
+
+            <CustomTabPanel index={1} value={tabValue}>
+              <Box sx={{ flex: 1, width: '100%' }}>
+                {animalData.graphics && animalData.graphics.length > 0 ? (
+                  animalData.graphics.map((graphic, index) => {
+                    const isImage = /\.(jpg|jpeg|png|gif|bmp|tiff)$/i.test(graphic.filePath); // Check if file is an image
+                    return (
+                      <Box key={graphic.gpcid} sx={{ marginTop: '20px' }}>
+                        <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', paddingBottom: '20px'}}>
+                          <Typography sx={{display: 'inline'}} variant="subtitle1">Media {index + 1}</Typography>
+                          <GraphicOptionsMenu graphic={graphic} />
+                        </Box>
+
+                        <Grid container spacing={2}>
+                          <Grid size={'grow'}>
+                            <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
+                              <AnimalMediaViewer key={graphic.gpcid} graphicId={graphic.gpcid} graphicFilePath={graphic.filePath} isImage={isImage} uploadedDate={graphic.gpcDateUpload} fileSize={convertBytes(graphic.gpcSize)}/>
+                            </ErrorBoundary>
+
+                          </Grid>
+                          <Grid size={'grow'}>
+                            <ErrorBoundary fallback={<Typography>There was an error loading the media</Typography>}>
+                              <Generation key={graphic.gpcid} graphicId={graphic.gpcid} animalId={animalId!} graphicFileName={graphic.filePath} />
+                            </ErrorBoundary>
+                          </Grid>
                         </Grid>
-                        <Grid size={6}>
-                          <Generation key={graphic.gpcid} graphicId={graphic.gpcid} animalId={animalId} graphicFileName={graphic.filePath}/>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                ))
-            ) : (
-                <Typography>No video available for this animal.</Typography>
-            )}
-        </CustomTabPanel>
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Typography>No media available for this animal.</Typography>
+                )}
+              </Box>
+            </CustomTabPanel>
 
-        <CustomTabPanel index={2} value={tabValue}>
-          <Typography variant="body1">Version history for {animalData.animalName} can go here.</Typography>
-        </CustomTabPanel>
 
-        <CustomTabPanel index={3} value={tabValue}>
-          <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
-        </CustomTabPanel>
+            <CustomTabPanel index={2} value={tabValue}>
+              <Box sx={{ flex: 1}}>
+                <Alert severity={'info'} variant="filled">This section is for future iterations</Alert>
+              </Box>
+            </CustomTabPanel>
 
-      {/* Back Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-        <Button variant="contained" onClick={handleBackBtnClick}>
-          Back to Animals
-        </Button>
-      </Box>
-    </Box>
+            <CustomTabPanel index={3} value={tabValue}>
+              <Alert severity={'info'} variant="filled">This section is for future iterations</Alert>
+            </CustomTabPanel>
+
+            {/* Back Button */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+              <Button variant="contained" onClick={handleBackBtnClick}>
+                Back to Animals
+              </Button>
+            </Box>
+          </Box>
+        </Box>
   );
+ 
+  
 };
 
 export default AnimalDetails;

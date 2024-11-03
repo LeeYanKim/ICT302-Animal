@@ -28,6 +28,7 @@ const NavbarBreadcrumbs: React.FC<DashboardMenuProps> = ({currentDashboardPage, 
     animalID = currentPath.split('/').pop() || '';
   }
   
+
   return (
     <StyledBreadcrumbs
       aria-label="breadcrumb"

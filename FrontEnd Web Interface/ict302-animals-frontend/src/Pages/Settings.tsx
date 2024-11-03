@@ -35,6 +35,7 @@ const Settings: React.FC = () => {
       setExpanded(isExpanded ? panel : false);
     };
 
+  //TODO: Add light/dark mode toggle
   return (
     <div>
       <h1>Settings</h1>
@@ -67,7 +68,7 @@ const Settings: React.FC = () => {
           <Typography>
             Do you want to log out of your account?
           </Typography>
-          <Button variant="text" color="primary" onClick={HandleLogOut}>
+          <Button variant="contained" color="warning" onClick={HandleLogOut}>
             Log Out
           </Button>
         </AccordionDetails>
