@@ -28,8 +28,9 @@ function Loader() {
   }
 // position={[0, 1, 5]} <PerspectiveCamera makeDefault fov={75}/>
   return (
-      <Canvas shadows camera={{ position: [-10, 10, 10], fov: 20 }}>
-          <ambientLight intensity={0.5}/>
+      <Canvas shadows camera={{position: [-10, 10, 10], fov: 20}}>
+          <ambientLight intensity={1}/>
+          <directionalLight castShadow position={[-2.5, 5, -5]} intensity={0.5} shadow-mapSize={[1024, 1024]}/>
           <directionalLight castShadow position={[2.5, 5, 5]} intensity={1.5} shadow-mapSize={[1024, 1024]}>
               <orthographicCamera attach={'shadow-camera'} args={[-5, 5, 5, -5, 1, 50]}/>
           </directionalLight>
@@ -42,7 +43,7 @@ function Loader() {
               {children}
           </Suspense>
       </Canvas>
-  );
+);
 };
 
 

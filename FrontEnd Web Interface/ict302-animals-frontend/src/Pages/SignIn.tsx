@@ -123,7 +123,7 @@ const SignIn: React.FC = () => {
 
 
       
-      nav('/dashboard');
+      nav('/dashboard/upload');
       
     } catch (error) {
       console.error("Error signing in with email and password:", error);
@@ -181,7 +181,7 @@ const SignIn: React.FC = () => {
       setProgress(100);
 
       // Navigate to the dashboard
-      nav('/dashboard');
+      nav('/dashboard/upload');
     } catch (error) {
       console.error("Error signing in with Google:", error);
       setLoading(false); //Hides loading symbol

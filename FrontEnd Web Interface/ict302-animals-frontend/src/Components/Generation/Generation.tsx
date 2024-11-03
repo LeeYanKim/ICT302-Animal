@@ -30,7 +30,7 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
     const frontendContext = useContext(FrontendContext);
     const [jobData, setJobData] = useState<JobData | null>(null);
     const [jobRequested, setJobRequested] = useState<boolean>(false);
-    const [jobProcessing, setJobProcessing] = useState<boolean>(false);
+    const [jobProcessing, setJobProcessing] = useState<boolean>(true);
     const [modelData, setModelData] = useState<JobModel | null>(null);
     const jobStatusRefreshInterval = 1000; // This is in milliseconds
 
@@ -80,7 +80,6 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
             return;
         }
         await response.json().then((job) => setJobData({jobId: job.jobID, status: job.status, queuePos: job.queuePos? job.queuePos : 0}));
-        setGenProgress(getProgressFromStatus(jobData?.status ? jobData.status : "Submitted"));
     }
 
     // Fetch job data on component mount
@@ -92,7 +91,7 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
 
     // Check job status
     async function checkJobStatus() {
-        if (jobData && jobData.status !== "Complete" && jobData.status !== "Failed") {
+        if (jobData && jobData.status !== "Complete" && jobData.status !== "Failed" && jobData.jobId !== "") {
             try{
                 await fetchJob();
             }
@@ -104,16 +103,16 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
 
     // Update job data when it changes
     useEffect(() => {
-        if(jobData && jobData.status !== "Complete" && jobData.status !== "Failed")
+        if(jobData && jobData.jobId !== "" && jobData.status !== "Complete" && jobData.status !== "Failed")
             setTimeout(checkJobStatus, jobStatusRefreshInterval);
 
-        if(jobData && jobData.status === "Complete")
+        if(jobData && jobData.jobId !== ""&& jobData.status === "Complete")
             fetchModelData();
     },[jobData]);
 
     // Fetch model data
     async function fetchModelData() {
-        if(jobData && jobData.status === "Complete") {
+        if(jobData && jobData.jobId !== "" && jobData.status === "Complete") {
             const fetchModel = async () => {
                 const response = await fetch(API.Download() + '/animals/models/graphics/' + graphicId);
                 if (!response.ok) {
@@ -217,8 +216,8 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
                 ) : null}
                 <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <Stack>
-                        <Typography>Queue Position: {jobData?.queuePos}</Typography>
-                        <Typography>Status: <Chip label={jobData?.status} color={jobData ? GetStatusColor(jobData.status) : "default"}/></Typography>
+                        <Typography>Queue Position: {jobData?.queuePos ? jobData?.queuePos : '...'}</Typography>
+                        <Typography>Status: <Chip label={jobData?.status ? jobData?.status : 'Submitted'} color={jobData ? GetStatusColor(jobData.status ? jobData.status : 'Submitted') : "default"}/></Typography>
                     </Stack>
                 </Box>
             </Box>
@@ -265,7 +264,7 @@ const Generation: React.FC<GenerationProps> = ({graphicId, animalId, graphicFile
 
     return (
         <div key={graphicId} style={{width: '100%', height: '100%'}}>
-            {jobData ? (modelData ? <ViewGeneration/> : <GenerationStatus/>) : <GenerationRequestBtn/>}
+            {jobData && jobData.jobId !== "" ? (modelData ? <ViewGeneration/> : <GenerationStatus/>) : <GenerationRequestBtn/>}
         </div>
         );
     }

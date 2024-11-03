@@ -55,7 +55,7 @@ const AnimalsGrid: React.FC<AnimalsGridProps> = ({ triggerRefresh, onAnimalClick
     if (userId) {
       fetchAnimalsData(); // Fetch animals when userId is available
     }
-  }, [userId]);
+  }, [userId, animals]);
 
   // Handle filter change
   const handleFilterSelect = (type: string) => {

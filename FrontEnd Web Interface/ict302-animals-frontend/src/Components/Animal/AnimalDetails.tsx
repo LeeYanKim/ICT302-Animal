@@ -1,7 +1,7 @@
 import { styled } from '@mui/material/styles';
 import React, { useEffect, useState, useContext} from "react";
 import {FrontendContext} from "../../Internals/ContextStore";
-import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid, Paper, MenuList, MenuItem, ListItemText, ListItemIcon, Divider } from "@mui/material";
+import { Box, Typography, CircularProgress, Button, Tabs, Tab, Grid2 as Grid, Paper, MenuList, MenuItem, ListItemText, ListItemIcon, Divider, Alert } from "@mui/material";
 import API from "../../Internals/API";
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import ModelViewer from "../ModelViewer/ModelViewer";
@@ -218,14 +218,12 @@ const AnimalDetails: React.FC<AnimalDetailsProps> = ({ animalId, activeTab, setA
 
             <CustomTabPanel index={2} value={tabValue}>
               <Box sx={{ flex: 1}}>
-                <Typography variant="body1">Animal history for {animalData.animalName} can go here.</Typography>
-                {/*<FullFeaturedCrudGrid /> {/* Render the DataGrid component here */}
-                < DataGridDemo triggerRefresh={refreshThumbnails} />
+                <Alert severity={'info'} variant="filled">This section is for future iterations</Alert>
               </Box>
             </CustomTabPanel>
 
             <CustomTabPanel index={3} value={tabValue}>
-              <Typography variant="body1">Access details for {animalData.animalName} can go here.</Typography>
+              <Alert severity={'info'} variant="filled">This section is for future iterations</Alert>
             </CustomTabPanel>
 
             {/* Back Button */}

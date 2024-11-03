@@ -23,8 +23,8 @@ const OptionsMenu: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
   };
   const handleClose = () => {
     setAnchorEl(null);
-    setCurrentDashboardPage(DashboardPages.Account);
-    nav('/dashboard/account');
+    //setCurrentDashboardPage(DashboardPages.Account);
+    //nav('/dashboard/account');
   };
   return (
     <React.Fragment>
@@ -40,7 +40,7 @@ const OptionsMenu: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
         id="menu"
         open={open}
         onClose={handleClose}
-        onClick={handleClose}
+        onClick={handleClick}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         sx={{
@@ -55,8 +55,6 @@ const OptionsMenu: React.FC<DashboardMenuProps> = ({currentDashboardPage, setCur
           },
         }}
       >
-        {/* <MenuItem onClick={handleClose}>My account</MenuItem> */}
-        <Divider />
         <Button
           component={Link}
           to="/signout"
